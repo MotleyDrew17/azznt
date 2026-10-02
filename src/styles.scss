@@ -1,1 +1,50 @@
-/* You can add global styles to this file, and also import other style files */
+@use './app/assets/variables';
+
+// 1. Убираем отступы у всех элементов
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+// 2. Улучшаем типографику и доступность
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+// 3. Убираем стандартные стили у списков, если они не нужны
+ul,
+ol {
+  list-style: none;
+}
+
+// 4. Делаем медиа-элементы блочными и адаптивными
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+// 5. Наследуем шрифты в элементах форм
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+
+.custom-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
