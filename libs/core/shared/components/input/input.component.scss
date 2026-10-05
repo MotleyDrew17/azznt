@@ -1,0 +1,25 @@
+:host {
+  display: block;
+  width: var(--field-width);
+}
+
+.input {
+  width: 100%;
+  height: var(--field-height);
+  padding: 0 var(--field-padding-x);
+  border: var(--field-border-width) solid var(--field-border-color);
+  border-radius: var(--field-radius);
+  background: var(--field-bg);
+  color: var(--field-color);
+  caret-color: var(--field-color);
+  font-size: var(--field-font-size);
+  outline: none;
+
+  &::placeholder {
+    color: var(--field-placeholder-color);
+  }
+
+  &:focus {
+    border-color: var(--field-border-color-focus);
+  }
+}

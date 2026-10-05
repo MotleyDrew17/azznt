@@ -1,4 +1,22 @@
 :root{
   --header-height: 52px;
   --content-height: calc(100% - var(--header-height));
+  --menu-width: 150px;
+
+  // editor variables
+
+  --editor-toolbar-witdth: 150px;
+
+  // поля, тема лавы
+  --field-width: 100%;
+  --field-height: 40px;
+  --field-padding-x: 12px;
+  --field-font-size: 14px;
+  --field-bg: var(--color-surface);
+  --field-color: var(--color-text);
+  --field-border-width: 1px;
+  --field-border-color: var(--color-border);
+  --field-border-color-focus: var(--color-focus);
+  --field-radius: 4px;
+  --field-placeholder-color: var(--color-text-muted);
 }

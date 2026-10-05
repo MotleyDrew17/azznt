@@ -1,3 +1,4 @@
+@use './app/assets/colors';
 @use './app/assets/variables';
 
 // 1. Убираем отступы у всех элементов
@@ -18,6 +19,8 @@ html {
 body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 // 3. Убираем стандартные стили у списков, если они не нужны

@@ -1,0 +1,19 @@
+.main {
+  height: 100dvh;
+
+  .content {
+    height: var(--content-height);
+    display: flex;
+  }
+
+  .center {
+    width: calc(100% - var(--menu-width));
+  }
+
+  .fields {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+}

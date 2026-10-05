@@ -1,0 +1,45 @@
+:host {
+  display: block;
+  width: var(--field-width);
+}
+
+.select {
+  position: relative;
+  width: 100%;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: var(--field-padding-x);
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--field-color);
+    border-bottom: 2px solid var(--field-color);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+}
+
+.select__native {
+  width: 100%;
+  height: var(--field-height);
+  padding: 0 calc(var(--field-padding-x) + 16px) 0 var(--field-padding-x);
+  border: var(--field-border-width) solid var(--field-border-color);
+  border-radius: var(--field-radius);
+  background: var(--field-bg);
+  color: var(--field-color);
+  font-size: var(--field-font-size);
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+
+  &:focus {
+    border-color: var(--field-border-color-focus);
+  }
+
+  option {
+    background: var(--field-bg);
+    color: var(--field-color);
+  }
+}

@@ -1,3 +1,42 @@
-:root{
-  --bg-main: black
+:root {
+  // Базовая палитра
+  --color-ink: #1C0711;
+  --color-wine: #73081A;
+  --color-ember: #EB6239;
+  --color-mauve: #827384;
+  --color-tide: #0C7A6C;
+
+  // Оттенки: шаг 10% к белому и к чёрному
+  --color-ink-light-10: color-mix(in srgb, var(--color-ink) 90%, white);
+  --color-ink-light-20: color-mix(in srgb, var(--color-ink) 80%, white);
+  --color-ink-light-30: color-mix(in srgb, var(--color-ink) 70%, white);
+  --color-ink-dark-10: color-mix(in srgb, var(--color-ink) 90%, black);
+
+  --color-wine-light-10: color-mix(in srgb, var(--color-wine) 90%, white);
+  --color-wine-light-20: color-mix(in srgb, var(--color-wine) 80%, white);
+  --color-wine-light-30: color-mix(in srgb, var(--color-wine) 70%, white);
+  --color-wine-dark-10: color-mix(in srgb, var(--color-wine) 90%, black);
+
+  --color-ember-light-10: color-mix(in srgb, var(--color-ember) 90%, white);
+  --color-ember-light-20: color-mix(in srgb, var(--color-ember) 80%, white);
+  --color-ember-light-30: color-mix(in srgb, var(--color-ember) 70%, white);
+  --color-ember-dark-10: color-mix(in srgb, var(--color-ember) 90%, black);
+
+  --color-mauve-light-10: color-mix(in srgb, var(--color-mauve) 90%, white);
+  --color-mauve-light-20: color-mix(in srgb, var(--color-mauve) 80%, white);
+  --color-mauve-light-30: color-mix(in srgb, var(--color-mauve) 70%, white);
+  --color-mauve-dark-10: color-mix(in srgb, var(--color-mauve) 90%, black);
+
+  --color-tide-light-10: color-mix(in srgb, var(--color-tide) 90%, white);
+  --color-tide-light-20: color-mix(in srgb, var(--color-tide) 80%, white);
+  --color-tide-light-30: color-mix(in srgb, var(--color-tide) 70%, white);
+  --color-tide-dark-10: color-mix(in srgb, var(--color-tide) 90%, black);
+
+  // Слои
+  --color-bg: var(--color-ink);
+  --color-surface: var(--color-ink-light-10);
+  --color-text: var(--color-ember);
+  --color-text-muted: var(--color-mauve);
+  --color-border: var(--color-wine);
+  --color-focus: var(--color-tide);
 }
