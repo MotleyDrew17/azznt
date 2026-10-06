@@ -1,0 +1,11 @@
+<button
+  type="button"
+  class="btn"
+  [class.btn_neutral]="variant === 'neutral'"
+  [class.btn_confirm]="variant === 'confirm'"
+  [class.btn_reject]="variant === 'reject'"
+  [class.btn_disabled]="disabled"
+  [appDisabled]="disabled"
+>
+  <ng-content />
+</button>

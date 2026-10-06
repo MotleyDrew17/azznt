@@ -10,16 +10,19 @@
   border: var(--field-border-width) solid var(--field-border-color);
   border-radius: var(--field-radius);
   background: var(--field-bg);
+  background-clip: padding-box;
   color: var(--field-color);
   caret-color: var(--field-color);
   font-size: var(--field-font-size);
   outline: none;
+  transition: var(--field-transition);
 
   &::placeholder {
     color: var(--field-placeholder-color);
   }
 
   &:focus {
+    background: var(--field-bg-focus);
     border-color: var(--field-border-color-focus);
   }
 }

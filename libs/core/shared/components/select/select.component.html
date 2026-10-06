@@ -1,3 +1,31 @@
-<div class="select">
-  <select class="select__native"></select>
+<div class="select" [class.select_open]="open">
+  <button
+    type="button"
+    class="select__trigger"
+    [class.select__trigger_empty]="!selected"
+    (click)="toggle()"
+    aria-haspopup="listbox"
+    [attr.aria-expanded]="open"
+  >
+    {{ selected ?? 'Не выбрано' }}
+  </button>
+
+  @if (open) {
+    <ul class="select__list" role="listbox">
+      @for (option of options; track option) {
+        <li>
+          <button
+            type="button"
+            class="select__option"
+            role="option"
+            [attr.aria-selected]="option === selected"
+            [class.select__option_selected]="option === selected"
+            (click)="choose(option)"
+          >
+            {{ option }}
+          </button>
+        </li>
+      }
+    </ul>
+  }
 </div>

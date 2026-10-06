@@ -1,3 +1,5 @@
+@use '../../../../../src/app/assets/interactive' as interactive;
+
 :host {
   display: block;
   width: var(--field-width);
@@ -10,7 +12,7 @@
   &::after {
     content: "";
     position: absolute;
-    top: 50%;
+    top: calc(var(--field-height) / 2);
     right: var(--field-padding-x);
     width: 8px;
     height: 8px;
@@ -18,28 +20,117 @@
     border-bottom: 2px solid var(--field-color);
     transform: translateY(-70%) rotate(45deg);
     pointer-events: none;
+    transition: transform 0.2s ease;
+  }
+
+  &_open::after {
+    transform: translateY(-30%) rotate(225deg);
   }
 }
 
-.select__native {
+.select__trigger {
   width: 100%;
   height: var(--field-height);
   padding: 0 calc(var(--field-padding-x) + 16px) 0 var(--field-padding-x);
-  border: var(--field-border-width) solid var(--field-border-color);
+  --surface: var(--color-lvl-1);
+  --surface-border: var(--color-lvl-2);
+  border: var(--field-border-width) solid var(--surface-border);
   border-radius: var(--field-radius);
-  background: var(--field-bg);
+  background: var(--surface);
+  background-clip: padding-box;
   color: var(--field-color);
+  font: inherit;
   font-size: var(--field-font-size);
+  text-align: left;
   outline: none;
-  appearance: none;
   cursor: pointer;
 
-  &:focus {
-    border-color: var(--field-border-color-focus);
+  @include interactive.states;
+
+  &_empty {
+    color: var(--field-placeholder-color);
   }
 
-  option {
-    background: var(--field-bg);
-    color: var(--field-color);
+  &:focus-visible,
+  .select_open & {
+    background: var(--field-bg-focus);
+    border-color: var(--field-border-color-focus);
+  }
+}
+
+.select__list {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  margin: 0;
+  padding: 4px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  list-style: none;
+  border: var(--field-border-width) solid var(--color-lvl-3);
+  border-radius: var(--field-radius);
+  --select-list-bg: color-mix(in srgb, white 6%, var(--color-bg));
+  background: var(--select-list-bg);
+  background-clip: padding-box;
+  color-scheme: dark;
+
+  // Firefox: стандартные свойства. В Chromium их не ставим,
+  // иначе браузер рисует системный скроллбар с дорожкой и стрелками.
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(228 211 180 / 45%) transparent;
+  }
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-track,
+  &::-webkit-scrollbar-track-piece,
+  &::-webkit-scrollbar-corner {
+    background: var(--select-list-bg);
+    border: none;
+    box-shadow: none;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgb(228 211 180 / 45%);
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-button,
+  &::-webkit-scrollbar-button:single-button,
+  &::-webkit-scrollbar-button:vertical:start:decrement,
+  &::-webkit-scrollbar-button:vertical:end:increment {
+    display: none;
+    width: 0;
+    height: 0;
+    background: transparent;
+  }
+}
+
+.select__option {
+  width: 100%;
+  padding: 8px var(--field-padding-x);
+  border: none;
+  border-radius: var(--field-radius);
+  --surface: var(--select-list-bg);
+  --surface-border: var(--select-list-bg);
+  background: transparent;
+  color: var(--field-color);
+  font: inherit;
+  font-size: var(--field-font-size);
+  text-align: left;
+  cursor: pointer;
+
+  @include interactive.states;
+
+  &_selected {
+    background-color: color-mix(in srgb, white var(--interactive-hover), var(--surface));
   }
 }

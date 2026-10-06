@@ -1,4 +1,6 @@
 :root{
+  --font-family: "Alegreya", "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
+
   --header-height: 52px;
   --content-height: calc(100% - var(--header-height));
   --menu-width: 150px;
@@ -7,16 +9,18 @@
 
   --editor-toolbar-witdth: 150px;
 
-  // поля, тема лавы
+  // поля
   --field-width: 100%;
   --field-height: 40px;
   --field-padding-x: 12px;
   --field-font-size: 14px;
-  --field-bg: var(--color-surface);
-  --field-color: var(--color-text);
+  --field-bg: var(--color-lvl-1);
+  --field-bg-focus: var(--color-lvl-2);
   --field-border-width: 1px;
-  --field-border-color: var(--color-border);
-  --field-border-color-focus: var(--color-focus);
+  --field-border-color: var(--color-lvl-2);
+  --field-border-color-focus: var(--color-lvl-3);
+  --field-transition: background-color 0.2s ease, border-color 0.2s ease;
+  --field-color: var(--color-text);
   --field-radius: 4px;
   --field-placeholder-color: var(--color-text-muted);
 }

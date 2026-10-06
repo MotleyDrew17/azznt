@@ -1,0 +1,51 @@
+@use '../../../../../src/app/assets/interactive' as interactive;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.btn {
+  width: 100%;
+  height: var(--field-height);
+  padding: 0 var(--field-padding-x);
+  border: var(--field-border-width) solid var(--surface-border);
+  border-radius: var(--field-radius);
+  background-color: var(--surface);
+  background-clip: padding-box;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--field-font-size);
+  cursor: pointer;
+
+  @include interactive.states;
+
+  &_neutral {
+    --surface: var(--color-lvl-1);
+    --surface-border: var(--color-lvl-2);
+  }
+
+  &_confirm {
+    --surface: var(--color-gold);
+    --surface-border: color-mix(in srgb, white var(--interactive-hover), var(--color-gold));
+    color: var(--color-midnight);
+
+    &:active:not(:disabled):not(.is-disabled) {
+      background-color: color-mix(in srgb, white 20%, var(--surface));
+      border-color: color-mix(in srgb, white 26%, var(--surface));
+    }
+  }
+
+  &_reject {
+    --surface: var(--color-plum);
+    --surface-border: color-mix(in srgb, white var(--interactive-hover), var(--color-plum));
+  }
+
+  &_disabled,
+  &.is-disabled {
+    --surface: color-mix(in srgb, var(--color-silver) 20%, var(--color-bg));
+    --surface-border: color-mix(in srgb, var(--color-silver) 30%, var(--color-bg));
+    color: var(--color-silver);
+    cursor: default;
+  }
+}
