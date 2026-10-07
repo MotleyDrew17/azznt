@@ -9,8 +9,11 @@
     <div class="dialog__body">
         <div class="field">
           <label class="field__label" for="storyline-name">Название</label>
-          <input id="storyline-name" class="control" type="text" [formField]="storylineForm.name" />
-          <span class="field__error">Ошибка названия, ну как так?</span>
+          @let nameError = storylineForm.name().touched() && storylineForm.name().getError('required');
+          <input id="storyline-name" class="control" type="text" [class.control_error]="nameError" [formField]="storylineForm.name" />
+          @if (nameError) {
+            <span class="field__error">{{ nameError.message }}</span>
+          }
         </div>
 
         <div class="field">
