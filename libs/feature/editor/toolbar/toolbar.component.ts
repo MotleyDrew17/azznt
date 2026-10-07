@@ -1,18 +1,23 @@
-import { Component } from '@angular/core';
-import {Dialog, DialogRef} from '@angular/cdk/dialog';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { DialogService } from '../dialog.service';
+import { EditorDialogKind } from '../quest-dialog/quest-dialog.component';
 
 @Component({
   selector: 'app-toolbar',
   imports: [],
   templateUrl: './toolbar.component.html',
   styleUrl: './toolbar.component.scss',
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class ToolbarComponent {
-  constructor(private dialogRef: DialogRef, private dialog: Dialog) {
-  }
+  private dialogService = inject(DialogService);
 
-  openQuestDialog(){
-    // this.dialog.open()
+  openQuestDialog(): void {
+    this.dialogService.openEditorDialog({
+      kind: EditorDialogKind.Quest,
+      name: '',
+      description: '',
+    });
   }
 }

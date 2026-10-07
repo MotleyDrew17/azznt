@@ -1,17 +1,23 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import {Quest} from '../classes/quest.class';
-import {CreateQuestData} from '../models/quest.model';
+import type { EditorDialogData } from '../../../feature/editor/quest-dialog/quest-dialog.component';
+import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GraphService {
   #questsMap: Record<string, Quest> = {};
-  graph: Quest | undefined;
+  #graph: Quest | undefined;
+  graph = signal<Quest | undefined>(undefined);
+  storageService = inject(StorageService);
 
-  constructor() {}
+  constructor() {
+    this.#initGraphFromStorage();
+    this.graph.set(this.#graph);
+  }
 
-  createQuest(data: CreateQuestData): Quest{
+  createQuest(data: EditorDialogData): Quest{
     const quest = new Quest();
     quest.name = data.name;
     quest.description = data.description;
@@ -34,7 +40,7 @@ export class GraphService {
   }
 
   createEmptyQuest(){
-    if(!this.graph) return
+    if(!this.#graph) return
     const quest = new Quest();
     this.#questsMap[quest.id] = quest;
     return quest;
@@ -46,5 +52,12 @@ export class GraphService {
     copy.description = quest.description;
     this.#questsMap[copy.id] = copy;
     return copy;
+  }
+
+  #initGraphFromStorage(){
+    const graph = this.storageService.local.get<Quest>('graph');
+    if(graph){
+      this.#graph = graph;
+    }
   }
 }

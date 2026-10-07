@@ -76,42 +76,6 @@
   background: var(--select-list-bg);
   background-clip: padding-box;
   color-scheme: dark;
-
-  // Firefox: стандартные свойства. В Chromium их не ставим,
-  // иначе браузер рисует системный скроллбар с дорожкой и стрелками.
-  @supports not selector(::-webkit-scrollbar) {
-    scrollbar-width: thin;
-    scrollbar-color: rgb(228 211 180 / 45%) transparent;
-  }
-
-  &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-track,
-  &::-webkit-scrollbar-track-piece,
-  &::-webkit-scrollbar-corner {
-    background: var(--select-list-bg);
-    border: none;
-    box-shadow: none;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgb(228 211 180 / 45%);
-    border-radius: 999px;
-  }
-
-  &::-webkit-scrollbar-button,
-  &::-webkit-scrollbar-button:single-button,
-  &::-webkit-scrollbar-button:vertical:start:decrement,
-  &::-webkit-scrollbar-button:vertical:end:increment {
-    display: none;
-    width: 0;
-    height: 0;
-    background: transparent;
-  }
 }
 
 .select__option {

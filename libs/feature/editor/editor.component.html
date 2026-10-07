@@ -1,1 +1,9 @@
-<div class="container"></div>
+<div class="editor">
+  @if (!graph()) {
+    <div class="editor__empty">
+      <button type="button" class="text-button" (click)="openStorylineDialog()">
+        Создать сюжетную линию
+      </button>
+    </div>
+  }
+</div>

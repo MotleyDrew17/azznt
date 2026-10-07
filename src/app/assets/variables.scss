@@ -1,5 +1,5 @@
 :root{
-  --font-family: "Alegreya", "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
+  --font-family: "Source Sans 3", "Segoe UI", sans-serif;
 
   --header-height: 52px;
   --content-height: calc(100% - var(--header-height));
@@ -13,7 +13,7 @@
   --field-width: 100%;
   --field-height: 40px;
   --field-padding-x: 12px;
-  --field-font-size: 14px;
+  --field-font-size: 16px;
   --field-bg: var(--color-lvl-1);
   --field-bg-focus: var(--color-lvl-2);
   --field-border-width: 1px;

@@ -8,6 +8,10 @@
 
   .center {
     width: calc(100% - var(--menu-width));
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
   }
 
   .fields {

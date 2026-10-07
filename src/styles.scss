@@ -1,6 +1,8 @@
 @use './app/assets/colors';
 @use './app/assets/variables';
 @use './app/assets/interactive' as interactive;
+@use './app/assets/text-button' as text-button;
+@use './app/assets/scrollbar' as scrollbar;
 
 // 1. Убираем отступы у всех элементов
 *,
@@ -11,6 +13,10 @@
   box-sizing: border-box;
 }
 
+* {
+  @include scrollbar.thin;
+}
+
 // 2. Улучшаем типографику и доступность
 html {
   scroll-behavior: smooth;
@@ -19,6 +25,7 @@ html {
 
 body {
   font-family: var(--font-family);
+  font-size: 18px;
   font-weight: 450;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -59,6 +66,10 @@ select {
 .interactive {
   @include interactive.states;
   cursor: pointer;
+}
+
+.text-button {
+  @include text-button.button;
 }
 
 .is-disabled {
