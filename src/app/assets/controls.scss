@@ -1,0 +1,93 @@
+@mixin control {
+  width: 100%;
+  height: var(--field-height);
+  padding: 0 var(--field-padding-x);
+  border: var(--field-border-width) solid var(--field-border-color);
+  border-radius: var(--field-radius);
+  background-color: var(--field-bg);
+  background-clip: padding-box;
+  color: var(--field-color);
+  caret-color: var(--field-color);
+  font: inherit;
+  font-size: var(--field-font-size);
+  outline: none;
+  transition: var(--field-transition);
+
+  &::placeholder {
+    color: var(--field-placeholder-color);
+  }
+
+  &:focus {
+    background-color: var(--field-bg-focus);
+    border-color: var(--field-border-color-focus);
+  }
+
+  &.control_error {
+    border-color: var(--color-error);
+    background-color: color-mix(in srgb, var(--color-error) 8%, var(--color-bg));
+
+    &:focus {
+      border-color: var(--color-error);
+      background-color: color-mix(in srgb, var(--color-error) 14%, var(--color-bg));
+    }
+  }
+
+  &:disabled,
+  &.is-disabled {
+    background-color: color-mix(in srgb, var(--color-silver) 12%, var(--color-bg));
+    border-color: color-mix(in srgb, var(--color-silver) 28%, var(--color-bg));
+    color: var(--color-silver);
+    caret-color: transparent;
+    cursor: default;
+  }
+}
+
+@mixin area {
+  height: 96px;
+  padding: 10px var(--field-padding-x);
+  resize: none;
+}
+
+@mixin select {
+  appearance: none;
+  padding-right: calc(var(--field-padding-x) + 18px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23E4D3B4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  color-scheme: dark;
+  cursor: pointer;
+
+  &.control_error {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23D98980' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  &:disabled,
+  &.is-disabled {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2399A4B0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+}
+
+@mixin field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  & + & {
+    margin-top: 14px;
+  }
+}
+
+@mixin label {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+@mixin error {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--color-error);
+
+  &:empty {
+    display: none;
+  }
+}

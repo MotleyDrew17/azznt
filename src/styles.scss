@@ -3,6 +3,7 @@
 @use './app/assets/interactive' as interactive;
 @use './app/assets/text-button' as text-button;
 @use './app/assets/scrollbar' as scrollbar;
+@use './app/assets/controls' as controls;
 
 // 1. Убираем отступы у всех элементов
 *,
@@ -70,6 +71,30 @@ select {
 
 .text-button {
   @include text-button.button;
+}
+
+.field {
+  @include controls.field;
+}
+
+.field__label {
+  @include controls.label;
+}
+
+.field__error {
+  @include controls.error;
+}
+
+.control {
+  @include controls.control;
+}
+
+.control_area {
+  @include controls.area;
+}
+
+.control_select {
+  @include controls.select;
 }
 
 .is-disabled {

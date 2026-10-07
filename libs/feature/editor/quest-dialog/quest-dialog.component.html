@@ -7,21 +7,24 @@
 
   @if (kind === EditorDialogKind.Storyline) {
     <div class="dialog__body">
-      <label class="field">
-        <span class="field__label">Название</span>
-        <input class="field__control" type="text" name="name" />
-      </label>
+        <div class="field">
+          <label class="field__label" for="storyline-name">Название</label>
+          <input id="storyline-name" class="control" type="text" [formField]="storylineForm.name" />
+          <span class="field__error">Ошибка названия, ну как так?</span>
+        </div>
 
-      <label class="field">
-        <span class="field__label">Описание</span>
-        <textarea class="field__control field__control_area" name="description" rows="4"></textarea>
-      </label>
+        <div class="field">
+          <label class="field__label" for="storyline-description">Описание</label>
+          <textarea id="storyline-description" class="control control_area" name="description" rows="4"></textarea>
+          <span class="field__error"></span>
+        </div>
+      
     </div>
   }
 
   <div class="dialog__footer">
     @if (kind === EditorDialogKind.Storyline) {
-      <app-button variant="confirm" width="148px" (click)="close()">Создать</app-button>
+      <app-button variant="confirm" width="148px" (click)="close()" [appDisabled]="storylineForm().invalid()">Создать</app-button>
     }
     <app-button width="148px" (click)="close()">Отмена</app-button>
   </div>

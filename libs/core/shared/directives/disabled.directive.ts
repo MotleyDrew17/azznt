@@ -16,7 +16,10 @@ export class DisabledDirective {
   constructor(private element: ElementRef<HTMLElement>) {}
 
   get pointerEvents(): string | null {
-    if (!this.appDisabled || this.element.nativeElement.tagName === 'BUTTON') {
+    const tag = this.element.nativeElement.tagName;
+    const nativeDisabled = tag === 'BUTTON' || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+    if (!this.appDisabled || nativeDisabled) {
       return null;
     }
 
