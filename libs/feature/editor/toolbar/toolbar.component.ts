@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DialogService } from '../dialog.service';
-import { EditorDialogKind } from '../quest-dialog/quest-dialog.component';
+import { EditorDialogKind } from '../editor-dialog/editor-dialog.component';
 
 @Component({
-  selector: 'app-toolbar',
+  selector: 'gm-toolbar',
   imports: [],
   templateUrl: './toolbar.component.html',
   styleUrl: './toolbar.component.scss',

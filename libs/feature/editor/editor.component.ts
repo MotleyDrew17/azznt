@@ -1,12 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { TextButtonDirective } from '../../core/shared/directives/text-button.directive';
 import { GraphService } from '../../core/shared/services/graph.service';
 import { DialogService } from './dialog.service';
-import { EditorDialogKind } from './quest-dialog/quest-dialog.component';
+import { EditorDialogKind } from './editor-dialog/editor-dialog.component';
 
 @Component({
-  selector: 'app-editor',
-  imports: [TextButtonDirective],
+  selector: 'gm-editor',
   templateUrl: './editor.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,7 +1,7 @@
 import { Component, ElementRef, HostListener } from '@angular/core';
 
 @Component({
-  selector: 'app-select',
+  selector: 'gm-select',
   imports: [],
   templateUrl: './select.component.html',
   styleUrl: './select.component.scss',

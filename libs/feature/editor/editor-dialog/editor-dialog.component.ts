@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ButtonComponent } from '../../../core/shared/components/button/button.component';
-import { Quest } from '../../../core/shared/classes/quest.class';
+import { CreateQuestData } from '../../../core/shared/models/quest.model';
 import { form, required, FormField } from '@angular/forms/signals';
 import { DisabledDirective } from '../../../core/shared/directives/disabled.directive';
+import { GraphService } from '../../../core/shared/services/graph.service';
 
 export enum EditorDialogKind {
   Storyline = 'storyline',
@@ -11,12 +12,8 @@ export enum EditorDialogKind {
   Edit = 'edit',
 }
 
-export interface EditorDialogData {
+export interface EditorDialogData extends CreateQuestData {
   kind: EditorDialogKind;
-  name: string;
-  description: string;
-  parent?: Quest;
-  child?: Quest;
 }
 
 const TITLES: Record<EditorDialogKind, string> = {
@@ -26,15 +23,16 @@ const TITLES: Record<EditorDialogKind, string> = {
 };
 
 @Component({
-  selector: 'app-quest-dialog',
+  selector: 'gm-editor-dialog',
   imports: [ButtonComponent, DisabledDirective, FormField],
-  templateUrl: './quest-dialog.component.html',
-  styleUrl: './quest-dialog.component.scss',
+  templateUrl: './editor-dialog.component.html',
+  styleUrl: './editor-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
 })
-export class QuestDialogComponent {
+export class EditorDialogComponent {
   private data = inject<EditorDialogData>(DIALOG_DATA);
   private dialogRef = inject(DialogRef<void, EditorDialogData>);
+  private graphService = inject(GraphService);
 
   readonly EditorDialogKind = EditorDialogKind;
   kind = this.data.kind;
@@ -46,5 +44,22 @@ export class QuestDialogComponent {
 
   close(): void {
     this.dialogRef.close();
+  }
+
+  submit() {
+    switch (this.kind) {
+      case EditorDialogKind.Storyline:
+        const questData: CreateQuestData = {
+          name: this.storylineForm.name().value(),
+          description: this.storylineForm.description().value(),
+        };
+        this.graphService.createQuest(questData, true);
+        console.log(this.graphService.graph());
+        this.close();
+        break;
+      case EditorDialogKind.Quest:
+        break;
+      case EditorDialogKind.Edit:
+    }
   }
 }

@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import {Quest} from '../classes/quest.class';
-import type { EditorDialogData } from '../../../feature/editor/quest-dialog/quest-dialog.component';
+import { CreateQuestData } from '../models/quest.model';
 import { StorageService } from './storage.service';
 
 @Injectable({
@@ -17,7 +17,7 @@ export class GraphService {
     this.graph.set(this.#graph);
   }
 
-  createQuest(data: EditorDialogData): Quest{
+  createQuest(data: CreateQuestData, isNewGraph: boolean = false): Quest{
     const quest = new Quest();
     quest.name = data.name;
     quest.description = data.description;
@@ -29,6 +29,10 @@ export class GraphService {
       quest.addParent(data.parent);
     }
     this.#questsMap[quest.id] = quest;
+    if(isNewGraph) {
+      this.#graph = quest;
+      this.graph.set(this.#graph);
+    }
     return quest;
   }
 

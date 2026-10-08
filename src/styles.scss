@@ -1,9 +1,9 @@
 @use './app/assets/colors';
 @use './app/assets/variables';
-@use './app/assets/interactive' as interactive;
-@use './app/assets/text-button' as text-button;
-@use './app/assets/scrollbar' as scrollbar;
-@use './app/assets/controls' as controls;
+@use './app/assets/mixins/interactive' as interactive;
+@use './app/assets/mixins/text-button' as text-button;
+@use './app/assets/mixins/scrollbar' as scrollbar;
+@use './app/assets/mixins/controls' as controls;
 
 // 1. Убираем отступы у всех элементов
 *,

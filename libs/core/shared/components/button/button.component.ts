@@ -4,7 +4,7 @@ import { DisabledDirective } from '../../directives/disabled.directive';
 export type ButtonVariant = 'neutral' | 'confirm' | 'reject';
 
 @Component({
-  selector: 'app-button',
+  selector: 'gm-button',
   imports: [DisabledDirective],
   templateUrl: './button.component.html',
   styleUrl: './button.component.scss',

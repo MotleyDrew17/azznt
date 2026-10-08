@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Общие стили
 
-Повторяемый вид контролов, полей, текстовых кнопок, ховера и скроллбара не пиши в `*.component.scss`. Миксин клади в `src/app/assets/`, класс объявляй в `src/styles.scss`, в шаблоне вешай этот класс.
+Повторяемый вид контролов, полей, текстовых кнопок, ховера и скроллбара не пиши в `*.component.scss`. Миксин клади в `src/app/assets/mixins/`, класс объявляй в `src/styles.scss`, в шаблоне вешай этот класс.
 
 В компоненте оставляй только раскладку этого экрана: окно диалога, шапка, отступы блока.
 
@@ -13,17 +13,17 @@ alwaysApply: true
 
 - `src/app/assets/colors.scss` — палитра, в том числе `--color-error`
 - `src/app/assets/variables.scss` — токены полей `--field-*`
-- `src/app/assets/controls.scss` — миксины поля и контролов
-- `src/app/assets/text-button.scss` — текстовая кнопка
-- `src/app/assets/interactive.scss` — ховер и нажатие
-- `src/app/assets/scrollbar.scss` — уже подключён на `*` в `src/styles.scss`
+- `src/app/assets/mixins/controls.scss` — миксины поля и контролов
+- `src/app/assets/mixins/text-button.scss` — текстовая кнопка
+- `src/app/assets/mixins/interactive.scss` — ховер и нажатие
+- `src/app/assets/mixins/scrollbar.scss` — уже подключён на `*` в `src/styles.scss`
 
 ## Классы
 
 - `field` на `div`, `field__label` на `label`, `field__error` на элемент текста ошибки. У подписи и контрола общая пара `for` / `id`
 - `control` — инпут; `control_area` — textarea; `control_select` — нативный select
 - `control_error` — статус ошибки у любого контрола
-- `text-button` — полупрозрачная текстовая кнопка; `--spot-x` и `--spot-y` задаёт `TextButtonDirective`
+- `text-button` — полупрозрачная текстовая кнопка, на наведении золотой текст
 - `interactive` — ховер; на элементе задай `--surface`
 - `is-disabled` — ставит `appDisabled` (`libs/core/shared/directives/disabled.directive.ts`) на кнопку, инпут, textarea и select
 

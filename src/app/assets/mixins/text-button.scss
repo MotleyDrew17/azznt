@@ -1,10 +1,5 @@
 // Текстовая кнопка: полупрозрачный серый текст, на ховере золото.
-// Яркость сгущается у курсора: --spot-x и --spot-y задаёт директива.
 @mixin button {
-  position: relative;
-  isolation: isolate;
-  --spot-x: 50%;
-  --spot-y: 50%;
   border: 0;
   background: none;
   padding: 0.2em 0.35em;
@@ -16,27 +11,6 @@
   cursor: pointer;
   transition: color 0.45s ease, text-shadow 0.45s ease;
 
-  &::after {
-    content: "";
-    position: absolute;
-    left: var(--spot-x);
-    top: var(--spot-y);
-    z-index: -1;
-    width: 28px;
-    height: 28px;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: radial-gradient(
-      circle,
-      color-mix(in srgb, white 65%, var(--color-gold)) 0%,
-      color-mix(in srgb, var(--color-gold) 75%, transparent) 38%,
-      transparent 72%
-    );
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.45s ease;
-  }
-
   &:hover,
   &:focus-visible {
     color: var(--color-gold);
@@ -45,9 +19,5 @@
       0 0 16px color-mix(in srgb, var(--color-gold) 55%, transparent),
       0 0 32px color-mix(in srgb, var(--color-gold) 28%, transparent);
     outline: none;
-
-    &::after {
-      opacity: 1;
-    }
   }
 }

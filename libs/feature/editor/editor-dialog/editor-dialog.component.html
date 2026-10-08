@@ -27,8 +27,8 @@
 
   <div class="dialog__footer">
     @if (kind === EditorDialogKind.Storyline) {
-      <app-button variant="confirm" width="148px" (click)="close()" [appDisabled]="storylineForm().invalid()">Создать</app-button>
+      <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="storylineForm().invalid()">Создать</gm-button>
     }
-    <app-button width="148px" (click)="close()">Отмена</app-button>
+    <gm-button width="148px" (click)="close()">Отмена</gm-button>
   </div>
 </div>
