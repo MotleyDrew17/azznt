@@ -1,0 +1,47 @@
+:host {
+  display: block;
+
+  &:has(.is-disabled) {
+    pointer-events: none;
+  }
+}
+
+.quest-node {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--surface-border, var(--surface));
+
+  &_shift {
+    cursor: grab;
+  }
+
+  &_grabbing {
+    cursor: grabbing;
+  }
+
+  &_selected {
+    outline: 2px solid var(--color-parchment);
+    outline-offset: 3px;
+  }
+  border-radius: 50%;
+  background-color: var(--surface);
+  transition: box-shadow 0.2s ease;
+
+  &_active {
+    --surface: var(--color-gold);
+    --surface-border: var(--color-gold);
+  }
+
+  &_completed {
+    --surface: var(--color-green);
+    --surface-border: var(--color-green);
+  }
+
+  &:hover:not(:disabled):not(.is-disabled) {
+    box-shadow:
+      0 0 6px color-mix(in srgb, var(--surface) 90%, transparent),
+      0 0 16px color-mix(in srgb, var(--surface) 55%, transparent),
+      0 0 32px color-mix(in srgb, var(--surface) 28%, transparent);
+  }
+}

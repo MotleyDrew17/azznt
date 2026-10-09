@@ -1,1 +1,13 @@
-<p>quest works!</p>
+<div
+  class="quest-node interactive"
+  [attr.data-quest-id]="nodeId()"
+  [class.quest-node_shift]="shiftHeld()"
+  [class.quest-node_grabbing]="grabbing()"
+  [class.quest-node_selected]="selected()"
+  [class.quest-node_active]="state() === QuestNodeState.Active"
+  [class.quest-node_completed]="state() === QuestNodeState.Completed"
+  [appDisabled]="state() === QuestNodeState.Blocked"
+  [style.left.px]="left()"
+  [style.top.px]="top()"
+  [style.z-index]="quest()?.zIndex"
+></div>

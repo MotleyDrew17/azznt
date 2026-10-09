@@ -1,20 +1,45 @@
+import { QuestSnapshot } from "../models/quest.model";
+
 export class Quest {
   #id: string = '';
   #children: Quest[] = [];
   #parents: Quest[] = [];
-  #pos_left: number = 0;
-  #pos_right: number = 0;
+  #pos_x: number = 0;
+  #pos_y: number = 0;
   #name: string = '';
   #description: string = '';
   #isCompleted: boolean = false;
   #ancestors: Quest[] = [];
+  #layer: number | null = 0; // null - квест вне графа
+  #isRoot: boolean = false;
+  #zIndex: number = 0;
 
   constructor() {
     this.#id = crypto.randomUUID();
   }
 
+  get isRoot(): boolean{
+    return this.#isRoot;
+  }
+
+  set isRoot(isRoot: boolean){
+    this.#isRoot = isRoot;
+  }
+
   get parents(): Quest[] {
     return this.#parents;
+  }
+
+  set parents(parents: Quest[]){
+    this.#parents = parents;
+  }
+
+  get children(): Quest[] {
+    return this.#children;
+  }
+
+  set children(children: Quest[]){
+    this.#children = children;
   }
 
   get ancestors(): Quest[]{
@@ -23,6 +48,10 @@ export class Quest {
 
   get id(): string {
     return this.#id;
+  }
+
+  set id(id: string){
+    this.#id = id;
   }
 
   get name(){
@@ -39,6 +68,38 @@ export class Quest {
 
   set description(description: string){
     this.#description = description;
+  }
+
+  get layer(): number | null{
+    return this.#layer;
+  }
+
+  set layer(layer: number | null){
+    this.#layer = layer;
+  }
+
+  get pos_x(): number{
+    return this.#pos_x;
+  }
+
+  set pos_x(pos_x: number){
+    this.#pos_x = pos_x;
+  }
+
+  get pos_y(): number{
+    return this.#pos_y;
+  }
+
+  set pos_y(pos_y: number){
+    this.#pos_y = pos_y;
+  }
+
+  get zIndex(): number{
+    return this.#zIndex;
+  }
+
+  set zIndex(zIndex: number){
+    this.#zIndex = zIndex;
   }
 
   /**
@@ -85,6 +146,21 @@ export class Quest {
     child.#detachParent(this.#id);
 
     return true;
+  }
+
+  toSnapshot(): QuestSnapshot {
+    return {
+      id: this.#id,
+      name: this.#name,
+      description: this.#description,
+      parents: this.#parents.map(parent => parent.id),
+      children: this.#children.map(child => child.id),
+      pos_x: this.#pos_x,
+      pos_y: this.#pos_y,
+      zIndex: this.#zIndex,
+      layer: this.#layer,
+      isRoot: this.#isRoot,
+    };
   }
 
   #addParent(parent: Quest) {

@@ -6,3 +6,16 @@ export interface CreateQuestData {
   parent?: Quest;
   child?: Quest;
 }
+
+export interface QuestSnapshot {
+  id: string;
+  name: string;
+  description: string;
+  parents?: string[];
+  children?: string[];
+  pos_x: number;
+  pos_y: number;
+  zIndex: number;
+  layer: number | null;
+  isRoot: boolean;
+}

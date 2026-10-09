@@ -2,13 +2,15 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { GraphService } from '../../core/shared/services/graph.service';
 import { DialogService } from './dialog.service';
 import { EditorDialogKind } from './editor-dialog/editor-dialog.component';
+import { WorkFieldComponent } from './work-field/work-field.component';
 
 @Component({
   selector: 'gm-editor',
   templateUrl: './editor.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './editor.component.scss'
+  styleUrl: './editor.component.scss',
+  imports: [WorkFieldComponent]
 })
 export class EditorComponent {
   private dialogService = inject(DialogService);
