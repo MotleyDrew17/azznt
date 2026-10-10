@@ -33,6 +33,11 @@
     --surface-border: var(--color-gold);
   }
 
+  &_root {
+    --surface: var(--color-epic);
+    --surface-border: var(--color-epic);
+  }
+
   &_completed {
     --surface: var(--color-green);
     --surface-border: var(--color-green);

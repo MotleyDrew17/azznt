@@ -5,7 +5,7 @@
 
   <h2 class="dialog__title">{{ title }}</h2>
 
-  @if (kind === EditorDialogKind.Storyline) {
+  @if (kind === EditorDialogKind.Storyline || kind === EditorDialogKind.Quest || kind === EditorDialogKind.Edit) {
     <div class="dialog__body">
         <div class="field">
           <label class="field__label" for="storyline-name">Название</label>
@@ -18,7 +18,7 @@
 
         <div class="field">
           <label class="field__label" for="storyline-description">Описание</label>
-          <textarea id="storyline-description" class="control control_area" name="description" rows="4"></textarea>
+          <textarea id="storyline-description" class="control control_area" name="description" rows="4" [formField]="storylineForm.description"></textarea>
           <span class="field__error"></span>
         </div>
       
@@ -26,8 +26,10 @@
   }
 
   <div class="dialog__footer">
-    @if (kind === EditorDialogKind.Storyline) {
-      <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="storylineForm().invalid()">Создать</gm-button>
+    @if (kind === EditorDialogKind.Storyline || kind === EditorDialogKind.Quest || kind === EditorDialogKind.Edit) {
+      <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="storylineForm().invalid()">
+        {{ kind === EditorDialogKind.Edit ? 'Сохранить' : 'Создать' }}
+      </gm-button>
     }
     <gm-button width="148px" (click)="close()">Отмена</gm-button>
   </div>

@@ -22,7 +22,7 @@
 
   &_neutral {
     --surface: var(--color-lvl-1);
-    --surface-border: var(--color-lvl-2);
+    --surface-border: var(--button-border, var(--color-lvl-2));
   }
 
   &_confirm {

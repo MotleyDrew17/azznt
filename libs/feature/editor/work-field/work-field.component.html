@@ -1,3 +1,30 @@
+@if (contextMenu(); as menu) {
+  <span class="quest-pin" [style.left.px]="menu.pinX" [style.top.px]="menu.pinY"></span>
+  <div class="context-menu" [style.left.px]="menu.x" [style.top.px]="menu.y" (click)="$event.stopPropagation()">
+    <gm-button (click)="openCreateQuest()">Создать квест</gm-button>
+  </div>
+}
+
+@if (selectedQuest(); as quest) {
+  <div
+    class="quest-toolbar"
+    [style.left.px]="toolbarPosition(quest).x"
+    [style.top.px]="toolbarPosition(quest).y"
+    (click)="$event.stopPropagation()"
+    (pointerdown)="$event.stopPropagation()"
+  >
+    <button type="button" class="quest-toolbar__action interactive" aria-label="Связать квесты">
+      <span class="quest-toolbar__icon quest-toolbar__icon_link"></span>
+    </button>
+    <button type="button" class="quest-toolbar__action interactive" aria-label="Редактировать" (click)="editSelectedQuest()">
+      <span class="quest-toolbar__icon quest-toolbar__icon_edit"></span>
+    </button>
+    <button type="button" class="quest-toolbar__action interactive" aria-label="Удалить" (click)="deleteSelectedQuest()">
+      <span class="quest-toolbar__icon quest-toolbar__icon_delete"></span>
+    </button>
+  </div>
+}
+
 @for (quest of quests(); track keyOf(quest)) {
   <gm-quest-node
     [quest]="quest"
@@ -7,5 +34,6 @@
     [shiftHeld]="shiftHeld()"
     [grabbing]="grabbedId() === keyOf(quest)"
     [selected]="selectedQuestId() === quest.id"
+    [root]="quest.id === rootId()"
   />
 }

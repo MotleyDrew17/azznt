@@ -5,6 +5,8 @@ export interface CreateQuestData {
   description: string;
   parent?: Quest;
   child?: Quest;
+  pos_x?: number;
+  pos_y?: number;
 }
 
 export interface QuestSnapshot {

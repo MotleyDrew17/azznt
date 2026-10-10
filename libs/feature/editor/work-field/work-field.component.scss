@@ -1,4 +1,6 @@
 :host {
+  --quest-pin: color-mix(in srgb, var(--color-parchment) 42%, transparent);
+  --field-overlay-z: 1000000;
   position: relative;
   display: block;
   flex: 1;
@@ -10,5 +12,68 @@
 
   &.is-grabbing {
     cursor: grabbing;
+  }
+}
+
+.context-menu {
+  --button-border: var(--quest-pin);
+  position: absolute;
+  z-index: var(--field-overlay-z);
+  width: 180px;
+}
+
+.quest-pin {
+  position: absolute;
+  z-index: calc(var(--field-overlay-z) - 1);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--quest-pin);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.quest-toolbar {
+  position: absolute;
+  z-index: var(--field-overlay-z);
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--quest-pin);
+  border-radius: 10px;
+  background: var(--color-bg);
+}
+
+.quest-toolbar__action {
+  --surface: transparent;
+  --surface-border: transparent;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-parchment);
+  cursor: pointer;
+}
+
+.quest-toolbar__icon {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+
+  &_link {
+    mask-image: url('../../../../src/app/assets/icons/link.svg');
+  }
+
+  &_edit {
+    mask-image: url('../../../../src/app/assets/icons/edit.svg');
+  }
+
+  &_delete {
+    mask-image: url('../../../../src/app/assets/icons/delete.svg');
   }
 }

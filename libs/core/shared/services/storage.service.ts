@@ -23,7 +23,6 @@ export class TypedStorage {
 
   set<T>(key: string, value: T): void {
     const string = JSON.stringify(value);
-    debugger
     this.storage.setItem(key, JSON.stringify(value));
   }
 

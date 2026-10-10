@@ -12,6 +12,7 @@ export class GraphService {
   #graph: Quest | undefined;
   #zIndex = 1;
   graph = signal<Quest | undefined>(undefined);
+  readonly listVersion = signal(0);
   selectedQuestId = signal<string | null>(null);
   storageService = inject(StorageService);
 
@@ -37,6 +38,8 @@ export class GraphService {
     quest.zIndex = this.#zIndex++;
     quest.name = data.name;
     quest.description = data.description;
+    if (data.pos_x !== undefined) quest.pos_x = data.pos_x;
+    if (data.pos_y !== undefined) quest.pos_y = data.pos_y;
     if(data.child) {
       quest.addChild(data.child);
     }
@@ -46,21 +49,42 @@ export class GraphService {
     }
     this.#questsMap[quest.id] = quest;
     if(isNewGraph) {
+      quest.isRoot = true;
       this.#graph = quest;
       this.graph.set(this.#graph);
     }
+    this.listVersion.update((version) => version + 1);
     this.saveGraphToStorage();
     return quest;
   }
 
-  removeQuest(id: string){
+  updateQuest(id: string, data: Pick<CreateQuestData, 'name' | 'description'>): void {
     const quest = this.#questsMap[id];
-    quest.parents.forEach((parent: Quest) => {
-      parent.removeChild(id);
-    })
+    if (!quest) return;
+
+    quest.name = data.name;
+    quest.description = data.description;
+    this.listVersion.update((version) => version + 1);
+    this.saveGraphToStorage();
+  }
+
+  removeQuest(id: string): void {
+    const quest = this.#questsMap[id];
+    if (!quest) return;
+
+    [...quest.parents].forEach((parent) => quest.removeParent(parent.id));
+    [...quest.children].forEach((child) => quest.removeChild(child.id));
+    delete this.#questsMap[id];
+
+    if (this.#graph?.id === id) {
+      this.#graph = this.questsList[0];
+      this.graph.set(this.#graph);
+    }
     if (this.selectedQuestId() === id) {
       this.selectedQuestId.set(null);
     }
+    this.listVersion.update((version) => version + 1);
+    this.saveGraphToStorage();
   }
 
   createEmptyQuest(){
@@ -97,7 +121,6 @@ export class GraphService {
   }
 
   extractGraphFromSnapshot(snapshot: QuestSnapshot[]): Quest {
-    const questsMap: Record<string, Quest> = {};
     snapshot.forEach(snapshot => {
       const quest = new Quest();
       quest.id = snapshot.id;
@@ -108,16 +131,16 @@ export class GraphService {
       quest.zIndex = snapshot.zIndex;
       quest.layer = snapshot.layer;
       quest.isRoot = snapshot.isRoot;
-      questsMap[quest.id] = quest;
+      this.#questsMap[quest.id] = quest;
     });
     snapshot.forEach(snapshot => {
-      const quest = questsMap[snapshot.id];
+      const quest = this.#questsMap[snapshot.id];
       if(quest){
-        quest.parents = snapshot.parents?.map(parentId => questsMap[parentId]) || [];
-        quest.children = snapshot.children?.map(childId => questsMap[childId]) || [];
+        quest.parents = snapshot.parents?.map(parentId => this.#questsMap[parentId]) || [];
+        quest.children = snapshot.children?.map(childId => this.#questsMap[childId]) || [];
       }
     });
-    return questsMap[snapshot[0].id];
+    return this.#questsMap[snapshot[0].id];
   }
 
 }

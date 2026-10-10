@@ -14,6 +14,7 @@ export enum EditorDialogKind {
 
 export interface EditorDialogData extends CreateQuestData {
   kind: EditorDialogKind;
+  id?: string;
 }
 
 const TITLES: Record<EditorDialogKind, string> = {
@@ -37,7 +38,7 @@ export class EditorDialogComponent {
   readonly EditorDialogKind = EditorDialogKind;
   kind = this.data.kind;
   title = TITLES[this.kind];
-  storylineModel = signal({name: '', description: ''})
+  storylineModel = signal({ name: this.data.name, description: this.data.description })
   storylineForm = form(this.storylineModel, (fieldPath) => {
     required(fieldPath.name, {message: 'Название обязательно'})
   })
@@ -52,14 +53,30 @@ export class EditorDialogComponent {
         const questData: CreateQuestData = {
           name: this.storylineForm.name().value(),
           description: this.storylineForm.description().value(),
+          pos_x: this.data.pos_x,
+          pos_y: this.data.pos_y,
         };
         this.graphService.createQuest(questData, true);
         console.log(this.graphService.graph());
         this.close();
         break;
       case EditorDialogKind.Quest:
+        this.graphService.createQuest({
+          name: this.storylineForm.name().value(),
+          description: this.storylineForm.description().value(),
+          pos_x: this.data.pos_x,
+          pos_y: this.data.pos_y,
+        });
+        this.close();
         break;
       case EditorDialogKind.Edit:
+        if (!this.data.id) break;
+        this.graphService.updateQuest(this.data.id, {
+          name: this.storylineForm.name().value(),
+          description: this.storylineForm.description().value(),
+        });
+        this.close();
+        break;
     }
   }
 }

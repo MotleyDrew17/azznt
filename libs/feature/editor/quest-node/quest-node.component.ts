@@ -24,5 +24,6 @@ export class QuestNodeComponent {
   readonly shiftHeld = input(false);
   readonly grabbing = input(false);
   readonly selected = input(false);
+  readonly root = input(false);
   readonly state = input(QuestNodeState.Active);
 }

@@ -10,11 +10,14 @@ import {
 } from '@angular/core';
 import { Quest } from '../../../core/shared/classes/quest.class';
 import { GraphService } from '../../../core/shared/services/graph.service';
+import { DialogService } from '../dialog.service';
+import { EditorDialogKind } from '../editor-dialog/editor-dialog.component';
+import { ButtonComponent } from '../../../core/shared/components/button/button.component';
 import { QuestNodeComponent } from '../quest-node/quest-node.component';
 
 @Component({
   selector: 'gm-work-field',
-  imports: [QuestNodeComponent],
+  imports: [QuestNodeComponent, ButtonComponent],
   templateUrl: './work-field.component.html',
   styleUrl: './work-field.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,15 +27,18 @@ import { QuestNodeComponent } from '../quest-node/quest-node.component';
     '(pointerup)': 'onPointerUp($event)',
     '(pointercancel)': 'onPointerUp($event)',
     '(click)': 'onClick($event)',
+    '(contextmenu)': 'onContextMenu($event)',
     '[class.is-grabbing]': 'grabbedId() !== null',
   },
 })
 export class WorkFieldComponent implements OnInit, OnDestroy {
   private host = inject(ElementRef<HTMLElement>);
   private graphService = inject(GraphService);
+  private dialogService = inject(DialogService);
 
   private graph = this.graphService.graph;
   readonly quests = computed(() => {
+    this.graphService.listVersion();
     const root = this.graph();
     if (!root) return [];
     return this.graphService.questsList;
@@ -41,14 +47,26 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
   #keyIndex = 0;
 
   readonly selectedQuestId = this.graphService.selectedQuestId;
+  readonly selectedQuest = computed(() => {
+    const id = this.selectedQuestId();
+    if (!id) return undefined;
+    return this.quests().find((quest) => quest.id === id);
+  });
   readonly shiftHeld = signal(false);
+  readonly rootId = computed(() => this.graph()?.id ?? null);
+  readonly contextMenu = signal<{ x: number; y: number; pinX: number; pinY: number } | null>(null);
   readonly grabbedId = signal<string | null>(null);
   #overrides = signal(new Map<string, { x: number; y: number }>());
   #grabOffsetX = 0;
   #grabOffsetY = 0;
   #pointerId: number | null = null;
+  #suppressClick = false;
   #nodeWidth = 48;
   #nodeHeight = 48;
+  #toolbarWidth = 108;
+  #toolbarHeight = 36;
+  #menuWidth = 180;
+  #menuHeight = 44;
 
   #onKeyDown = (event: KeyboardEvent): void => {
     if (event.key !== 'Shift' || this.shiftHeld()) return;
@@ -77,14 +95,22 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     this.#commit();
   };
 
+  #onDocumentPointerDown = (event: PointerEvent): void => {
+    const target = event.target;
+    if (target instanceof Element && target.closest('.context-menu')) return;
+    this.contextMenu.set(null);
+  };
+
   ngOnInit(): void {
     document.addEventListener('keydown', this.#onKeyDown);
     document.addEventListener('keyup', this.#onKeyUp);
+    document.addEventListener('pointerdown', this.#onDocumentPointerDown);
   }
 
   ngOnDestroy(): void {
     document.removeEventListener('keydown', this.#onKeyDown);
     document.removeEventListener('keyup', this.#onKeyUp);
+    document.removeEventListener('pointerdown', this.#onDocumentPointerDown);
     this.#endGrab();
     this.#commit();
   }
@@ -108,7 +134,42 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     return this.#overrides().get(this.keyOf(quest))?.y ?? quest.pos_y ?? 0;
   }
 
+  toolbarPosition(quest: Quest): { x: number; y: number } {
+    const gap = 8;
+    const field = this.host.nativeElement;
+    const left = this.leftOf(quest);
+    const top = this.topOf(quest);
+    let x = left + this.#nodeWidth + gap;
+    if (x + this.#toolbarWidth > field.clientWidth) {
+      x = left - gap - this.#toolbarWidth;
+    }
+    const y = top + (this.#nodeHeight - this.#toolbarHeight) / 2;
+    return {
+      x: Math.max(0, x),
+      y: Math.min(Math.max(0, y), Math.max(0, field.clientHeight - this.#toolbarHeight)),
+    };
+  }
+
+  editSelectedQuest(): void {
+    const quest = this.selectedQuest();
+    if (!quest) return;
+
+    this.dialogService.openEditorDialog({
+      kind: EditorDialogKind.Edit,
+      id: quest.id,
+      name: quest.name,
+      description: quest.description,
+    });
+  }
+
+  deleteSelectedQuest(): void {
+    const id = this.selectedQuestId();
+    if (!id) return;
+    this.graphService.removeQuest(id);
+  }
+
   onPointerDown(event: PointerEvent): void {
+    this.#suppressClick = false;
     if (!event.shiftKey || this.grabbedId()) return;
 
     const node = this.#nodeFromEvent(event);
@@ -146,7 +207,41 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     this.#setOverride(id, next.x, next.y);
   }
 
+  onContextMenu(event: MouseEvent): void {
+    if (!event.shiftKey || this.#nodeFromEvent(event)) {
+      this.contextMenu.set(null);
+      return;
+    }
+
+    event.preventDefault();
+    const origin = this.#origin();
+    const pinX = event.clientX - origin.left;
+    const pinY = event.clientY - origin.top;
+    const menu = this.#placeMenu(pinX + 14, pinY + 14);
+    this.contextMenu.set({ x: menu.x, y: menu.y, pinX, pinY });
+  }
+
+  openCreateQuest(): void {
+    const menu = this.contextMenu();
+    this.contextMenu.set(null);
+    if (!menu) return;
+
+    const pos = this.#clamp(menu.pinX - this.#nodeWidth / 2, menu.pinY - this.#nodeHeight / 2);
+    this.dialogService.openEditorDialog({
+      kind: EditorDialogKind.Quest,
+      name: '',
+      description: '',
+      pos_x: pos.x,
+      pos_y: pos.y,
+    });
+  }
+
   onClick(event: MouseEvent): void {
+    if (this.#suppressClick) {
+      this.#suppressClick = false;
+      return;
+    }
+
     const node = this.#nodeFromEvent(event);
     const key = node?.dataset['questId'];
     const quest = key ? this.#questByKey(key) : undefined;
@@ -174,6 +269,7 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
   }
 
   #endGrab(event?: PointerEvent): void {
+    const wasGrabbing = this.grabbedId() !== null;
     const host = this.host.nativeElement;
     const pointerId = event?.pointerId ?? this.#pointerId;
     if (pointerId !== null && host.hasPointerCapture(pointerId)) {
@@ -182,6 +278,8 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     this.#pointerId = null;
     this.grabbedId.set(null);
     this.#unlisten();
+
+    if (wasGrabbing) this.#suppressClick = true;
   }
 
   #commit(): void {
@@ -219,6 +317,16 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
   #origin(): { left: number; top: number } {
     const rect = this.host.nativeElement.getBoundingClientRect();
     return { left: rect.left, top: rect.top };
+  }
+
+  #placeMenu(x: number, y: number): { x: number; y: number } {
+    const field = this.host.nativeElement;
+    const maxX = Math.max(0, field.clientWidth - this.#menuWidth);
+    const maxY = Math.max(0, field.clientHeight - this.#menuHeight);
+    return {
+      x: Math.min(Math.max(0, x), maxX),
+      y: Math.min(Math.max(0, y), maxY),
+    };
   }
 
   #clamp(x: number, y: number): { x: number; y: number } {
