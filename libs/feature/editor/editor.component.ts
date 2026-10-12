@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject } from '@angular/core';
 import { GraphService } from '../../core/shared/services/graph.service';
-import { DialogService } from './dialog.service';
+import { DialogService } from '../../core/shared/services/dialog.service';
 import { EditorDialogKind } from './editor-dialog/editor-dialog.component';
 import { WorkFieldComponent } from './work-field/work-field.component';
 

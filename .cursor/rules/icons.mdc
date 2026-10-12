@@ -1,0 +1,20 @@
+---
+description: Иконки лежат в src/app/assets/icons. Бери их оттуда, новые файлы клади туда же.
+alwaysApply: true
+---
+
+# Иконки
+
+Готовые иконки лежат в `src/app/assets/icons` (`link.svg`, `plus.svg`, `edit.svg`, `delete.svg`). Перед новой иконкой проверь эту папку и возьми существующий файл.
+
+Новую иконку тоже клади туда отдельным `.svg`. Не вставляй разметку SVG в шаблон и не клади копии рядом с компонентом.
+
+Подключай файл маской, чтобы цвет шёл от `currentColor`:
+
+```scss
+.icon {
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../../../../src/app/assets/icons/edit.svg');
+}
+```

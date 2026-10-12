@@ -2,12 +2,13 @@
   <button
     type="button"
     class="select__trigger"
+    [id]="controlId"
     [class.select__trigger_empty]="!selected"
     (click)="toggle()"
     aria-haspopup="listbox"
     [attr.aria-expanded]="open"
   >
-    {{ selected ?? 'Не выбрано' }}
+    {{ selected ?? placeholder }}
   </button>
 
   @if (open) {

@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'gm-select',
@@ -8,7 +8,7 @@ import { Component, ElementRef, HostListener } from '@angular/core';
   standalone: true
 })
 export class SelectComponent {
-  readonly options = [
+  @Input() options = [
     'Полуночный зал',
     'Звёздная гавань',
     'Пыльный склеп',
@@ -20,8 +20,11 @@ export class SelectComponent {
     'Тихая крипта',
     'Северная застава',
   ];
+  @Input() selected: string | null = null;
+  @Input() placeholder = 'Не выбрано';
+  @Input() controlId?: string;
+  @Output() selectedChange = new EventEmitter<string>();
 
-  selected: string | null = null;
   open = false;
 
   constructor(private host: ElementRef<HTMLElement>) {}
@@ -32,6 +35,7 @@ export class SelectComponent {
 
   choose(option: string): void {
     this.selected = option;
+    this.selectedChange.emit(option);
     this.open = false;
   }
 

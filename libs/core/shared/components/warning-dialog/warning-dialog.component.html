@@ -1,0 +1,17 @@
+<div class="dialog">
+  <button type="button" class="dialog__close interactive" (click)="close()" aria-label="Закрыть">
+    ×
+  </button>
+
+  @if (title) {
+    <h2 class="dialog__title">{{ title }}</h2>
+  }
+
+  @if (message) {
+    <p class="dialog__message">{{ message }}</p>
+  }
+
+  <div class="dialog__footer">
+    <gm-button variant="confirm" width="148px" (click)="close()">{{ okLabel }}</gm-button>
+  </div>
+</div>

@@ -5,8 +5,19 @@
 
   <h2 class="dialog__title">{{ title }}</h2>
 
-  @if (kind === EditorDialogKind.Storyline || kind === EditorDialogKind.Quest || kind === EditorDialogKind.Edit) {
+  @if (kind === EditorDialogKind.Storyline || kind === EditorDialogKind.Quest || kind === EditorDialogKind.Edit || kind === EditorDialogKind.Relation) {
     <div class="dialog__body">
+        @if (kind === EditorDialogKind.Relation) {
+          <div class="field">
+            <label class="field__label" for="quest-relation">Кем будет новый квест</label>
+            <gm-select
+              controlId="quest-relation"
+              [options]="relationOptions"
+              [selected]="relationLabel()"
+              (selectedChange)="setRelation($event)"
+            />
+          </div>
+        }
         <div class="field">
           <label class="field__label" for="storyline-name">Название</label>
           @let nameError = storylineForm.name().touched() && storylineForm.name().getError('required');
@@ -18,7 +29,7 @@
 
         <div class="field">
           <label class="field__label" for="storyline-description">Описание</label>
-          <textarea id="storyline-description" class="control control_area" name="description" rows="4" [formField]="storylineForm.description"></textarea>
+          <textarea id="storyline-description" class="control control_area" rows="4" [formField]="storylineForm.description"></textarea>
           <span class="field__error"></span>
         </div>
       
@@ -26,7 +37,7 @@
   }
 
   <div class="dialog__footer">
-    @if (kind === EditorDialogKind.Storyline || kind === EditorDialogKind.Quest || kind === EditorDialogKind.Edit) {
+    @if (kind === EditorDialogKind.Storyline || kind === EditorDialogKind.Quest || kind === EditorDialogKind.Edit || kind === EditorDialogKind.Relation) {
       <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="storylineForm().invalid()">
         {{ kind === EditorDialogKind.Edit ? 'Сохранить' : 'Создать' }}
       </gm-button>

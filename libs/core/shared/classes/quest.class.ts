@@ -1,4 +1,7 @@
 import { QuestSnapshot } from "../models/quest.model";
+import { dfs } from "../services/graph.utils";
+
+export const QUEST_CYCLE_ERROR = 'Такая связь замкнёт цикл.';
 
 export class Quest {
   #id: string = '';
@@ -118,14 +121,20 @@ export class Quest {
     return this.#children.find((child) => child.id === id);
   }
 
-  addParent(parent: Quest) {
+  addParent(parent: Quest): string | null {
+    if (this.#reaches(this, parent)) return QUEST_CYCLE_ERROR;
+
     this.#addParent(parent);
-    parent.#addChild(this)
+    parent.#addChild(this);
+    return null;
   }
 
-  addChild(child: Quest) {
+  addChild(child: Quest): string | null {
+    if (this.#reaches(child, this)) return QUEST_CYCLE_ERROR;
+
     this.#addChild(child);
     child.#addParent(this);
+    return null;
   }
 
   removeParent(id: string): boolean {
@@ -161,6 +170,14 @@ export class Quest {
       layer: this.#layer,
       isRoot: this.#isRoot,
     };
+  }
+
+  #reaches(from: Quest, target: Quest): boolean {
+    let found = false;
+    dfs(from, (quest) => {
+      if (quest === target) found = true;
+    });
+    return found;
   }
 
   #addParent(parent: Quest) {

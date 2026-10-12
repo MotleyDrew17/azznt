@@ -68,6 +68,19 @@ export class GraphService {
     this.saveGraphToStorage();
   }
 
+  linkQuests(childId: string, parentId: string): string | null {
+    const child = this.#questsMap[childId];
+    const parent = this.#questsMap[parentId];
+    if (!child || !parent || child.getParentById(parentId)) return null;
+
+    const error = child.addParent(parent);
+    if (error) return error;
+
+    this.listVersion.update((version) => version + 1);
+    this.saveGraphToStorage();
+    return null;
+  }
+
   removeQuest(id: string): void {
     const quest = this.#questsMap[id];
     if (!quest) return;
@@ -113,6 +126,8 @@ export class GraphService {
       const graph = this.extractGraphFromSnapshot(graphSnapshot);
       this.#graph = graph;
       this.graph.set(this.#graph);
+      const maxZ = this.questsList.reduce((max, quest) => Math.max(max, quest.zIndex), 0);
+      this.#zIndex = maxZ + 1;
     }
   }
 

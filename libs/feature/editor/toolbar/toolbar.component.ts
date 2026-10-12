@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { DialogService } from '../dialog.service';
+import { DialogService } from '../../../core/shared/services/dialog.service';
 import { EditorDialogKind } from '../editor-dialog/editor-dialog.component';
 
 @Component({

@@ -4,6 +4,7 @@
 @use './app/assets/mixins/text-button' as text-button;
 @use './app/assets/mixins/scrollbar' as scrollbar;
 @use './app/assets/mixins/controls' as controls;
+@use './app/assets/mixins/hint' as hint;
 
 // 1. Убираем отступы у всех элементов
 *,
@@ -95,6 +96,10 @@ select {
 
 .control_select {
   @include controls.select;
+}
+
+.hint {
+  @include hint.bubble;
 }
 
 .is-disabled {

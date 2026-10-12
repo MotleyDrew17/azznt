@@ -10,10 +10,19 @@ import {
 } from '@angular/core';
 import { Quest } from '../../../core/shared/classes/quest.class';
 import { GraphService } from '../../../core/shared/services/graph.service';
-import { DialogService } from '../dialog.service';
+import { DialogService } from '../../../core/shared/services/dialog.service';
 import { EditorDialogKind } from '../editor-dialog/editor-dialog.component';
 import { ButtonComponent } from '../../../core/shared/components/button/button.component';
 import { QuestNodeComponent } from '../quest-node/quest-node.component';
+
+interface QuestEdge {
+  id: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  arrow: string;
+}
 
 @Component({
   selector: 'gm-work-field',
@@ -29,6 +38,7 @@ import { QuestNodeComponent } from '../quest-node/quest-node.component';
     '(click)': 'onClick($event)',
     '(contextmenu)': 'onContextMenu($event)',
     '[class.is-grabbing]': 'grabbedId() !== null',
+    '[class.is-linking]': 'linkDraft() !== null',
   },
 })
 export class WorkFieldComponent implements OnInit, OnDestroy {
@@ -54,6 +64,35 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
   });
   readonly shiftHeld = signal(false);
   readonly rootId = computed(() => this.graph()?.id ?? null);
+  readonly edges = computed(() => {
+    this.#overrides();
+    const edges: QuestEdge[] = [];
+
+    for (const quest of this.quests()) {
+      for (const parent of quest.parents) {
+        if (!parent || parent === quest) continue;
+        const edge = this.#edgeToParent(quest, parent);
+        if (edge) edges.push(edge);
+      }
+    }
+
+    return edges;
+  });
+  readonly linkDraft = signal<{ fromId: string; x: number; y: number; targetId: string | null } | null>(null);
+  readonly draftEdge = computed(() => {
+    const draft = this.linkDraft();
+    if (!draft) return null;
+
+    const from = this.quests().find((quest) => quest.id === draft.fromId);
+    if (!from) return null;
+
+    if (draft.targetId) {
+      const target = this.quests().find((quest) => quest.id === draft.targetId);
+      if (target) return this.#edgeToParent(from, target);
+    }
+
+    return this.#edgeToPoint(from, draft.x, draft.y);
+  });
   readonly contextMenu = signal<{ x: number; y: number; pinX: number; pinY: number } | null>(null);
   readonly grabbedId = signal<string | null>(null);
   #overrides = signal(new Map<string, { x: number; y: number }>());
@@ -63,12 +102,15 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
   #suppressClick = false;
   #nodeWidth = 48;
   #nodeHeight = 48;
-  #toolbarWidth = 108;
   #toolbarHeight = 36;
   #menuWidth = 180;
   #menuHeight = 44;
 
   #onKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === 'Escape') {
+      this.linkDraft.set(null);
+      return;
+    }
     if (event.key !== 'Shift' || this.shiftHeld()) return;
     this.shiftHeld.set(true);
   };
@@ -139,9 +181,10 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     const field = this.host.nativeElement;
     const left = this.leftOf(quest);
     const top = this.topOf(quest);
+    const toolbarWidth = this.toolbarWidth(quest);
     let x = left + this.#nodeWidth + gap;
-    if (x + this.#toolbarWidth > field.clientWidth) {
-      x = left - gap - this.#toolbarWidth;
+    if (x + toolbarWidth > field.clientWidth) {
+      x = left - gap - toolbarWidth;
     }
     const y = top + (this.#nodeHeight - this.#toolbarHeight) / 2;
     return {
@@ -150,7 +193,55 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     };
   }
 
+  hintBelow(quest: Quest): boolean {
+    const y = this.toolbarPosition(quest).y;
+    const above = y;
+    const below = this.host.nativeElement.clientHeight - y - this.#toolbarHeight;
+    return above < 32 && below > above;
+  }
+
+  canLink(quest: Quest): boolean {
+    return quest.id !== this.rootId() && !quest.isRoot;
+  }
+
+  toolbarWidth(quest: Quest): number {
+    const count = this.canLink(quest) ? 4 : 3;
+    return count * 28 + (count - 1) * 2 + 8;
+  }
+
+  startLink(event: MouseEvent): void {
+    const quest = this.selectedQuest();
+    if (!quest || !this.canLink(quest)) return;
+
+    const origin = this.#origin();
+    this.linkDraft.set({
+      fromId: quest.id,
+      x: event.clientX - origin.left,
+      y: event.clientY - origin.top,
+      targetId: null,
+    });
+  }
+
+  openRelatedQuest(): void {
+    const quest = this.selectedQuest();
+    if (!quest) return;
+
+    this.linkDraft.set(null);
+    const offset = 16;
+    const pos = this.#clamp(this.leftOf(quest) + offset, this.topOf(quest) + offset);
+    this.dialogService.openEditorDialog({
+      kind: EditorDialogKind.Relation,
+      name: '',
+      description: '',
+      anchorId: quest.id,
+      relation: 'next',
+      pos_x: pos.x,
+      pos_y: pos.y,
+    });
+  }
+
   editSelectedQuest(): void {
+    this.linkDraft.set(null);
     const quest = this.selectedQuest();
     if (!quest) return;
 
@@ -163,14 +254,21 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
   }
 
   deleteSelectedQuest(): void {
+    this.linkDraft.set(null);
     const id = this.selectedQuestId();
     if (!id) return;
-    this.graphService.removeQuest(id);
+
+    this.dialogService.openConfirmDialog({
+      title: 'Удалить квест',
+      message: 'Квест будет удалён.',
+      okLabel: 'Удалить',
+      onOk: () => this.graphService.removeQuest(id),
+    });
   }
 
   onPointerDown(event: PointerEvent): void {
     this.#suppressClick = false;
-    if (!event.shiftKey || this.grabbedId()) return;
+    if (this.linkDraft() || !event.shiftKey || this.grabbedId()) return;
 
     const node = this.#nodeFromEvent(event);
     const id = node?.dataset['questId'];
@@ -190,6 +288,8 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
   }
 
   onPointerMove(event: PointerEvent): void {
+    this.#moveLink(event);
+
     const id = this.grabbedId();
     if (!id) return;
 
@@ -245,6 +345,22 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     const node = this.#nodeFromEvent(event);
     const key = node?.dataset['questId'];
     const quest = key ? this.#questByKey(key) : undefined;
+    const draft = this.linkDraft();
+
+    if (draft) {
+      if (quest && quest.id !== draft.fromId) {
+        const error = this.graphService.linkQuests(draft.fromId, quest.id);
+        if (error) {
+          this.dialogService.openWarningDialog({
+            title: 'Нельзя соединить',
+            message: error,
+          });
+        }
+      }
+      this.linkDraft.set(null);
+      return;
+    }
+
     this.graphService.selectQuest(quest?.id ?? null);
   }
 
@@ -293,6 +409,7 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
       quest.pos_y = pos.y;
     }
     this.#overrides.set(new Map());
+    this.graphService.saveGraphToStorage();
   }
 
   #setOverride(id: string, x: number, y: number): void {
@@ -326,6 +443,77 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     return {
       x: Math.min(Math.max(0, x), maxX),
       y: Math.min(Math.max(0, y), maxY),
+    };
+  }
+
+  #moveLink(event: PointerEvent): void {
+    const draft = this.linkDraft();
+    if (!draft) return;
+
+    const origin = this.#origin();
+    const node = this.#nodeFromEvent(event);
+    const key = node?.dataset['questId'];
+    const target = key ? this.#questByKey(key) : undefined;
+
+    this.linkDraft.set({
+      fromId: draft.fromId,
+      x: event.clientX - origin.left,
+      y: event.clientY - origin.top,
+      targetId: target && target.id !== draft.fromId ? target.id : null,
+    });
+  }
+
+  #edgeToParent(quest: Quest, parent: Quest): QuestEdge | null {
+    const radius = this.#nodeWidth / 2;
+    return this.#edge(
+      `${quest.id}:${parent.id}`,
+      this.leftOf(quest) + radius,
+      this.topOf(quest) + radius,
+      this.leftOf(parent) + radius,
+      this.topOf(parent) + radius,
+      radius,
+    );
+  }
+
+  #edgeToPoint(quest: Quest, x: number, y: number): QuestEdge | null {
+    const radius = this.#nodeWidth / 2;
+    return this.#edge(
+      'draft',
+      this.leftOf(quest) + radius,
+      this.topOf(quest) + radius,
+      x,
+      y,
+      0,
+    );
+  }
+
+  #edge(id: string, fromX: number, fromY: number, toX: number, toY: number, endGap: number): QuestEdge | null {
+    const radius = this.#nodeWidth / 2;
+    const dx = toX - fromX;
+    const dy = toY - fromY;
+    const length = Math.hypot(dx, dy);
+    const head = Math.min(9, Math.max(0, length - radius - endGap));
+    if (head <= 0) return null;
+
+    const ux = dx / length;
+    const uy = dy / length;
+    const x1 = fromX + ux * radius;
+    const y1 = fromY + uy * radius;
+    const tipX = toX - ux * endGap;
+    const tipY = toY - uy * endGap;
+    const x2 = tipX - ux * head;
+    const y2 = tipY - uy * head;
+    const wing = head * 0.55;
+    const px = -uy;
+    const py = ux;
+
+    return {
+      id,
+      x1,
+      y1,
+      x2,
+      y2,
+      arrow: `${tipX},${tipY} ${x2 + px * wing},${y2 + py * wing} ${x2 - px * wing},${y2 - py * wing}`,
     };
   }
 

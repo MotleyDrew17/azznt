@@ -1,3 +1,14 @@
+<svg class="quest-edges" aria-hidden="true">
+  @for (edge of edges(); track edge.id) {
+    <line class="quest-edges__line" [attr.x1]="edge.x1" [attr.y1]="edge.y1" [attr.x2]="edge.x2" [attr.y2]="edge.y2" />
+    <polygon class="quest-edges__arrow" [attr.points]="edge.arrow" />
+  }
+  @if (draftEdge(); as edge) {
+    <line class="quest-edges__line" [attr.x1]="edge.x1" [attr.y1]="edge.y1" [attr.x2]="edge.x2" [attr.y2]="edge.y2" />
+    <polygon class="quest-edges__arrow" [attr.points]="edge.arrow" />
+  }
+</svg>
+
 @if (contextMenu(); as menu) {
   <span class="quest-pin" [style.left.px]="menu.pinX" [style.top.px]="menu.pinY"></span>
   <div class="context-menu" [style.left.px]="menu.x" [style.top.px]="menu.y" (click)="$event.stopPropagation()">
@@ -13,13 +24,18 @@
     (click)="$event.stopPropagation()"
     (pointerdown)="$event.stopPropagation()"
   >
-    <button type="button" class="quest-toolbar__action interactive" aria-label="Связать квесты">
-      <span class="quest-toolbar__icon quest-toolbar__icon_link"></span>
+    @if (canLink(quest)) {
+      <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Соединить" aria-label="Соединить" (click)="startLink($event)">
+        <span class="quest-toolbar__icon quest-toolbar__icon_link"></span>
+      </button>
+    }
+    <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Добавить" aria-label="Добавить" (click)="openRelatedQuest()">
+      <span class="quest-toolbar__icon quest-toolbar__icon_plus"></span>
     </button>
-    <button type="button" class="quest-toolbar__action interactive" aria-label="Редактировать" (click)="editSelectedQuest()">
+    <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Редактировать" aria-label="Редактировать" (click)="editSelectedQuest()">
       <span class="quest-toolbar__icon quest-toolbar__icon_edit"></span>
     </button>
-    <button type="button" class="quest-toolbar__action interactive" aria-label="Удалить" (click)="deleteSelectedQuest()">
+    <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Удалить" aria-label="Удалить" (click)="deleteSelectedQuest()">
       <span class="quest-toolbar__icon quest-toolbar__icon_delete"></span>
     </button>
   </div>

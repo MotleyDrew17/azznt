@@ -9,6 +9,8 @@ alwaysApply: true
 
 В компоненте оставляй только раскладку этого экрана: окно диалога, шапка, отступы блока.
 
+Кнопку, инпут и селект бери из `libs/core/shared/components`: `gm-button`, `gm-input`, `gm-select`. Нативный `select` не ставь: список опций рисует браузер, стили `gm-select` до него не доходят.
+
 ## Куда смотреть
 
 - `src/app/assets/colors.scss` — палитра, в том числе `--color-error`
@@ -17,15 +19,17 @@ alwaysApply: true
 - `src/app/assets/mixins/text-button.scss` — текстовая кнопка
 - `src/app/assets/mixins/interactive.scss` — ховер и нажатие
 - `src/app/assets/mixins/scrollbar.scss` — уже подключён на `*` в `src/styles.scss`
+- `src/app/assets/mixins/hint.scss` — подсказка при наведении
 
 ## Классы
 
 - `field` на `div`, `field__label` на `label`, `field__error` на элемент текста ошибки. У подписи и контрола общая пара `for` / `id`
-- `control` — инпут; `control_area` — textarea; `control_select` — нативный select
+- `control` — инпут; `control_area` — textarea. Селект в экране — `gm-select`
 - `control_error` — статус ошибки у любого контрола
 - `text-button` — полупрозрачная текстовая кнопка, на наведении золотой текст
 - `interactive` — ховер; на элементе задай `--surface`
 - `is-disabled` — ставит `appDisabled` (`libs/core/shared/directives/disabled.directive.ts`) на кнопку, инпут, textarea и select
+- `hint` — подсказка из `data-hint` над элементом. `hint_below` показывает её снизу, если сверху нет места
 
 ```html
 <div class="field">
