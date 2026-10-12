@@ -1,8 +1,8 @@
 import { inject, Injectable, signal } from '@angular/core';
-import {Quest} from '../classes/quest.class';
+import {Quest, QUEST_CYCLE_ERROR} from '../classes/quest.class';
 import { CreateQuestData, QuestSnapshot } from '../models/quest.model';
 import { StorageService } from './storage.service';
-import { dfs } from './graph.utils';
+import { hasCycle } from './graph.utils';
 
 @Injectable({
   providedIn: 'root'
@@ -33,20 +33,31 @@ export class GraphService {
     this.selectedQuestId.set(id);
   }
 
-  createQuest(data: CreateQuestData, isNewGraph: boolean = false): Quest{
+  createQuest(data: CreateQuestData, isNewGraph: boolean = false): string | null {
     const quest = new Quest();
-    quest.zIndex = this.#zIndex++;
     quest.name = data.name;
     quest.description = data.description;
     if (data.pos_x !== undefined) quest.pos_x = data.pos_x;
     if (data.pos_y !== undefined) quest.pos_y = data.pos_y;
-    if(data.child) {
-      quest.addChild(data.child);
+    const cyclicBefore = hasCycle(this.questsList);
+    if (data.child) {
+      const error = quest.addChild(data.child);
+      if (error) return error;
     }
 
-    if(data.parent) {
-      quest.addParent(data.parent);
+    if (data.parent) {
+      const error = quest.addParent(data.parent);
+      if (error) {
+        if (data.child) quest.removeChild(data.child.id);
+        return error;
+      }
     }
+    if (!cyclicBefore && hasCycle([quest, ...this.questsList])) {
+      if (data.parent) quest.removeParent(data.parent.id);
+      if (data.child) quest.removeChild(data.child.id);
+      return QUEST_CYCLE_ERROR;
+    }
+    quest.zIndex = this.#zIndex++;
     this.#questsMap[quest.id] = quest;
     if(isNewGraph) {
       quest.isRoot = true;
@@ -55,7 +66,7 @@ export class GraphService {
     }
     this.listVersion.update((version) => version + 1);
     this.saveGraphToStorage();
-    return quest;
+    return null;
   }
 
   updateQuest(id: string, data: Pick<CreateQuestData, 'name' | 'description'>): void {
@@ -73,8 +84,13 @@ export class GraphService {
     const parent = this.#questsMap[parentId];
     if (!child || !parent || child.getParentById(parentId)) return null;
 
+    const cyclicBefore = hasCycle(this.questsList);
     const error = child.addParent(parent);
     if (error) return error;
+    if (!cyclicBefore && hasCycle(this.questsList)) {
+      child.removeParent(parent.id);
+      return QUEST_CYCLE_ERROR;
+    }
 
     this.listVersion.update((version) => version + 1);
     this.saveGraphToStorage();
@@ -83,7 +99,7 @@ export class GraphService {
 
   removeQuest(id: string): void {
     const quest = this.#questsMap[id];
-    if (!quest) return;
+    if (!quest || quest.isRoot || quest.id === this.#graph?.id) return;
 
     [...quest.parents].forEach((parent) => quest.removeParent(parent.id));
     [...quest.children].forEach((child) => quest.removeChild(child.id));

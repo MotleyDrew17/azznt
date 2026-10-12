@@ -201,11 +201,17 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
   }
 
   canLink(quest: Quest): boolean {
-    return quest.id !== this.rootId() && !quest.isRoot;
+    return !this.#isRoot(quest);
+  }
+
+  canDelete(quest: Quest): boolean {
+    return !this.#isRoot(quest);
   }
 
   toolbarWidth(quest: Quest): number {
-    const count = this.canLink(quest) ? 4 : 3;
+    let count = 2;
+    if (this.canLink(quest)) count++;
+    if (this.canDelete(quest)) count++;
     return count * 28 + (count - 1) * 2 + 8;
   }
 
@@ -234,7 +240,7 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
       name: '',
       description: '',
       anchorId: quest.id,
-      relation: 'next',
+      relation: this.#isRoot(quest) ? 'previous' : 'next',
       pos_x: pos.x,
       pos_y: pos.y,
     });
@@ -255,8 +261,9 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
 
   deleteSelectedQuest(): void {
     this.linkDraft.set(null);
-    const id = this.selectedQuestId();
-    if (!id) return;
+    const quest = this.selectedQuest();
+    if (!quest || !this.canDelete(quest)) return;
+    const id = quest.id;
 
     this.dialogService.openConfirmDialog({
       title: 'Удалить квест',
@@ -421,6 +428,10 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
 
   #questByKey(key: string): Quest | undefined {
     return this.quests().find((quest) => this.keyOf(quest) === key);
+  }
+
+  #isRoot(quest: Quest): boolean {
+    return quest.id === this.rootId() || quest.isRoot;
   }
 
   #nodeFromEvent(event: Event): HTMLElement | null {

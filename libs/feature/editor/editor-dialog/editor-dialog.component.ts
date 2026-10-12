@@ -6,6 +6,7 @@ import { CreateQuestData } from '../../../core/shared/models/quest.model';
 import { form, required, FormField } from '@angular/forms/signals';
 import { DisabledDirective } from '../../../core/shared/directives/disabled.directive';
 import { GraphService } from '../../../core/shared/services/graph.service';
+import { DialogService } from '../../../core/shared/services/dialog.service';
 
 export enum EditorDialogKind {
   Storyline = 'storyline',
@@ -40,11 +41,11 @@ export class EditorDialogComponent {
   private data = inject<EditorDialogData>(DIALOG_DATA);
   private dialogRef = inject(DialogRef<void, EditorDialogData>);
   private graphService = inject(GraphService);
+  private dialogService = inject(DialogService);
 
   readonly EditorDialogKind = EditorDialogKind;
   kind = this.data.kind;
-  relation = signal<QuestRelation>(this.data.relation ?? 'next');
-  readonly relationOptions = ['Предыдущий', 'Следующий'];
+  relation = signal<QuestRelation>(this.#initialRelation());
 
   get title(): string {
     if (this.kind !== EditorDialogKind.Relation) return TITLES[this.kind];
@@ -59,11 +60,19 @@ export class EditorDialogComponent {
     this.dialogRef.close();
   }
 
+  get relationOptions(): string[] {
+    return this.#anchorIsRoot() ? ['Предыдущий'] : ['Предыдущий', 'Следующий'];
+  }
+
   relationLabel(): string {
     return this.relation() === 'previous' ? 'Предыдущий' : 'Следующий';
   }
 
   setRelation(label: string): void {
+    if (this.#anchorIsRoot()) {
+      this.relation.set('previous');
+      return;
+    }
     this.relation.set(label === 'Предыдущий' ? 'previous' : 'next');
   }
 
@@ -76,31 +85,29 @@ export class EditorDialogComponent {
           pos_x: this.data.pos_x,
           pos_y: this.data.pos_y,
         };
-        this.graphService.createQuest(questData, true);
-        console.log(this.graphService.graph());
-        this.close();
+        if (this.#createQuest(questData, true)) this.close();
         break;
       case EditorDialogKind.Quest:
-        this.graphService.createQuest({
+        if (this.#createQuest({
           name: this.storylineForm.name().value(),
           description: this.storylineForm.description().value(),
           pos_x: this.data.pos_x,
           pos_y: this.data.pos_y,
-        });
-        this.close();
+        })) this.close();
         break;
       case EditorDialogKind.Relation:
         const anchor = this.data.anchorId ? this.graphService.getQuestById(this.data.anchorId) : undefined;
-        if (!anchor) break;
-        this.graphService.createQuest({
+        const root = this.graphService.graph();
+        if (!anchor || !root) break;
+        const relation = this.#anchorIsRoot() ? 'previous' : this.relation();
+        if (this.#createQuest({
           name: this.storylineForm.name().value(),
           description: this.storylineForm.description().value(),
           pos_x: this.data.pos_x,
           pos_y: this.data.pos_y,
-          parent: this.relation() === 'previous' ? anchor : undefined,
-          child: this.relation() === 'next' ? anchor : undefined,
-        });
-        this.close();
+          parent: relation === 'previous' ? anchor : root,
+          child: relation === 'next' ? anchor : undefined,
+        })) this.close();
         break;
       case EditorDialogKind.Edit:
         if (!this.data.id) break;
@@ -111,5 +118,27 @@ export class EditorDialogComponent {
         this.close();
         break;
     }
+  }
+
+  #createQuest(data: CreateQuestData, isNewGraph = false): boolean {
+    const error = this.graphService.createQuest(data, isNewGraph);
+    if (!error) return true;
+
+    this.dialogService.openWarningDialog({
+      title: 'Нельзя соединить',
+      message: error,
+    });
+    return false;
+  }
+
+  #initialRelation(): QuestRelation {
+    if (this.#anchorIsRoot()) return 'previous';
+    return this.data.relation ?? 'next';
+  }
+
+  #anchorIsRoot(): boolean {
+    const anchor = this.data.anchorId ? this.graphService.getQuestById(this.data.anchorId) : undefined;
+    const root = this.graphService.graph();
+    return !!anchor && !!root && (anchor.isRoot || anchor.id === root.id);
   }
 }

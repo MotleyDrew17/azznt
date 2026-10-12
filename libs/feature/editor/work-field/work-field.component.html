@@ -35,9 +35,11 @@
     <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Редактировать" aria-label="Редактировать" (click)="editSelectedQuest()">
       <span class="quest-toolbar__icon quest-toolbar__icon_edit"></span>
     </button>
-    <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Удалить" aria-label="Удалить" (click)="deleteSelectedQuest()">
-      <span class="quest-toolbar__icon quest-toolbar__icon_delete"></span>
-    </button>
+    @if (canDelete(quest)) {
+      <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Удалить" aria-label="Удалить" (click)="deleteSelectedQuest()">
+        <span class="quest-toolbar__icon quest-toolbar__icon_delete"></span>
+      </button>
+    }
   </div>
 }
 
