@@ -1,4 +1,80 @@
-.header{
+:host {
+  display: block;
+}
+
+.header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   height: var(--header-height);
+  padding: 0 12px;
   background: var(--color-lvl-1);
+}
+
+.header__files {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.header__action {
+  --surface: transparent;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-parchment);
+
+  &_play {
+    color: var(--color-green);
+  }
+
+  &.hint::after {
+    left: auto;
+    transform: none;
+  }
+
+  &_mode.hint::after {
+    right: auto;
+    left: 0;
+  }
+}
+
+.header__files .hint::after {
+  right: 0;
+  left: auto;
+  transform: none;
+}
+
+.header__icon {
+  width: 32px;
+  height: 32px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+
+  &_play {
+    mask-image: url('../../../../src/app/assets/icons/play.svg');
+  }
+
+  &_pen {
+    mask-image: url('../../../../src/app/assets/icons/pen.svg');
+  }
+
+  &_download {
+    mask-image: url('../../../../src/app/assets/icons/download.svg');
+  }
+
+  &_upload {
+    mask-image: url('../../../../src/app/assets/icons/upload.svg');
+  }
+}
+
+.header__file {
+  display: none;
 }

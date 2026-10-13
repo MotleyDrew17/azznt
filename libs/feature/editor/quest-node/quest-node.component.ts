@@ -21,6 +21,7 @@ export class QuestNodeComponent {
   readonly nodeId = input('');
   readonly left = input(0);
   readonly top = input(0);
+  readonly size = input(48);
   readonly shiftHeld = input(false);
   readonly grabbing = input(false);
   readonly selected = input(false);

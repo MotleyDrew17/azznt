@@ -9,8 +9,14 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+  --field-zoom: 1;
 
-  &.is-grabbing {
+  &.is-space {
+    cursor: grab;
+  }
+
+  &.is-grabbing,
+  &.is-panning {
     cursor: grabbing;
   }
 
@@ -30,7 +36,7 @@
 
 .quest-edges__line {
   stroke: var(--color-gold);
-  stroke-width: 2;
+  stroke-width: calc(2px * var(--field-zoom));
 }
 
 .quest-edges__arrow {
@@ -53,6 +59,113 @@
   background: var(--quest-pin);
   pointer-events: none;
   transform: translate(-50%, -50%);
+}
+
+.quest-card {
+  position: absolute;
+  z-index: var(--field-overlay-z);
+  width: 260px;
+  border: 1px solid var(--quest-pin);
+  border-radius: 10px;
+  background: var(--color-bg);
+  color: var(--color-parchment);
+  pointer-events: auto;
+  transform: translateY(calc(-100% - 8px));
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: var(--tail-x);
+    width: 0;
+    height: 0;
+    border-style: solid;
+    pointer-events: none;
+    transform: translateX(-50%);
+  }
+
+  &::before {
+    z-index: 0;
+    bottom: -9px;
+    border-width: 9px 8px 0;
+    border-color: var(--quest-pin) transparent transparent;
+  }
+
+  &::after {
+    z-index: 2;
+    bottom: -7px;
+    border-width: 8px 7px 0;
+    border-color: var(--color-bg) transparent transparent;
+  }
+
+  &_pinned {
+    pointer-events: auto;
+  }
+
+  &_below {
+    transform: translateY(8px);
+
+    &::before {
+      bottom: auto;
+      top: -9px;
+      border-width: 0 8px 9px;
+      border-color: transparent transparent var(--quest-pin);
+    }
+
+    &::after {
+      bottom: auto;
+      top: -7px;
+      border-width: 0 7px 8px;
+      border-color: transparent transparent var(--color-bg);
+    }
+  }
+}
+
+.quest-card__bridge {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 14px;
+}
+
+.quest-card:not(.quest-card_below) .quest-card__bridge {
+  bottom: -14px;
+}
+
+.quest-card_below .quest-card__bridge {
+  top: -14px;
+}
+
+.quest-card__body {
+  position: relative;
+  z-index: 1;
+  max-height: 220px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: var(--color-bg);
+  overflow: auto;
+}
+
+.quest-card__name,
+.quest-card__description {
+  margin: 0;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.quest-card__name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.quest-card__description {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+.quest-card__name + .quest-card__description {
+  margin-top: 4px;
 }
 
 .quest-toolbar {

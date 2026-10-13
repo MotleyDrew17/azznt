@@ -21,11 +21,15 @@
 
 // 2. Улучшаем типографику и доступность
 html {
+  height: 100%;
+  overflow: hidden;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
+  height: 100%;
+  overflow: hidden;
   font-family: var(--font-family);
   font-size: 18px;
   font-weight: 450;

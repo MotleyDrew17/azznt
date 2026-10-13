@@ -10,5 +10,7 @@
   [appDisabled]="state() === QuestNodeState.Blocked"
   [style.left.px]="left()"
   [style.top.px]="top()"
+  [style.width.px]="size()"
+  [style.height.px]="size()"
   [style.z-index]="quest()?.zIndex"
 ></div>

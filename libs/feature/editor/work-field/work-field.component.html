@@ -16,7 +16,31 @@
   </div>
 }
 
-@if (selectedQuest(); as quest) {
+@if (cardQuest(); as quest) {
+  <div
+    class="quest-card"
+    [attr.data-quest-card]="keyOf(quest)"
+    [class.quest-card_below]="cardBelow(quest)"
+    [class.quest-card_pinned]="cardPinned()"
+    [style.left.px]="cardLeft(quest)"
+    [style.top.px]="cardTop(quest)"
+    [style.--tail-x.px]="cardTail(quest)"
+    (click)="$event.stopPropagation()"
+    (pointerdown)="$event.stopPropagation()"
+  >
+    <span class="quest-card__bridge"></span>
+    <div class="quest-card__body">
+      @if (quest.name.trim()) {
+        <p class="quest-card__name">{{ quest.name }}</p>
+      }
+      @if (quest.description.trim()) {
+        <p class="quest-card__description">{{ quest.description }}</p>
+      }
+    </div>
+  </div>
+}
+
+@if (showToolbar() && selectedQuest(); as quest) {
   <div
     class="quest-toolbar"
     [style.left.px]="toolbarPosition(quest).x"
@@ -24,18 +48,22 @@
     (click)="$event.stopPropagation()"
     (pointerdown)="$event.stopPropagation()"
   >
-    @if (canLink(quest)) {
+    @if (allows(FieldAction.LinkQuest) && canLink(quest)) {
       <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Соединить" aria-label="Соединить" (click)="startLink($event)">
         <span class="quest-toolbar__icon quest-toolbar__icon_link"></span>
       </button>
     }
-    <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Добавить" aria-label="Добавить" (click)="openRelatedQuest()">
-      <span class="quest-toolbar__icon quest-toolbar__icon_plus"></span>
-    </button>
-    <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Редактировать" aria-label="Редактировать" (click)="editSelectedQuest()">
-      <span class="quest-toolbar__icon quest-toolbar__icon_edit"></span>
-    </button>
-    @if (canDelete(quest)) {
+    @if (allows(FieldAction.AddQuest)) {
+      <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Добавить" aria-label="Добавить" (click)="openRelatedQuest()">
+        <span class="quest-toolbar__icon quest-toolbar__icon_plus"></span>
+      </button>
+    }
+    @if (allows(FieldAction.EditQuest)) {
+      <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Редактировать" aria-label="Редактировать" (click)="editSelectedQuest()">
+        <span class="quest-toolbar__icon quest-toolbar__icon_edit"></span>
+      </button>
+    }
+    @if (allows(FieldAction.DeleteQuest) && canDelete(quest)) {
       <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Удалить" aria-label="Удалить" (click)="deleteSelectedQuest()">
         <span class="quest-toolbar__icon quest-toolbar__icon_delete"></span>
       </button>
@@ -43,14 +71,15 @@
   </div>
 }
 
-@for (quest of quests(); track keyOf(quest)) {
+@for (quest of visibleQuests(); track keyOf(quest)) {
   <gm-quest-node
     [quest]="quest"
     [nodeId]="keyOf(quest)"
     [left]="leftOf(quest)"
     [top]="topOf(quest)"
-    [shiftHeld]="shiftHeld()"
-    [grabbing]="grabbedId() === keyOf(quest)"
+    [size]="nodeSize()"
+    [shiftHeld]="allows(FieldAction.MoveQuest) && shiftHeld()"
+    [grabbing]="allows(FieldAction.MoveQuest) && grabbedId() === keyOf(quest)"
     [selected]="selectedQuestId() === quest.id"
     [root]="quest.id === rootId()"
   />

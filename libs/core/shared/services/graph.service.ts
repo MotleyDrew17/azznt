@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import {Quest, QUEST_CYCLE_ERROR} from '../classes/quest.class';
-import { CreateQuestData, QuestSnapshot } from '../models/quest.model';
+import { CreateQuestData, parseQuestSnapshots, QuestSnapshot } from '../models/quest.model';
 import { StorageService } from './storage.service';
 import { hasCycle } from './graph.utils';
 
@@ -99,11 +99,21 @@ export class GraphService {
 
   removeQuest(id: string): void {
     const quest = this.#questsMap[id];
-    if (!quest || quest.isRoot || quest.id === this.#graph?.id) return;
+    const root = this.#graph;
+    if (!quest || !root || quest.isRoot || quest.id === root.id) return;
+
+    const freed = [...quest.children].filter((child) =>
+      child.parents.every((parent) => parent.id === quest.id),
+    );
 
     [...quest.parents].forEach((parent) => quest.removeParent(parent.id));
     [...quest.children].forEach((child) => quest.removeChild(child.id));
     delete this.#questsMap[id];
+
+    for (const child of freed) {
+      if (child.id === root.id || child.isRoot || child.parents.length > 0) continue;
+      child.addParent(root);
+    }
 
     if (this.#graph?.id === id) {
       this.#graph = this.questsList[0];
@@ -136,6 +146,23 @@ export class GraphService {
     this.storageService.local.set('graph', graphSnapshot);
   }
 
+  graphFileName(): string {
+    const name = this.#graph?.name.trim() || 'graph';
+    const safe = name.replace(/[<>:"/\\|?*\u0000-\u001f]/g, '').trim() || 'graph';
+    return `${safe}.gm`;
+  }
+
+  toGraphFile(): string {
+    return JSON.stringify(this.createGraphSnapshot());
+  }
+
+  loadGraphFile(text: string): string | null {
+    const snapshot = parseQuestSnapshots(text);
+    if (!snapshot) return 'Файл не похож на сохранение.';
+    this.#replaceGraph(snapshot);
+    return null;
+  }
+
   #initGraphFromStorage(){
     const graphSnapshot = this.storageService.local.get<QuestSnapshot[]>('graph');
     if(graphSnapshot){
@@ -149,6 +176,25 @@ export class GraphService {
 
   createGraphSnapshot(): QuestSnapshot[] {
    return this.questsList.map(quest => quest.toSnapshot());
+  }
+
+  #replaceGraph(snapshot: QuestSnapshot[]): void {
+    this.#questsMap = {};
+    this.selectedQuestId.set(null);
+    if (snapshot.length === 0) {
+      this.#graph = undefined;
+      this.graph.set(undefined);
+      this.#zIndex = 1;
+    } else {
+      this.extractGraphFromSnapshot(snapshot);
+      const root = this.questsList.find((quest) => quest.isRoot) ?? this.questsList[0];
+      this.#graph = root;
+      this.graph.set(root);
+      const maxZ = this.questsList.reduce((max, quest) => Math.max(max, quest.zIndex), 0);
+      this.#zIndex = maxZ + 1;
+    }
+    this.listVersion.update((version) => version + 1);
+    this.saveGraphToStorage();
   }
 
   extractGraphFromSnapshot(snapshot: QuestSnapshot[]): Quest {

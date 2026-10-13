@@ -1,0 +1,18 @@
+---
+description: Сервисы, модели, классы и enums клади в libs/core/shared, не рядом с компонентом.
+alwaysApply: true
+---
+
+# Общий код
+
+Новый сервис, модель, класс и enum не клади в `libs/feature` и не оставляй рядом с компонентом. Компонент их только импортирует.
+
+- `libs/core/shared/services` — сервисы, файл `*.service.ts`
+- `libs/core/shared/models` — модели и типы данных, файл `*.model.ts`
+- `libs/core/shared/classes` — классы, файл `*.class.ts`
+- `libs/core/shared/enums` — enums, файл `*.enum.ts`
+
+```ts
+import { GraphService } from '../../core/shared/services/graph.service';
+import { FieldMode } from '../../core/shared/enums/field-mode.enum';
+```
