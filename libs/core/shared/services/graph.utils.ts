@@ -44,34 +44,28 @@ export function hasCycle(quests: readonly Quest[]): boolean {
   return false;
 }
 
-function reaches(start: Quest, target: Quest, next: (quest: Quest) => readonly (Quest | undefined)[]): boolean {
-  const visited = new Set<Quest>();
-  const stack: Quest[] = [start];
+function reaches(start: Quest, target: Quest, next: (quest: Quest) => readonly Quest[]): boolean {
+  let found = false;
+  dfs(start, (quest) => {
+    if (quest !== start && quest === target) found = true;
+  }, next);
+  return found;
+}
 
+export function dfs(
+  graph: Quest,
+  callback: (quest: Quest) => void,
+  next: (quest: Quest) => readonly Quest[] = (quest) => quest.children,
+) {
+  const visited = new Set<Quest>();
+  const stack: Quest[] = [graph];
   while (stack.length > 0) {
     const current = stack.pop();
     if (!current || visited.has(current)) continue;
     visited.add(current);
-
+    callback(current);
     for (const quest of next(current)) {
-      if (!quest || visited.has(quest)) continue;
-      if (quest === target) return true;
-      stack.push(quest);
-    }
-  }
-
-  return false;
-}
-
-export function dfs(graph: Quest, callback: (quest: Quest) => void) {
-  const visited: Set<Quest> = new Set();
-  const stack: Quest[] = [graph];
-  while (stack.length > 0) {
-    const current = stack.pop();
-    if (current && !visited.has(current)) {
-      visited.add(current);
-      callback(current);
-      stack.push(...(current?.children || []));
+      if (quest && !visited.has(quest)) stack.push(quest);
     }
   }
 }

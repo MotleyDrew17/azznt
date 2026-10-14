@@ -29,4 +29,20 @@
     top: calc(100% + 6px);
     bottom: auto;
   }
+
+  &_wrap {
+    &:hover,
+    &:focus-visible {
+      z-index: 3;
+    }
+
+    &::after {
+      width: max-content;
+      max-width: 280px;
+      padding: 8px 10px;
+      line-height: 1.35;
+      white-space: normal;
+      text-align: left;
+    }
+  }
 }

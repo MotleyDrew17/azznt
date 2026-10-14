@@ -5,6 +5,7 @@
 @use './app/assets/mixins/scrollbar' as scrollbar;
 @use './app/assets/mixins/controls' as controls;
 @use './app/assets/mixins/hint' as hint;
+@use './app/assets/mixins/dialog' as dialog;
 
 // 1. Убираем отступы у всех элементов
 *,
@@ -68,6 +69,40 @@ select {
   background: rgba(0, 0, 0, 0.5);
 }
 
+.dialog-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dialog-host {
+  @include dialog.host;
+}
+
+.dialog {
+  @include dialog.window;
+}
+
+.dialog__close {
+  @include dialog.close;
+}
+
+.dialog__title {
+  @include dialog.title;
+}
+
+.dialog__message {
+  @include dialog.message;
+}
+
+.dialog__body {
+  @include dialog.body;
+}
+
+.dialog__footer {
+  @include dialog.footer;
+}
+
 // Иконки и прочие активные элементы: задать --surface своим цветом.
 .interactive {
   @include interactive.states;
@@ -86,12 +121,36 @@ select {
   @include controls.label;
 }
 
+.field__heading {
+  @include controls.heading;
+}
+
+.field__hint {
+  @include controls.hint-button;
+}
+
+.field__hint-icon {
+  @include controls.hint-icon;
+}
+
+.field__line {
+  @include controls.line;
+}
+
+.field__suffix {
+  @include controls.suffix;
+}
+
 .field__error {
   @include controls.error;
 }
 
 .control {
   @include controls.control;
+}
+
+.control[type='number'] {
+  @include controls.number;
 }
 
 .control_area {

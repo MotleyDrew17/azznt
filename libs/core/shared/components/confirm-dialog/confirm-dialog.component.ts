@@ -15,8 +15,8 @@ export interface ConfirmDialogData {
   selector: 'gm-confirm-dialog',
   imports: [ButtonComponent],
   templateUrl: './confirm-dialog.component.html',
-  styleUrl: './confirm-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'dialog-host' },
 })
 export class ConfirmDialogComponent {
   private data = inject<ConfirmDialogData>(DIALOG_DATA);

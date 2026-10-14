@@ -1,0 +1,93 @@
+:host {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.checkbox {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text);
+  font-size: 16px;
+  line-height: 1.3;
+  cursor: pointer;
+
+  &.is-disabled {
+    color: var(--color-silver);
+    cursor: default;
+  }
+}
+
+.checkbox__input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+
+  .is-disabled & {
+    cursor: default;
+  }
+
+  &:focus-visible + .checkbox__box {
+    border-color: var(--field-border-color-focus);
+  }
+
+  &:checked + .checkbox__box {
+    border-color: var(--color-gold);
+    background-color: color-mix(in srgb, var(--color-gold) 22%, var(--color-bg));
+
+    &::after {
+      content: '';
+      width: 8px;
+      height: 4px;
+      margin-top: -2px;
+      border-bottom: 2px solid var(--color-gold);
+      border-left: 2px solid var(--color-gold);
+      transform: rotate(-45deg);
+    }
+  }
+
+  &:checked:focus-visible + .checkbox__box {
+    border-color: var(--color-gold);
+  }
+
+  &:disabled + .checkbox__box {
+    border-color: color-mix(in srgb, var(--color-silver) 28%, var(--color-bg));
+    background-color: color-mix(in srgb, var(--color-silver) 12%, var(--color-bg));
+  }
+
+  &:disabled:checked + .checkbox__box::after {
+    border-color: var(--color-silver);
+  }
+}
+
+.checkbox__box {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border: var(--field-border-width) solid var(--color-lvl-3);
+  border-radius: var(--field-radius);
+  background-color: var(--color-lvl-1);
+  transition: var(--field-transition);
+
+  .checkbox:hover:not(.is-disabled) & {
+    background-color: color-mix(in srgb, white var(--interactive-hover), var(--color-lvl-1));
+    border-color: color-mix(in srgb, white var(--interactive-hover), var(--color-lvl-3));
+  }
+
+  .checkbox:hover:not(.is-disabled) .checkbox__input:checked + & {
+    border-color: var(--color-gold);
+    background-color: color-mix(in srgb, var(--color-gold) 30%, var(--color-bg));
+  }
+}
+
+.checkbox__text:empty {
+  display: none;
+}

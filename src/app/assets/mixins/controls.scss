@@ -1,5 +1,7 @@
 @mixin control {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: var(--field-height);
   padding: 0 var(--field-padding-x);
   border: var(--field-border-width) solid var(--field-border-color);
@@ -42,6 +44,37 @@
   }
 }
 
+@mixin number {
+  padding-right: 18px;
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 18px;
+    margin: 0 -8px 0 0;
+    opacity: 1;
+    cursor: pointer;
+    background: center / 10px 14px no-repeat;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M1 5.2 5 1.5 9 5.2' fill='none' stroke='%23E4D3B4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M1 8.8 5 12.5 9 8.8' fill='none' stroke='%23E4D3B4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  &.control_error::-webkit-inner-spin-button {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M1 5.2 5 1.5 9 5.2' fill='none' stroke='%23D98980' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M1 8.8 5 12.5 9 8.8' fill='none' stroke='%23D98980' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  &:disabled::-webkit-inner-spin-button,
+  &.is-disabled::-webkit-inner-spin-button {
+    cursor: default;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M1 5.2 5 1.5 9 5.2' fill='none' stroke='%2399A4B0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M1 8.8 5 12.5 9 8.8' fill='none' stroke='%2399A4B0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+}
+
 @mixin area {
   height: 96px;
   padding: 10px var(--field-padding-x);
@@ -71,6 +104,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
+  max-width: 100%;
 
   & + & {
     margin-top: 14px;
@@ -80,6 +115,71 @@
 @mixin label {
   font-size: 14px;
   color: var(--color-text-muted);
+}
+
+@mixin heading {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+@mixin hint-button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-parchment);
+  }
+
+  &.hint {
+    position: static;
+  }
+
+  &.hint::after {
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: none;
+    transform: none;
+  }
+}
+
+@mixin hint-icon {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../icons/hint.svg');
+}
+
+@mixin line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+
+  .control:not([type='number']) {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+  }
+}
+
+@mixin suffix {
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: 14px;
 }
 
 @mixin error {

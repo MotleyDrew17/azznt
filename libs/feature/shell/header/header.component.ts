@@ -1,4 +1,7 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import { DialogService } from '../../../core/shared/services/dialog.service';
 import { GraphService } from '../../../core/shared/services/graph.service';
 import { FieldMode } from '../../../core/shared/enums/field-mode.enum';
@@ -16,11 +19,22 @@ export class HeaderComponent {
   readonly FieldMode = FieldMode;
 
   private fieldMode = inject(FieldModeService);
+  private router = inject(Router);
   private graphService = inject(GraphService);
   private dialogService = inject(DialogService);
   private fileInput = viewChild<ElementRef<HTMLInputElement>>('file');
 
   readonly mode = this.fieldMode.mode;
+  readonly showTools = signal(this.#showsTools(this.router.url));
+
+  constructor() {
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      takeUntilDestroyed(),
+    ).subscribe(() => {
+      this.showTools.set(this.#showsTools(this.router.url));
+    });
+  }
 
   toggleMode(): void {
     this.fieldMode.toggle();
@@ -60,6 +74,11 @@ export class HeaderComponent {
       const error = this.graphService.loadGraphFile(text);
       if (error) this.#rejectFile(error);
     });
+  }
+
+  #showsTools(url: string): boolean {
+    const path = url.split('?')[0].split('#')[0];
+    return path === '/quest-tree' || /^\/skill\/[^/]+$/.test(path);
   }
 
   #rejectFile(message: string): void {

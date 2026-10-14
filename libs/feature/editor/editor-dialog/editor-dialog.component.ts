@@ -34,8 +34,8 @@ const TITLES: Record<Exclude<EditorDialogKind, EditorDialogKind.Relation>, strin
   selector: 'gm-editor-dialog',
   imports: [ButtonComponent, SelectComponent, DisabledDirective, FormField],
   templateUrl: './editor-dialog.component.html',
-  styleUrl: './editor-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
+  host: { class: 'dialog-host' },
 })
 export class EditorDialogComponent {
   private data = inject<EditorDialogData>(DIALOG_DATA);

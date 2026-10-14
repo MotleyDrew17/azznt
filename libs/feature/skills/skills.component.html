@@ -1,0 +1,13 @@
+<div class="skills">
+  @if (!skills.length) {
+    <div class="skills__empty">
+      <button type="button" class="text-button" (click)="openSkillDialog()">
+        Добавить навык для прокачки
+      </button>
+    </div>
+  } @else {
+    @for (skill of skills; track skill.id) {
+      <gm-skill-item />
+    }
+  }
+</div>

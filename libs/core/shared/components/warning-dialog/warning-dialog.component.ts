@@ -12,8 +12,8 @@ export interface WarningDialogData {
   selector: 'gm-warning-dialog',
   imports: [ButtonComponent],
   templateUrl: './warning-dialog.component.html',
-  styleUrl: './warning-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'dialog-host' },
 })
 export class WarningDialogComponent {
   private data = inject<WarningDialogData>(DIALOG_DATA);

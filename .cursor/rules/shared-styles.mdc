@@ -7,9 +7,9 @@ alwaysApply: true
 
 Повторяемый вид контролов, полей, текстовых кнопок, ховера и скроллбара не пиши в `*.component.scss`. Миксин клади в `src/app/assets/mixins/`, класс объявляй в `src/styles.scss`, в шаблоне вешай этот класс.
 
-В компоненте оставляй только раскладку этого экрана: окно диалога, шапка, отступы блока.
+В компоненте оставляй только раскладку, которая есть у этого экрана и ни у какого другого. Оболочка диалога общая, её не копируй.
 
-Кнопку, инпут и селект бери из `libs/core/shared/components`: `gm-button`, `gm-input`, `gm-select`. Нативный `select` не ставь: список опций рисует браузер, стили `gm-select` до него не доходят.
+Кнопку, инпут, селект и чекбокс бери из `libs/core/shared/components`: `gm-button`, `gm-input`, `gm-select`, `gm-checkbox`. Нативный `select` и `checkbox` не ставь: их рисует браузер, стили общих компонентов до них не доходят.
 
 ## Куда смотреть
 
@@ -20,16 +20,20 @@ alwaysApply: true
 - `src/app/assets/mixins/interactive.scss` — ховер и нажатие
 - `src/app/assets/mixins/scrollbar.scss` — уже подключён на `*` в `src/styles.scss`
 - `src/app/assets/mixins/hint.scss` — подсказка при наведении
+- `src/app/assets/mixins/dialog.scss` — оболочка диалога
 
 ## Классы
 
 - `field` на `div`, `field__label` на `label`, `field__error` на элемент текста ошибки. У подписи и контрола общая пара `for` / `id`
-- `control` — инпут; `control_area` — textarea. Селект в экране — `gm-select`
+- `field__heading` — строка подписи и кнопки подсказки. Кнопка `field__hint hint hint_wrap`, внутри неё `field__hint-icon`
+- `field__line` — инпут и приписка в одну строку, приписка `field__suffix`
+- `control` — инпут, в том числе `type="number"`; `control_area` — textarea. Селект в экране — `gm-select`, чекбокс — `gm-checkbox`
 - `control_error` — статус ошибки у любого контрола
 - `text-button` — полупрозрачная текстовая кнопка, на наведении золотой текст
 - `interactive` — ховер; на элементе задай `--surface`
 - `is-disabled` — ставит `appDisabled` (`libs/core/shared/directives/disabled.directive.ts`) на кнопку, инпут, textarea и select
 - `hint` — подсказка из `data-hint` над элементом. `hint_below` показывает её снизу, если сверху нет места
+- `dialog-host` на хосте компонента окна. Внутри: `dialog`, `dialog__close`, `dialog__title`, `dialog__body`, `dialog__message`, `dialog__footer`. Окно не выше `min(640px, 100dvh - 32px)`: длинное содержимое скроллится в `dialog__body` и `dialog__message`
 
 ```html
 <div class="field">

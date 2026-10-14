@@ -1,4 +1,5 @@
 <div class="header">
+  @if (showTools()) {
   <button
     type="button"
     class="header__action header__action_mode interactive hint hint_below"
@@ -22,4 +23,5 @@
     </button>
     <input #file class="header__file" type="file" accept=".gm" (change)="loadFile($event)" />
   </div>
+  }
 </div>
