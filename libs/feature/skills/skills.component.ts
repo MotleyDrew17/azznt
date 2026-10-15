@@ -4,6 +4,7 @@ import { SkillService } from '../../core/shared/services/skill.service';
 import { SkillDialogKind } from '../../core/shared/enums/skill-dialog-kind.enum';
 import { Skill } from '../../core/shared/classes/skill.class';
 import { AutocompleteComponent } from '../../core/shared/components/autocomplete/autocomplete.component';
+import { HintDirective } from '../../core/shared/directives/hint.directive';
 import { SkillItemComponent } from './skill-item/skill-item.component';
 
 const SLOT = 168;
@@ -27,7 +28,7 @@ interface SkillSlide {
 
 @Component({
   selector: 'gm-skills',
-  imports: [SkillItemComponent, AutocompleteComponent],
+  imports: [SkillItemComponent, AutocompleteComponent, HintDirective],
   templateUrl: './skills.component.html',
   styleUrl: './skills.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

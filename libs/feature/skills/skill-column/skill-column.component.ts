@@ -3,15 +3,18 @@ import { Skill } from '../../../core/shared/classes/skill.class';
 import { SkillDialogKind } from '../../../core/shared/enums/skill-dialog-kind.enum';
 import { DialogService } from '../../../core/shared/services/dialog.service';
 import { SkillService } from '../../../core/shared/services/skill.service';
+import { HintDirective } from '../../../core/shared/directives/hint.directive';
 
 @Component({
   selector: 'gm-skill-column',
+  imports: [HintDirective],
   templateUrl: './skill-column.component.html',
   styleUrl: './skill-column.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.skill-column_active]': 'active()',
     '[class.skill-column_fill]': 'fill()',
+    '[class.skill-column_decaying]': 'decaying()',
   },
 })
 export class SkillColumnComponent {
@@ -72,6 +75,11 @@ export class SkillColumnComponent {
     const till = this.skill()?.getDecayTimestamp() ?? 0;
     if (!this.hasDecay() || till <= 0) return formatDecayDelay(0);
     return formatDecayDelay(till - this.now());
+  });
+  readonly decaying = computed(() => {
+    this.skillService.skills();
+    if (!this.hasDecay()) return false;
+    return (this.skill()?.getDecayTimestamp() ?? 0) <= this.now();
   });
 
   constructor() {

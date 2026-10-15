@@ -1,5 +1,5 @@
 @if (skill()) {
-  <div class="skill-column__scale">
+  <div class="skill-column__scale" appHint>
     <span class="skill-column__level skill-column__level_next">{{ nextLevel() }}</span>
     <div class="skill-column__meter">
       @if (fillPercent() > 0) {
@@ -8,7 +8,7 @@
     </div>
     <span class="skill-column__level">{{ currentLevel() }}</span>
     @if (active()) {
-      <div class="skill-column__hint" (pointerdown)="$event.stopPropagation()" (click)="$event.stopPropagation()">
+      <div class="skill-column__hint" appHintContent (pointerdown)="$event.stopPropagation()" (click)="$event.stopPropagation()">
         <div class="hint-panel">
           <ul class="skill-column__facts">
             <li>Опыт: {{ currentExp() }} / {{ requiredExp() }}</li>
@@ -24,8 +24,8 @@
           <div class="skill-column__actions">
             <button
               type="button"
-              class="skill-column__action interactive hint hint_below"
-              data-hint="Редактировать"
+              class="skill-column__action interactive"
+              appHint="Редактировать"
               aria-label="Редактировать"
               (click)="edit($event)"
             >
@@ -34,8 +34,8 @@
             @if (showDelete()) {
               <button
                 type="button"
-                class="skill-column__action interactive hint hint_below"
-                data-hint="Удалить"
+                class="skill-column__action interactive"
+                appHint="Удалить"
                 aria-label="Удалить"
                 (click)="remove($event)"
               >
@@ -50,8 +50,7 @@
   <p
     #nameLabel
     class="skill-column__name"
-    [class.hint]="nameOverflow()"
-    [class.hint_wrap]="nameOverflow()"
-    [attr.data-hint]="nameOverflow() ? name() : null"
+    [appHint]="nameOverflow() ? name() : ''"
+    appHintWrap
   >{{ name() }}</p>
 }

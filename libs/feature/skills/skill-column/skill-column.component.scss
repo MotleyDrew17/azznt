@@ -15,6 +15,16 @@
   opacity: 1;
 }
 
+:host.skill-column_decaying .skill-column__scale::before {
+  background: linear-gradient(
+    155deg,
+    var(--color-skill-decay-light) 0%,
+    var(--color-skill-decay) 32%,
+    var(--color-skill-decay-dark) 58%,
+    var(--color-skill-decay-mid) 100%
+  );
+}
+
 .skill-column__scale {
   position: relative;
   display: flex;
@@ -130,21 +140,9 @@
 }
 
 .skill-column__hint {
-  position: absolute;
-  top: 0;
-  left: 100%;
-  z-index: 3;
-  padding-left: 10px;
+  position: fixed;
   opacity: 0;
   pointer-events: none;
-}
-
-.skill-column__scale:hover .skill-column__hint,
-.skill-column__scale:focus-within .skill-column__hint,
-.skill-column__hint:hover,
-.skill-column__hint:focus-within {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .skill-column__actions {

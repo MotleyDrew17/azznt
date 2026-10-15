@@ -56,6 +56,29 @@
   }
 }
 
+@mixin floating {
+  position: fixed;
+  z-index: 1000001;
+  max-width: min(280px, calc(100vw - 16px));
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--color-parchment) 42%, transparent);
+  border-radius: 6px;
+  background: var(--color-bg);
+  color: var(--color-parchment);
+  font-size: 13px;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+
+  &_wrap {
+    width: max-content;
+    padding: 8px 10px;
+    line-height: 1.35;
+    white-space: normal;
+    text-align: left;
+  }
+}
+
 @mixin panel {
   width: max-content;
   max-width: 280px;

@@ -49,22 +49,22 @@
     (pointerdown)="$event.stopPropagation()"
   >
     @if (allows(FieldAction.LinkQuest) && canLink(quest)) {
-      <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Соединить" aria-label="Соединить" (click)="startLink($event)">
+      <button type="button" class="quest-toolbar__action interactive" appHint="Соединить" aria-label="Соединить" (click)="startLink($event)">
         <span class="quest-toolbar__icon quest-toolbar__icon_link"></span>
       </button>
     }
     @if (allows(FieldAction.AddQuest)) {
-      <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Добавить" aria-label="Добавить" (click)="openRelatedQuest()">
+      <button type="button" class="quest-toolbar__action interactive" appHint="Добавить" aria-label="Добавить" (click)="openRelatedQuest()">
         <span class="quest-toolbar__icon quest-toolbar__icon_plus"></span>
       </button>
     }
     @if (allows(FieldAction.EditQuest)) {
-      <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Редактировать" aria-label="Редактировать" (click)="editSelectedQuest()">
+      <button type="button" class="quest-toolbar__action interactive" appHint="Редактировать" aria-label="Редактировать" (click)="editSelectedQuest()">
         <span class="quest-toolbar__icon quest-toolbar__icon_edit"></span>
       </button>
     }
     @if (allows(FieldAction.DeleteQuest) && canDelete(quest)) {
-      <button type="button" class="quest-toolbar__action interactive hint" [class.hint_below]="hintBelow(quest)" data-hint="Удалить" aria-label="Удалить" (click)="deleteSelectedQuest()">
+      <button type="button" class="quest-toolbar__action interactive" appHint="Удалить" aria-label="Удалить" (click)="deleteSelectedQuest()">
         <span class="quest-toolbar__icon quest-toolbar__icon_delete"></span>
       </button>
     }

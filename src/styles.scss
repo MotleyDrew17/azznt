@@ -193,8 +193,36 @@ select {
   @include hint.bubble;
 }
 
+.hint-bubble {
+  @include hint.floating;
+}
+
 .hint-panel {
   @include hint.panel;
+}
+
+.no-scrollbar {
+  @include scrollbar.hidden;
+}
+
+.scroll-nav {
+  @include scrollbar.nav;
+}
+
+.scroll-nav__icon {
+  @include scrollbar.nav-icon;
+}
+
+.scroll-nav_up .scroll-nav__icon {
+  transform: rotate(90deg);
+}
+
+.scroll-nav_down .scroll-nav__icon {
+  transform: rotate(-90deg);
+}
+
+.scroll-nav_next .scroll-nav__icon {
+  transform: scaleX(-1);
 }
 
 .is-disabled {

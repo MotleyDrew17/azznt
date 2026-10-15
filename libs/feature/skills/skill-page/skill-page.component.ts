@@ -1,14 +1,16 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
+import { HintDirective } from '../../../core/shared/directives/hint.directive';
+import { ScrollDirective } from '../../../core/shared/directives/scroll.directive';
 import { DialogService } from '../../../core/shared/services/dialog.service';
 import { SkillService } from '../../../core/shared/services/skill.service';
 import { SkillColumnComponent } from '../skill-column/skill-column.component';
-import { ExerciseComponent } from './exercise/exercise.component';
+import { ExerciseRowComponent } from './exercise/exercise.component';
 
 @Component({
   selector: 'gm-skill-page',
-  imports: [SkillColumnComponent, ExerciseComponent],
+  imports: [SkillColumnComponent, ExerciseRowComponent, HintDirective, ScrollDirective],
   templateUrl: './skill-page.component.html',
   styleUrl: './skill-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +34,7 @@ export class SkillPageComponent implements OnInit {
     return (skill?.getLayers() ?? [])
       .map((layer) => ({
         levelScore: layer.levelScore,
+        exercises: [...layer.exercises],
         state: layer.levelScore < score ? 'reached' : layer.levelScore === score ? 'current' : 'locked',
       }))
       .sort((a, b) => b.levelScore - a.levelScore);

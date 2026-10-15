@@ -35,3 +35,40 @@
     background: transparent;
   }
 }
+
+@mixin hidden {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+@mixin nav {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-parchment);
+  opacity: 0.45;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+  }
+}
+
+@mixin nav-icon {
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../icons/chevron.svg');
+}

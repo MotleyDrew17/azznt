@@ -17,6 +17,7 @@ import { ButtonComponent } from '../../../core/shared/components/button/button.c
 import { QuestNodeComponent } from '../quest-node/quest-node.component';
 import { FieldAction, modeAllows } from '../../../core/shared/enums/field-mode.enum';
 import { FieldModeService } from '../../../core/shared/services/field-mode.service';
+import { HintDirective } from '../../../core/shared/directives/hint.directive';
 
 interface QuestEdge {
   id: string;
@@ -29,7 +30,7 @@ interface QuestEdge {
 
 @Component({
   selector: 'gm-work-field',
-  imports: [QuestNodeComponent, ButtonComponent],
+  imports: [QuestNodeComponent, ButtonComponent, HintDirective],
   templateUrl: './work-field.component.html',
   styleUrl: './work-field.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -302,13 +303,6 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
       x: Math.max(0, x),
       y: Math.min(Math.max(0, y), Math.max(0, field.clientHeight - this.#toolbarHeight)),
     };
-  }
-
-  hintBelow(quest: Quest): boolean {
-    const y = this.toolbarPosition(quest).y;
-    const above = y;
-    const below = this.host.nativeElement.clientHeight - y - this.#toolbarHeight;
-    return above < 32 && below > above;
   }
 
   canLink(quest: Quest): boolean {

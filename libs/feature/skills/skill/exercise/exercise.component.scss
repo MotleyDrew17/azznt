@@ -1,0 +1,153 @@
+:host {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 200px;
+}
+
+:host(:hover),
+:host(:focus-within) {
+  z-index: 3;
+}
+
+.exercise__button {
+  position: relative;
+  display: block;
+  width: 200px;
+  height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--color-skill-metal-light) 0%, var(--color-skill-metal) 46%, var(--color-skill-metal-dark) 100%);
+  color: var(--color-parchment);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 42%),
+    inset 0 -2px 0 rgb(0 0 0 / 38%),
+    0 2px 0 var(--color-skill-metal-dark),
+    0 4px 8px rgb(0 0 0 / 35%);
+
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+
+  &:disabled {
+    pointer-events: none;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    pointer-events: none;
+    background: linear-gradient(155deg, var(--color-skill-metal-light) 0%, var(--color-skill-metal) 32%, var(--color-skill-metal-dark) 58%, var(--color-skill-metal-mid) 100%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+}
+
+:host.exercise_done .exercise__button {
+  background: linear-gradient(180deg, var(--color-skill-fill-light) 0%, var(--color-skill-fill) 58%, color-mix(in srgb, var(--color-skill-fill) 70%, black) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 40%),
+    inset 0 -2px 0 rgb(0 0 0 / 35%),
+    0 2px 0 color-mix(in srgb, var(--color-skill-fill) 55%, black),
+    0 4px 8px rgb(0 0 0 / 35%);
+
+  &::before {
+    background: linear-gradient(155deg, var(--color-skill-fill-sheen) 0%, var(--color-skill-fill-light) 38%, var(--color-skill-fill) 100%);
+  }
+}
+
+:host.exercise_locked .exercise__button {
+  background: linear-gradient(180deg, var(--color-skill-metal-dark) 0%, color-mix(in srgb, var(--color-skill-metal-dark) 55%, black) 100%);
+  color: color-mix(in srgb, var(--color-parchment) 36%, var(--color-skill-metal-dark));
+  cursor: default;
+  box-shadow: none;
+
+  &::before {
+    background: linear-gradient(155deg, var(--color-skill-metal) 0%, var(--color-skill-metal-dark) 48%, color-mix(in srgb, var(--color-skill-metal-dark) 40%, black) 100%);
+  }
+}
+
+.exercise__button:active:not(:disabled):not(.is-disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 4px 8px rgb(0 0 0 / 45%),
+    inset 0 -1px 0 rgb(255 255 255 / 16%);
+}
+
+.exercise__label {
+  position: relative;
+  z-index: 1;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exercise__hint {
+  position: fixed;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.exercise__title,
+.exercise__description,
+.exercise__experience {
+  margin: 0;
+}
+
+.exercise__description,
+.exercise__experience {
+  margin-top: 8px;
+}
+
+.exercise__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.exercise__action {
+  --surface: transparent;
+  --surface-border: transparent;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-silver);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-parchment);
+  }
+}
+
+.exercise__action-icon {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+
+  &_delete {
+    mask-image: url('../../../../../src/app/assets/icons/delete.svg');
+  }
+
+  &_move {
+    mask-image: url('../../../../../src/app/assets/icons/move.svg');
+  }
+}

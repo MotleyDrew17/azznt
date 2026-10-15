@@ -40,12 +40,6 @@
   background: transparent;
   color: var(--color-green);
   cursor: pointer;
-
-  &.hint::after {
-    right: 0;
-    left: auto;
-    transform: none;
-  }
 }
 
 .skills__add-icon {

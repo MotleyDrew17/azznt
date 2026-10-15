@@ -26,8 +26,8 @@
           <label class="field__label" for="skill-required-exp">Требуемый опыт</label>
           <button
             type="button"
-            class="field__hint hint hint_wrap"
-            data-hint="Опыт, который необходимо накопить для достижения 2-го уровня. С каждым новым уровнем требуемый опыт для достижения следующего уровня будет увеличиваться на указанный ниже процент."
+            class="field__hint" appHintWrap
+            appHint="Опыт, который необходимо накопить для достижения 2-го уровня. С каждым новым уровнем требуемый опыт для достижения следующего уровня будет увеличиваться на указанный ниже процент."
             aria-label="Подсказка"
           >
             <span class="field__hint-icon"></span>
@@ -45,8 +45,8 @@
           <label class="field__label" for="skill-exp-increase">Процент увеличения</label>
           <button
             type="button"
-            class="field__hint hint hint_wrap"
-            data-hint="На данный процент будет увеличиваться количество опыта, требуемого для достижения следующего уровня. При пустом значении опыт всегда будет одинаковый для каждого уровня."
+            class="field__hint" appHintWrap
+            appHint="На данный процент будет увеличиваться количество опыта, требуемого для достижения следующего уровня. При пустом значении опыт всегда будет одинаковый для каждого уровня."
             aria-label="Подсказка"
           >
             <span class="field__hint-icon"></span>
@@ -65,8 +65,8 @@
         <gm-checkbox controlId="skill-decay" [formField]="skillForm.decayEnabled">Включить откат</gm-checkbox>
         <button
           type="button"
-          class="field__hint hint hint_wrap"
-          data-hint="Навык будет терять накопленный опыт при невыполнении выбранных упражнений в течение установленного срока."
+          class="field__hint" appHintWrap
+          appHint="Навык будет терять накопленный опыт при невыполнении выбранных упражнений в течение установленного срока."
           aria-label="Подсказка"
         >
           <span class="field__hint-icon"></span>
@@ -81,8 +81,8 @@
           <label class="field__label" for="skill-inactivity">Срок бездействия</label>
           <button
             type="button"
-            class="field__hint hint hint_wrap"
-            data-hint="Через указанное количество дней опыт начнет ежедневно убывать до выполнения обновляющего действия. (Опыт убывает в 00:00 каждого дня)."
+            class="field__hint" appHintWrap
+            appHint="Через указанное количество дней опыт начнет ежедневно убывать до выполнения обновляющего действия. (Опыт убывает в 00:00 каждого дня)."
             aria-label="Подсказка"
           >
             <span class="field__hint-icon"></span>
@@ -103,8 +103,8 @@
           <label class="field__label" for="skill-lost-exp">Теряемый опыт</label>
           <button
             type="button"
-            class="field__hint hint hint_wrap"
-            data-hint="Количество опыта, которое будет теряться каждый день при исчерпании срока бездействия"
+            class="field__hint" appHintWrap
+            appHint="Количество опыта, которое будет теряться каждый день при исчерпании срока бездействия"
             aria-label="Подсказка"
           >
             <span class="field__hint-icon"></span>

@@ -46,6 +46,19 @@ export class SkillService {
     this.#save();
   }
 
+  removeExercise(exerciseId: string): void {
+    const skill = this.skills().find((item) =>
+      item.getLayers().some((layer) => layer.exercises.some((exercise) => exercise.id === exerciseId)),
+    );
+    if (!skill) return;
+    const layer = skill.getLayers().find((item) => item.exercises.some((exercise) => exercise.id === exerciseId));
+    const exercise = layer?.exercises.find((item) => item.id === exerciseId);
+    if (!layer || !exercise) return;
+    skill.removeExerciseFromLayer(layer.levelScore, exercise);
+    this.skills.update((skills) => [...skills]);
+    this.#save();
+  }
+
   removeSkill(id: string): void {
     const skills = this.skills().filter((skill) => skill.id !== id);
     if (skills.length === this.skills().length) return;
@@ -76,6 +89,14 @@ export class SkillService {
       data.description,
     );
     skill.addExerciseToLayer(levelScore, exercise);
+    this.skills.update((skills) => [...skills]);
+    this.#save();
+  }
+
+  doExercise(skillId: string, exerciseId: string): void {
+    const skill = this.skills().find((item) => item.id === skillId);
+    if (!skill) return;
+    skill.doExercise(exerciseId);
     this.skills.update((skills) => [...skills]);
     this.#save();
   }

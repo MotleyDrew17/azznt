@@ -5,6 +5,7 @@ import { ButtonComponent } from '../../../core/shared/components/button/button.c
 import { CheckboxComponent } from '../../../core/shared/components/checkbox/checkbox.component';
 import { ClearInputDirective } from '../../../core/shared/directives/clear-input.directive';
 import { DisabledDirective } from '../../../core/shared/directives/disabled.directive';
+import { HintDirective } from '../../../core/shared/directives/hint.directive';
 import { SkillDialogKind } from '../../../core/shared/enums/skill-dialog-kind.enum';
 import { CreateSkillData, SkillDialogData } from '../../../core/shared/models/skill.model';
 import { SkillService } from '../../../core/shared/services/skill.service';
@@ -17,7 +18,7 @@ const TITLES: Record<SkillDialogKind, string> = {
 @Component({
   selector: 'gm-skill-dialog',
   standalone: true,
-  imports: [FormField, CheckboxComponent, ButtonComponent, DisabledDirective, ClearInputDirective],
+  imports: [FormField, CheckboxComponent, ButtonComponent, DisabledDirective, ClearInputDirective, HintDirective],
   templateUrl: './skill-dialog.component.html',
   styleUrl: './skill-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

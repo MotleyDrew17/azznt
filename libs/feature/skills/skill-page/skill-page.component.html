@@ -2,14 +2,25 @@
   <div class="skill-page">
     <gm-skill-column class="skill-page__column" [skill]="skill" [showDelete]="false" [fill]="true" />
     <div class="skill-page__board">
+      @if (layersScroll.canBack()) {
+        <button type="button" class="scroll-nav scroll-nav_up skill-page__nav skill-page__nav_up" appHint="Вверх" aria-label="Вверх" (click)="layersScroll.step(-1)">
+          <span class="scroll-nav__icon"></span>
+        </button>
+      }
+      @if (layersScroll.canForward()) {
+        <button type="button" class="scroll-nav scroll-nav_down skill-page__nav skill-page__nav_down" appHint="Вниз" aria-label="Вниз" (click)="layersScroll.step(1)">
+          <span class="scroll-nav__icon"></span>
+        </button>
+      }
+      <div class="skill-page__scroller no-scrollbar" appScroll="y" #layersScroll="scroll">
       <div class="skill-page__stack">
         <div class="skill-page__line skill-page__line_locked">
-          <button type="button" class="skill-page__add hint hint_below" data-hint="Добавить уровень" aria-label="Добавить уровень" (click)="openLayerDialog()">
+          <button type="button" class="skill-page__add" appHint="Добавить уровень" aria-label="Добавить уровень" (click)="openLayerDialog()">
             <span class="skill-page__add-icon"></span>
           </button>
         </div>
         @for (layer of layers(); track layer.levelScore) {
-          <gm-exercise (add)="openExerciseDialog(layer.levelScore)" />
+          <gm-exercise-row [exercises]="layer.exercises" (add)="openExerciseDialog(layer.levelScore)" />
           <div
             class="skill-page__line"
             [class.skill-page__line_reached]="layer.state === 'reached'"
@@ -20,8 +31,8 @@
             @if (layer.levelScore !== 1) {
               <button
                 type="button"
-                class="skill-page__remove hint hint_below"
-                data-hint="Удалить уровень"
+                class="skill-page__remove"
+                appHint="Удалить уровень"
                 aria-label="Удалить уровень"
                 (click)="confirmRemoveLayer(layer.levelScore)"
               >
@@ -30,6 +41,7 @@
             }
           </div>
         }
+      </div>
       </div>
     </div>
   </div>

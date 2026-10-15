@@ -1,0 +1,33 @@
+<button type="button" class="exercise__button" [appDisabled]="view().unavailable" (click)="doExercise()">
+  <span class="exercise__label">{{ view().name }}</span>
+</button>
+<div class="exercise__hint" appHintContent>
+  <div class="hint-panel">
+    <p class="exercise__title">{{ view().name }}</p>
+    @if (view().description.trim()) {
+      <p class="exercise__description">{{ view().description }}</p>
+    }
+    @if (view().showExperience) {
+      <p class="exercise__experience">Опыт: {{ view().experience }}</p>
+    }
+    <div class="exercise__actions">
+      <button
+        type="button"
+        class="exercise__action interactive"
+        appHint="Удалить"
+        aria-label="Удалить"
+        (click)="remove($event)"
+      >
+        <span class="exercise__action-icon exercise__action-icon_delete"></span>
+      </button>
+      <button
+        type="button"
+        class="exercise__action interactive"
+        appHint="Переместить"
+        aria-label="Переместить"
+      >
+        <span class="exercise__action-icon exercise__action-icon_move"></span>
+      </button>
+    </div>
+  </div>
+</div>

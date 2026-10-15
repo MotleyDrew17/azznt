@@ -25,8 +25,8 @@
         <label class="field__label" for="exercise-experience">Опыт</label>
         <button
           type="button"
-          class="field__hint hint hint_wrap"
-          data-hint="Количество опыта, получаемое за выполнение упражнения."
+          class="field__hint" appHintWrap
+          appHint="Количество опыта, получаемое за выполнение упражнения."
           aria-label="Подсказка"
         >
           <span class="field__hint-icon"></span>
@@ -45,8 +45,8 @@
           <gm-checkbox controlId="exercise-limit" [formField]="exerciseForm.limitEnabled">Лимит уровня</gm-checkbox>
           <button
             type="button"
-            class="field__hint hint hint_wrap"
-            data-hint="При включенном лимите упражнение перестает давать опыт начиная с указанного уровня."
+            class="field__hint" appHintWrap
+            appHint="При включенном лимите упражнение перестает давать опыт начиная с указанного уровня."
             aria-label="Подсказка"
           >
             <span class="field__hint-icon"></span>
@@ -70,8 +70,8 @@
           <gm-checkbox controlId="exercise-reset-decay" [formField]="exerciseForm.resetsDecay">Сбрасывает откат</gm-checkbox>
           <button
             type="button"
-            class="field__hint hint hint_wrap"
-            data-hint="Выполнение упражнения сбрасывает таймер до начала отката навыка до исходного значения."
+            class="field__hint" appHintWrap
+            appHint="Выполнение упражнения сбрасывает таймер до начала отката навыка до исходного значения."
             aria-label="Подсказка"
           >
             <span class="field__hint-icon"></span>

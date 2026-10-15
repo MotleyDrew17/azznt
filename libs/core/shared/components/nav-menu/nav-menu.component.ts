@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
+import { HintDirective } from '../../directives/hint.directive';
 
 interface NavRoute {
   label: string;
@@ -11,7 +12,7 @@ interface NavRoute {
 
 @Component({
   selector: 'gm-nav-menu',
-  imports: [RouterLink],
+  imports: [RouterLink, HintDirective],
   templateUrl: './nav-menu.component.html',
   styleUrl: './nav-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

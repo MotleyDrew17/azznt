@@ -1,11 +1,26 @@
 <div class="exercise">
   <button
     type="button"
-    class="exercise__add interactive hint hint_below"
-    data-hint="Добавить упражнение"
+    class="exercise__add interactive"
+    appHint="Добавить упражнение"
     aria-label="Добавить упражнение"
     (click)="add.emit()"
   >
     <span class="exercise__add-icon"></span>
   </button>
+  @if (exercisesScroll.canBack()) {
+    <button type="button" class="scroll-nav exercise__nav exercise__nav_prev" appHint="Влево" aria-label="Влево" (click)="exercisesScroll.step(-1)">
+      <span class="scroll-nav__icon"></span>
+    </button>
+  }
+  @if (exercisesScroll.canForward()) {
+    <button type="button" class="scroll-nav scroll-nav_next exercise__nav exercise__nav_next" appHint="Вправо" aria-label="Вправо" (click)="exercisesScroll.step(1)">
+      <span class="scroll-nav__icon"></span>
+    </button>
+  }
+  <div class="exercise__list no-scrollbar" appScroll="x" #exercisesScroll="scroll">
+    @for (exercise of exercises(); track exercise.id) {
+      <gm-exercise [exercise]="exercise" />
+    }
+  </div>
 </div>

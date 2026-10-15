@@ -64,11 +64,6 @@
   &_play {
     color: var(--color-green);
   }
-
-  &.hint::after {
-    left: auto;
-    transform: none;
-  }
 }
 
 .header__back {
@@ -77,17 +72,6 @@
     cursor: default;
     pointer-events: none;
   }
-
-  &.hint::after {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-}
-
-.header__files .hint::after {
-  right: 0;
-  left: auto;
-  transform: none;
 }
 
 .header__icon {

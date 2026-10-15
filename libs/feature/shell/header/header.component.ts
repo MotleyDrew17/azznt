@@ -8,10 +8,11 @@ import { FieldMode } from '../../../core/shared/enums/field-mode.enum';
 import { FieldModeService } from '../../../core/shared/services/field-mode.service';
 import { SkillService } from '../../../core/shared/services/skill.service';
 import { NavMenuComponent } from '../../../core/shared/components/nav-menu/nav-menu.component';
+import { HintDirective } from '../../../core/shared/directives/hint.directive';
 
 @Component({
   selector: 'gm-header',
-  imports: [NavMenuComponent],
+  imports: [NavMenuComponent, HintDirective],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

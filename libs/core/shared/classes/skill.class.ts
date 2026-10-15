@@ -16,7 +16,6 @@ export class Skill {
     #name: string = '';
     #description: string = '';
     #level: Level | null = null; // текущий уровень навыка
-    #exercises: Exercise[] = []; // упражнения, которые нужно выполнить для прокачки навыка
     #layers: SkillLayer[] = [
         { levelScore: 1, exercises: [] },
     ]; // уровни навыка, на которых становятся доступны упражнения
@@ -56,7 +55,7 @@ export class Skill {
     }
 
     get exercises(): Exercise[] {
-        return this.#exercises;
+        return this.#layers.flatMap(layer => layer.exercises);
     }
 
     addLayer(levelScore: number) {
@@ -93,20 +92,20 @@ export class Skill {
     addExercise(max_level: number, available_on_level: number) {
         if(!this.#level) throw new Error('Level is not set'); 
         const exercise = new Exercise(this.#level, max_level, available_on_level, 0, true, '', '');
-        this.#exercises.push(exercise);
+        this.addExerciseToLayer(available_on_level, exercise);
     }
 
     doExercise(exercise_id: string) {
-        const exercise = this.#exercises.find(exercise => exercise.id === exercise_id);
+        const exercise = this.exercises.find(exercise => exercise.id === exercise_id);
         exercise?.do();
     }
 
     getExercise(exercise_id: string) {
-        return this.#exercises.find(exercise => exercise.id === exercise_id);
+        return this.exercises.find(exercise => exercise.id === exercise_id);
     }
 
     getExercises() {
-        return this.#exercises;
+        return this.exercises;
     }
 
     getLevel() {
@@ -127,7 +126,7 @@ export class Skill {
             name: this.#name,
             description: this.#description,
             level: this.#level?.toSnapshot() ?? null,
-            exercises: this.#exercises.map(exercise => exercise.toSnapshot()),
+            exercises: this.exercises.map(exercise => exercise.toSnapshot()),
             layers: this.#layers.map(layer => ({
                 levelScore: layer.levelScore,
                 exercises: layer.exercises.map(exercise => exercise.toSnapshot()),
@@ -146,7 +145,6 @@ export class Skill {
         });
         skill.#id = snapshot.id;
         skill.#level = level;
-        skill.#exercises = level ? snapshot.exercises.map(exercise => Exercise.fromSnapshot(exercise, level)) : [];
         if (snapshot.layers?.length) {
             skill.#layers = snapshot.layers.map(layer => ({
                 levelScore: layer.levelScore,
@@ -198,6 +196,14 @@ export class Exercise {
         this.#description = description;
     }
 
+    get experience(): number {
+        return this.#experience;
+    }
+
+    get currentLevel(): number {
+        return this.#level?.score ?? 0;
+    }
+
     get maxLevel(): number {
         return this.#maxLevel;
     }
@@ -208,6 +214,11 @@ export class Exercise {
 
     isAvailable(current_level: number) {
         return current_level >= this.#available_on_level;
+    }
+
+    reachedMaxLevel(): boolean {
+        if (!this.#level || this.#maxLevel <= 0) return false;
+        return this.#level.score >= this.#maxLevel;
     }
 
     do() {

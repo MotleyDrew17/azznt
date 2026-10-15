@@ -18,12 +18,6 @@
   background: transparent;
   color: var(--color-parchment);
   cursor: pointer;
-
-  &.hint::after {
-    right: auto;
-    left: 0;
-    transform: none;
-  }
 }
 
 .nav-menu__icon {
