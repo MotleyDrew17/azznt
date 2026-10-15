@@ -28,11 +28,13 @@ alwaysApply: true
 - `field__heading` — строка подписи и кнопки подсказки. Кнопка `field__hint hint hint_wrap`, внутри неё `field__hint-icon`
 - `field__line` — инпут и приписка в одну строку, приписка `field__suffix`
 - `control` — инпут, в том числе `type="number"`; `control_area` — textarea. Селект в экране — `gm-select`, чекбокс — `gm-checkbox`
+- Крестик очистки ставит директива `ClearInputDirective` на `input.control[type=text]` и `textarea.control`. Оболочка `control-clear`, кнопка `control__clear`. Кнопка видна только в фокусе, если в поле есть текст
+- `autocomplete` — поле с выпадающим списком `autocomplete__list`, пункт `autocomplete__option`. Компонент `gm-autocomplete`
 - `control_error` — статус ошибки у любого контрола
 - `text-button` — полупрозрачная текстовая кнопка, на наведении золотой текст
 - `interactive` — ховер; на элементе задай `--surface`
 - `is-disabled` — ставит `appDisabled` (`libs/core/shared/directives/disabled.directive.ts`) на кнопку, инпут, textarea и select
-- `hint` — подсказка из `data-hint` над элементом. `hint_below` показывает её снизу, если сверху нет места
+- `hint` — подсказка из `data-hint` над элементом. `hint_below` показывает её снизу, если сверху нет места. `hint_right` показывает её справа. `hint_wrap` переносит длинный текст. `hint-panel` — такая же оболочка на обычном элементе, когда в подсказке несколько строк
 - `dialog-host` на хосте компонента окна. Внутри: `dialog`, `dialog__close`, `dialog__title`, `dialog__body`, `dialog__message`, `dialog__footer`. Окно не выше `min(640px, 100dvh - 32px)`: длинное содержимое скроллится в `dialog__body` и `dialog__message`
 
 ```html

@@ -1,0 +1,27 @@
+<div class="nav-menu">
+  <button
+    type="button"
+    class="nav-menu__toggle interactive hint hint_below"
+    data-hint="Меню"
+    aria-label="Меню"
+    [attr.aria-expanded]="open()"
+    (click)="toggle()"
+  >
+    <span class="nav-menu__icon"></span>
+  </button>
+  @if (open()) {
+    <ul class="nav-menu__list">
+      @for (route of routes; track route.path) {
+        <li>
+          <a
+            class="nav-menu__link"
+            [routerLink]="route.path"
+            [class.nav-menu__link_active]="isActive(route)"
+          >
+            {{ route.label }}
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</div>

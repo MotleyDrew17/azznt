@@ -4,6 +4,7 @@ import { ButtonComponent } from '../../../core/shared/components/button/button.c
 import { SelectComponent } from '../../../core/shared/components/select/select.component';
 import { CreateQuestData } from '../../../core/shared/models/quest.model';
 import { form, required, FormField } from '@angular/forms/signals';
+import { ClearInputDirective } from '../../../core/shared/directives/clear-input.directive';
 import { DisabledDirective } from '../../../core/shared/directives/disabled.directive';
 import { GraphService } from '../../../core/shared/services/graph.service';
 import { DialogService } from '../../../core/shared/services/dialog.service';
@@ -32,7 +33,7 @@ const TITLES: Record<Exclude<EditorDialogKind, EditorDialogKind.Relation>, strin
 
 @Component({
   selector: 'gm-editor-dialog',
-  imports: [ButtonComponent, SelectComponent, DisabledDirective, FormField],
+  imports: [ButtonComponent, SelectComponent, DisabledDirective, ClearInputDirective, FormField],
   templateUrl: './editor-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   host: { class: 'dialog-host' },

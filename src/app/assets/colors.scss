@@ -28,4 +28,29 @@
   // Ховер и эктив: тот же шаг 3%, но от цвета самого элемента.
   --interactive-hover: 3%;
   --interactive-active: 6%;
+
+  // Шкала навыка: колодец, металлическая рамка, золотая рамка наведения, заливка опыта.
+  --color-skill-well: #142824;
+  --color-skill-shade: rgb(0 0 0 / 55%);
+  --color-skill-shade-side: rgb(0 0 0 / 35%);
+  --color-skill-shade-side-soft: rgb(0 0 0 / 28%);
+  --color-skill-glint: rgb(255 255 255 / 5%);
+  --color-skill-edge: rgb(255 255 255 / 14%);
+  --color-skill-level-next: color-mix(in srgb, var(--color-parchment) 38%, transparent);
+
+  --color-skill-metal-light: #8b9692;
+  --color-skill-metal: #5c6763;
+  --color-skill-metal-dark: #2c3533;
+  --color-skill-metal-mid: #6a736f;
+
+  --color-skill-rim-light: #f3e6c8;
+  --color-skill-rim-deep: #8d7344;
+  --color-skill-rim: #e7d7b4;
+
+  --color-skill-fill-light: #279f64;
+  --color-skill-fill: #125c3f;
+  --color-skill-fill-sheen: rgb(163 223 168 / 50%);
+  --color-skill-fill-sheen-end: rgb(35 145 90 / 0%);
+  --color-skill-fill-glow: rgb(25 150 98 / 40%);
+  --color-skill-fill-inset: rgb(200 235 195 / 19%);
 }

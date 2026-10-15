@@ -8,7 +8,7 @@
   <div class="dialog__body">
     <div class="field">
       <label class="field__label" for="skill-name">Название</label>
-      @let nameError = skillForm.name().touched() && (skillForm.name().getError('required') || skillForm.name().getError('blank'));
+      @let nameError = skillForm.name().touched() && (skillForm.name().getError('required') || skillForm.name().getError('blank') || skillForm.name().getError('duplicate'));
       <input id="skill-name" class="control" type="text" [class.control_error]="nameError" [formField]="skillForm.name" />
       @if (nameError) {
         <span class="field__error">{{ nameError.message }}</span>
@@ -20,42 +20,44 @@
       <textarea id="skill-description" class="control control_area" rows="4" [formField]="skillForm.description"></textarea>
     </div>
 
-    <div class="field">
-      <div class="field__heading">
-        <label class="field__label" for="skill-required-exp">Требуемый опыт</label>
-        <button
-          type="button"
-          class="field__hint hint hint_wrap"
-          data-hint="Опыт, который необходимо накопить для достижения 2-го уровня. С каждым новым уровнем требуемый опыт для достижения следующего уровня будет увеличиваться на указанный ниже процент."
-          aria-label="Подсказка"
-        >
-          <span class="field__hint-icon"></span>
-        </button>
+    <div class="skill-dialog__row">
+      <div class="field">
+        <div class="field__heading">
+          <label class="field__label" for="skill-required-exp">Требуемый опыт</label>
+          <button
+            type="button"
+            class="field__hint hint hint_wrap"
+            data-hint="Опыт, который необходимо накопить для достижения 2-го уровня. С каждым новым уровнем требуемый опыт для достижения следующего уровня будет увеличиваться на указанный ниже процент."
+            aria-label="Подсказка"
+          >
+            <span class="field__hint-icon"></span>
+          </button>
+        </div>
+        @let expError = skillForm.requiredExp().touched() && (skillForm.requiredExp().getError('required') || skillForm.requiredExp().getError('positive') || skillForm.requiredExp().getError('parse'));
+        <input id="skill-required-exp" class="control" type="number" step="any" [class.control_error]="expError" [formField]="skillForm.requiredExp" />
+        @if (expError) {
+          <span class="field__error">{{ expError.message || 'Введите число' }}</span>
+        }
       </div>
-      @let expError = skillForm.requiredExp().touched() && (skillForm.requiredExp().getError('required') || skillForm.requiredExp().getError('positive') || skillForm.requiredExp().getError('parse'));
-      <input id="skill-required-exp" class="control" type="number" step="any" [class.control_error]="expError" [formField]="skillForm.requiredExp" />
-      @if (expError) {
-        <span class="field__error">{{ expError.message || 'Введите число' }}</span>
-      }
-    </div>
 
-    <div class="field">
-      <div class="field__heading">
-        <label class="field__label" for="skill-exp-increase">Процент увеличения опыта</label>
-        <button
-          type="button"
-          class="field__hint hint hint_wrap"
-          data-hint="На данный процент будет увеличиваться количество опыта, требуемого для достижения следующего уровня. При пустом значении опыт всегда будет одинаковый для каждого уровня."
-          aria-label="Подсказка"
-        >
-          <span class="field__hint-icon"></span>
-        </button>
+      <div class="field">
+        <div class="field__heading">
+          <label class="field__label" for="skill-exp-increase">Процент увеличения</label>
+          <button
+            type="button"
+            class="field__hint hint hint_wrap"
+            data-hint="На данный процент будет увеличиваться количество опыта, требуемого для достижения следующего уровня. При пустом значении опыт всегда будет одинаковый для каждого уровня."
+            aria-label="Подсказка"
+          >
+            <span class="field__hint-icon"></span>
+          </button>
+        </div>
+        @let percentError = skillForm.expIncreasePercent().touched() && (skillForm.expIncreasePercent().getError('min') || skillForm.expIncreasePercent().getError('parse'));
+        <input id="skill-exp-increase" class="control" type="number" step="any" [class.control_error]="percentError" [formField]="skillForm.expIncreasePercent" />
+        @if (percentError) {
+          <span class="field__error">{{ percentError.message || 'Введите число' }}</span>
+        }
       </div>
-      @let percentError = skillForm.expIncreasePercent().touched() && (skillForm.expIncreasePercent().getError('min') || skillForm.expIncreasePercent().getError('parse'));
-      <input id="skill-exp-increase" class="control" type="number" step="any" [class.control_error]="percentError" [formField]="skillForm.expIncreasePercent" />
-      @if (percentError) {
-        <span class="field__error">{{ percentError.message || 'Введите число' }}</span>
-      }
     </div>
 
     <div class="field">
@@ -73,6 +75,7 @@
     </div>
 
     @if (skillForm.decayEnabled().value()) {
+      <div class="skill-dialog__row">
       <div class="field">
         <div class="field__heading">
           <label class="field__label" for="skill-inactivity">Срок бездействия</label>
@@ -112,6 +115,7 @@
         @if (lostExpError) {
           <span class="field__error">{{ lostExpError.message || 'Введите число' }}</span>
         }
+      </div>
       </div>
     }
   </div>

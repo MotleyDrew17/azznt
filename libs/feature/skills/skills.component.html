@@ -1,13 +1,72 @@
 <div class="skills">
-  @if (!skills.length) {
+  @if (skills().length) {
+    <div class="skills__bar">
+      <gm-autocomplete
+        placeholder="Поиск навыка"
+        [options]="searchOptions()"
+        [(value)]="query"
+        (picked)="showSkill($event)"
+      />
+      <button
+        type="button"
+        class="skills__add interactive hint hint_below"
+        data-hint="Добавить навык"
+        aria-label="Добавить навык"
+        (click)="openSkillDialog()"
+      >
+        <span class="skills__add-icon"></span>
+      </button>
+    </div>
+  }
+  @if (!skills().length) {
     <div class="skills__empty">
       <button type="button" class="text-button" (click)="openSkillDialog()">
         Добавить навык для прокачки
       </button>
     </div>
   } @else {
-    @for (skill of skills; track skill.id) {
-      <gm-skill-item />
-    }
+    <div
+      class="skills__stage"
+      #stage
+      (pointerdown)="onPointerDown($event)"
+      (pointermove)="onPointerMove($event)"
+      (pointerup)="onPointerUp($event)"
+      (pointercancel)="onPointerUp($event)"
+    >
+      @for (slide of slides(); track slide.key) {
+        <div
+          class="skills__slide"
+          [class.skills__slide_center]="slide.active"
+          [style.transform]="slide.transform"
+          [style.opacity]="slide.opacity"
+          [style.z-index]="slide.zIndex"
+          [attr.aria-hidden]="slide.active ? null : true"
+        >
+          <gm-skill-item [skill]="slide.skill" [active]="slide.active" [blockClick]="blockClick()" />
+        </div>
+      }
+      @if (skills().length > 1) {
+        <button
+          type="button"
+          class="skills__arrow skills__arrow_prev"
+          aria-label="Предыдущий навык"
+          [disabled]="!canPrev()"
+          (pointerdown)="$event.stopPropagation()"
+          (click)="step(-1)"
+        >
+          <span class="skills__chevron"></span>
+        </button>
+        <button
+          type="button"
+          class="skills__arrow skills__arrow_next"
+          aria-label="Следующий навык"
+          [disabled]="!canNext()"
+          (pointerdown)="$event.stopPropagation()"
+          (click)="step(1)"
+        >
+          <span class="skills__chevron"></span>
+        </button>
+      }
+    </div>
   }
 </div>

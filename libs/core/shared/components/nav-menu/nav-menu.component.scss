@@ -1,0 +1,66 @@
+:host {
+  display: block;
+}
+
+.nav-menu {
+  position: relative;
+}
+
+.nav-menu__toggle {
+  --surface: transparent;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-parchment);
+  cursor: pointer;
+
+  &.hint::after {
+    right: auto;
+    left: 0;
+    transform: none;
+  }
+}
+
+.nav-menu__icon {
+  width: 32px;
+  height: 32px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../../../../../src/app/assets/icons/menu.svg');
+}
+
+.nav-menu__list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 5;
+  min-width: 196px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid color-mix(in srgb, var(--color-parchment) 28%, transparent);
+  border-radius: 10px;
+  background: var(--color-bg);
+}
+
+.nav-menu__link {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--color-text);
+  text-decoration: none;
+
+  &:hover {
+    background: var(--color-lvl-2);
+  }
+
+  &_active {
+    color: var(--color-gold);
+    background: color-mix(in srgb, var(--color-gold) 14%, transparent);
+  }
+}

@@ -161,8 +161,40 @@ select {
   @include controls.select;
 }
 
+.control-clear {
+  @include controls.clearable;
+}
+
+.control__clear {
+  @include controls.clear-button;
+}
+
+.control__clear-icon {
+  @include controls.clear-icon;
+}
+
+.autocomplete {
+  @include controls.autocomplete;
+}
+
+.autocomplete__list {
+  @include controls.autocomplete-list;
+}
+
+.autocomplete__option {
+  @include controls.autocomplete-option;
+}
+
+.autocomplete__empty {
+  @include controls.autocomplete-empty;
+}
+
 .hint {
   @include hint.bubble;
+}
+
+.hint-panel {
+  @include hint.panel;
 }
 
 .is-disabled {

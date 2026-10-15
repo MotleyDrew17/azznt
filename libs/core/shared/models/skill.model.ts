@@ -12,6 +12,7 @@ export interface CreateSkillData {
 
 export interface SkillDialogData {
   kind: SkillDialogKind;
+  id?: string;
 }
 
 export interface DecaySnapshot {
@@ -45,6 +46,11 @@ export interface SkillSnapshot {
   description: string;
   level: LevelSnapshot | null;
   exercises: ExerciseSnapshot[];
+}
+
+export function readSkillSnapshots(value: unknown): SkillSnapshot[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(isSkillSnapshot);
 }
 
 export function parseSkillSnapshot(text: string): SkillSnapshot | null {

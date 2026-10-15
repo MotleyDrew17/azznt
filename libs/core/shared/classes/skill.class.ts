@@ -41,6 +41,12 @@ export class Skill {
         this.#description = description;
     }
 
+    update(data: CreateSkillData): void {
+        this.#name = data.name;
+        this.#description = data.description;
+        this.#level?.update(data);
+    }
+
     get exercises(): Exercise[] {
         return this.#exercises;
     }
@@ -198,12 +204,13 @@ export class Level {
         this.#next_exp = requiredExp;
         this.#coefficient = expIncreasePercent;
         if(decayEnabled) {
-        this.#decay = {
-            value: lostExp,
-            freezed_till_ms: 0,
-            freezed_interval_ms: inactivityDays * 24 * 60 * 60 * 1000,
-        };
-      }
+            const interval = inactivityDays * 24 * 60 * 60 * 1000;
+            this.#decay = {
+                value: lostExp,
+                freezed_till_ms: Date.now() + interval,
+                freezed_interval_ms: interval,
+            };
+        }
 
     }
 
@@ -213,6 +220,14 @@ export class Level {
 
     get current_exp(): number {
         return this.#current_exp;
+    }
+
+    get next_exp(): number {
+        return this.#next_exp;
+    }
+
+    get coefficient(): number {
+        return this.#coefficient;
     }
 
     get decay(): Decay | null{
@@ -226,6 +241,32 @@ export class Level {
 
     set current_exp(current_exp: number) {
         this.#current_exp = current_exp;
+    }
+
+    update(data: CreateSkillData): void {
+        this.#next_exp = data.requiredExp;
+        this.#coefficient = data.expIncreasePercent;
+        if (!data.decayEnabled) {
+            this.#decay = null;
+            return;
+        }
+
+        const interval = (data.inactivityDays ?? 0) * 24 * 60 * 60 * 1000;
+        const lostExp = data.lostExp ?? 0;
+        if (this.#decay) {
+            this.#decay.value = lostExp;
+            if (this.#decay.freezed_interval_ms !== interval) {
+                this.#decay.freezed_interval_ms = interval;
+                this.#decay.freezed_till_ms = Date.now() + interval;
+            }
+            return;
+        }
+
+        this.#decay = {
+            value: lostExp,
+            freezed_till_ms: Date.now() + interval,
+            freezed_interval_ms: interval,
+        };
     }
 
     freezeDecay() {
@@ -282,6 +323,9 @@ export class Level {
         level.#current_exp = snapshot.current_exp;
         level.#prev_exp = snapshot.prev_exp;
         level.#decay = snapshot.decay ? { ...snapshot.decay } : null;
+        if (level.#decay && level.#decay.freezed_till_ms <= 0 && level.#decay.freezed_interval_ms > 0) {
+            level.#decay.freezed_till_ms = Date.now() + level.#decay.freezed_interval_ms;
+        }
         return level;
     }
     

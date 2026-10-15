@@ -1,20 +1,36 @@
 <div class="header">
+  <div class="header__heading">
+    <h1 class="header__title">{{ title() }}</h1>
+  </div>
+  <div class="header__nav">
+    <gm-nav-menu />
+    <button
+      type="button"
+      class="header__action header__back interactive hint hint_below"
+      data-hint="Назад"
+      aria-label="Назад"
+      [disabled]="!canBack()"
+      (click)="back()"
+    >
+      <span class="header__icon header__icon_back"></span>
+    </button>
+  </div>
   @if (showTools()) {
-  <button
-    type="button"
-    class="header__action header__action_mode interactive hint hint_below"
-    [class.header__action_play]="mode() === FieldMode.Editor"
-    [attr.data-hint]="mode() === FieldMode.Editor ? 'Игра' : 'Редактор'"
-    [attr.aria-label]="mode() === FieldMode.Editor ? 'Игра' : 'Редактор'"
-    (click)="toggleMode()"
-  >
-    @if (mode() === FieldMode.Editor) {
-      <span class="header__icon header__icon_play"></span>
-    } @else {
-      <span class="header__icon header__icon_pen"></span>
-    }
-  </button>
   <div class="header__files">
+    <button
+      type="button"
+      class="header__action header__action_mode interactive hint hint_below"
+      [class.header__action_play]="mode() === FieldMode.Editor"
+      [attr.data-hint]="mode() === FieldMode.Editor ? 'Игра' : 'Редактор'"
+      [attr.aria-label]="mode() === FieldMode.Editor ? 'Игра' : 'Редактор'"
+      (click)="toggleMode()"
+    >
+      @if (mode() === FieldMode.Editor) {
+        <span class="header__icon header__icon_play"></span>
+      } @else {
+        <span class="header__icon header__icon_pen"></span>
+      }
+    </button>
     <button type="button" class="header__action interactive hint hint_below" data-hint="Скачать" aria-label="Скачать" (click)="download()">
       <span class="header__icon header__icon_download"></span>
     </button>

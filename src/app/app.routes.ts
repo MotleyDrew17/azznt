@@ -15,6 +15,10 @@ export const routes: Routes = [
                 loadComponent: () => import('../../libs/feature/skills/skills.component').then(m => m.SkillsComponent)
             },
             {
+                path: 'settings',
+                loadComponent: () => import('../../libs/feature/settings/settings.component').then(m => m.SettingsComponent)
+            },
+            {
                 path: 'skill/:id/stats',
                 loadComponent: () => import('../../libs/feature/skills/skill-page/stats/skill-stats.component').then(m => m.SkillStatsComponent)
             },

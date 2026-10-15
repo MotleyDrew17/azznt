@@ -1,0 +1,29 @@
+<input
+  class="control"
+  type="text"
+  [attr.placeholder]="placeholder()"
+  [attr.aria-expanded]="open()"
+  [value]="value()"
+  (input)="onInput($event)"
+  (focus)="open.set(true)"
+  (click)="open.set(true)"
+  (blur)="close()"
+/>
+@if (open()) {
+  <ul class="autocomplete__list">
+    @for (option of filtered(); track option.id) {
+      <li>
+        <button
+          type="button"
+          class="autocomplete__option"
+          (mousedown)="$event.preventDefault()"
+          (click)="pick(option)"
+        >
+          {{ option.label }}
+        </button>
+      </li>
+    } @empty {
+      <li class="autocomplete__empty">Ничего не найдено</li>
+    }
+  </ul>
+}

@@ -6,10 +6,12 @@ import { DialogService } from '../../../core/shared/services/dialog.service';
 import { GraphService } from '../../../core/shared/services/graph.service';
 import { FieldMode } from '../../../core/shared/enums/field-mode.enum';
 import { FieldModeService } from '../../../core/shared/services/field-mode.service';
+import { SkillService } from '../../../core/shared/services/skill.service';
+import { NavMenuComponent } from '../../../core/shared/components/nav-menu/nav-menu.component';
 
 @Component({
   selector: 'gm-header',
-  imports: [],
+  imports: [NavMenuComponent],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,19 +23,32 @@ export class HeaderComponent {
   private fieldMode = inject(FieldModeService);
   private router = inject(Router);
   private graphService = inject(GraphService);
+  private skillService = inject(SkillService);
   private dialogService = inject(DialogService);
   private fileInput = viewChild<ElementRef<HTMLInputElement>>('file');
 
   readonly mode = this.fieldMode.mode;
   readonly showTools = signal(this.#showsTools(this.router.url));
+  readonly title = signal(this.#title(this.router.url));
+  readonly canBack = signal(false);
+  private history = [this.#path(this.router.url)];
 
   constructor() {
     this.router.events.pipe(
-      filter((event) => event instanceof NavigationEnd),
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       takeUntilDestroyed(),
-    ).subscribe(() => {
+    ).subscribe((event) => {
+      this.#remember(event.urlAfterRedirects);
       this.showTools.set(this.#showsTools(this.router.url));
+      this.title.set(this.#title(this.router.url));
     });
+  }
+
+  back(): void {
+    if (this.history.length < 2) return;
+    this.history.pop();
+    this.canBack.set(this.history.length > 1);
+    void this.router.navigateByUrl(this.history[this.history.length - 1]);
   }
 
   toggleMode(): void {
@@ -76,9 +91,33 @@ export class HeaderComponent {
     });
   }
 
+  #remember(url: string): void {
+    const path = this.#path(url);
+    if (this.history[this.history.length - 1] === path) return;
+    this.history.push(path);
+    this.canBack.set(true);
+  }
+
   #showsTools(url: string): boolean {
-    const path = url.split('?')[0].split('#')[0];
+    const path = this.#path(url);
     return path === '/quest-tree' || /^\/skill\/[^/]+$/.test(path);
+  }
+
+  #title(url: string): string {
+    const path = this.#path(url);
+    if (path === '/quest-tree' || path === '/editor') return 'Квесты';
+    if (path === '/skills') return 'Навыки';
+    if (path === '/settings') return 'Настройки';
+
+    const skillId = path.match(/^\/skill\/([^/]+)/)?.[1];
+    if (!skillId) return '';
+    if (!this.skillService.skills().length) this.skillService.loadSkills();
+    const name = this.skillService.skills().find((skill) => skill.id === skillId)?.name ?? '';
+    return name ? `Навык - ${name}` : '';
+  }
+
+  #path(url: string): string {
+    return url.split('?')[0].split('#')[0];
   }
 
   #rejectFile(message: string): void {

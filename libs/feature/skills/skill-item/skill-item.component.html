@@ -1,0 +1,59 @@
+@if (skill(); as skill) {
+  <div class="skill-item" [class.skill-item_active]="active()" (click)="open()">
+    <div class="skill-item__scale">
+      <span class="skill-item__level skill-item__level_next">{{ nextLevel() }}</span>
+      <div class="skill-item__meter">
+        @if (fillPercent() > 0) {
+          <div class="skill-item__fill" [style.height.%]="fillPercent()"></div>
+        }
+      </div>
+      <span class="skill-item__level">{{ currentLevel() }}</span>
+      @if (active()) {
+      <div class="skill-item__hint" (pointerdown)="$event.stopPropagation()" (click)="$event.stopPropagation()">
+        <div class="hint-panel">
+          <ul class="skill-item__facts">
+            <li>Опыт: {{ currentExp() }} / {{ requiredExp() }}</li>
+            @if (hasDecay()) {
+              <li>Откат через: {{ decayDelay() }}</li>
+              <li>Сила отката: {{ decayValue() }}</li>
+            }
+            <li>Доступных действий: {{ availableActions() }}</li>
+          </ul>
+          @if (description().trim()) {
+            <p class="skill-item__description">{{ description() }}</p>
+          }
+          <div class="skill-item__actions">
+            <button
+              type="button"
+              class="skill-item__action interactive hint hint_below"
+              data-hint="Редактировать"
+              aria-label="Редактировать"
+              (click)="edit($event)"
+            >
+              <span class="skill-item__action-icon skill-item__action-icon_edit"></span>
+            </button>
+            <button
+              type="button"
+              class="skill-item__action interactive hint hint_below"
+              data-hint="Удалить"
+              aria-label="Удалить"
+              (click)="remove($event)"
+            >
+              <span class="skill-item__action-icon skill-item__action-icon_delete"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+    <div class="skill-item__title">
+      <p
+        #nameLabel
+        class="skill-item__name"
+        [class.hint]="nameOverflow()"
+        [class.hint_wrap]="nameOverflow()"
+        [attr.data-hint]="nameOverflow() ? name() : null"
+      >{{ name() }}</p>
+    </div>
+  </div>
+}

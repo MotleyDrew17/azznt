@@ -45,4 +45,26 @@
       text-align: left;
     }
   }
+
+  &_right::after {
+    top: 0;
+    right: auto;
+    bottom: auto;
+    left: calc(100% + 10px);
+    transform: none;
+    white-space: pre-line;
+  }
+}
+
+@mixin panel {
+  width: max-content;
+  max-width: 280px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--color-parchment) 42%, transparent);
+  border-radius: 6px;
+  background: var(--color-bg);
+  color: var(--color-parchment);
+  font-size: 13px;
+  line-height: 1.35;
+  text-align: left;
 }

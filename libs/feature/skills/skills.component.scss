@@ -13,7 +13,132 @@
   min-height: 0;
 }
 
+.skills {
+  flex-direction: column;
+}
+
+.skills__bar {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px 0;
+}
+
+.skills__add {
+  --surface: transparent;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-green);
+  cursor: pointer;
+
+  &.hint::after {
+    right: 0;
+    left: auto;
+    transform: none;
+  }
+}
+
+.skills__add-icon {
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../../../src/app/assets/icons/plus.svg');
+}
+
+.skills__bar .autocomplete {
+  width: 280px;
+  max-width: 100%;
+}
+
 .skills__empty {
   align-items: center;
   justify-content: center;
+}
+
+.skills__stage {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.skills__slide {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max-content;
+  pointer-events: none;
+  will-change: transform;
+
+  &_center {
+    pointer-events: auto;
+  }
+}
+
+.skills__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 88px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-parchment);
+  opacity: 0.4;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: opacity 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 0.85;
+  }
+
+  &:disabled {
+    opacity: 0.15;
+    cursor: default;
+    pointer-events: none;
+  }
+}
+
+.skills__arrow_prev {
+  left: 8px;
+}
+
+.skills__arrow_next {
+  right: 8px;
+
+  .skills__chevron {
+    transform: scaleX(-1);
+  }
+}
+
+.skills__chevron {
+  width: 28px;
+  height: 28px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../../../src/app/assets/icons/chevron.svg');
 }
