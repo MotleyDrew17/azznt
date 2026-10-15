@@ -4,3 +4,157 @@
   min-width: 0;
   min-height: 0;
 }
+
+.skill-page {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  gap: 24px;
+  padding: 16px 32px 24px 24px;
+}
+
+.skill-page__column {
+  flex: none;
+  align-self: stretch;
+}
+
+.skill-page__board {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-width: 0;
+  min-height: 0;
+}
+
+.skill-page__stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.skill-page__add {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--color-skill-metal-light) 55%, black);
+  border-radius: 50%;
+  background: var(--color-bg);
+  color: var(--color-silver);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: color 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--color-bg);
+    color: var(--color-parchment);
+  }
+}
+
+.skill-page__add-icon {
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../../../../src/app/assets/icons/plus.svg');
+}
+
+.skill-page__line {
+  position: relative;
+  flex: none;
+  height: 1px;
+
+  &_reached {
+    background: linear-gradient(90deg, var(--color-skill-metal-light), var(--color-skill-metal), var(--color-skill-metal-mid));
+  }
+
+  &_current {
+    background: linear-gradient(90deg, var(--color-skill-rim-light), var(--color-gold), var(--color-skill-rim));
+  }
+
+  &_locked {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-skill-metal) 68%, black),
+      color-mix(in srgb, var(--color-skill-metal-light) 52%, black),
+      color-mix(in srgb, var(--color-skill-metal) 68%, black)
+    );
+  }
+}
+
+.skill-page__mark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--color-bg);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+}
+
+.skill-page__line_reached .skill-page__mark {
+  border: 1px solid var(--color-skill-metal);
+  color: var(--color-skill-metal-light);
+}
+
+.skill-page__line_current .skill-page__mark {
+  border: 1px solid var(--color-gold);
+  color: var(--color-parchment);
+}
+
+.skill-page__line_locked .skill-page__mark {
+  border: 1px solid color-mix(in srgb, var(--color-skill-metal-light) 55%, black);
+  color: color-mix(in srgb, var(--color-skill-metal-light) 72%, black);
+}
+
+.skill-page__remove {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--color-error);
+  border-radius: 50%;
+  background: var(--color-bg);
+  color: var(--color-error);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s ease;
+}
+
+.skill-page__remove-icon {
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../../../../src/app/assets/icons/minus.svg');
+}
+
+.skill-page__line:hover .skill-page__remove,
+.skill-page__remove:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.skill-page__line:has(.skill-page__remove):hover .skill-page__mark,
+.skill-page__line:has(.skill-page__remove:focus-visible) .skill-page__mark {
+  opacity: 0;
+}

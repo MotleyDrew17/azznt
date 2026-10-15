@@ -1,0 +1,57 @@
+@if (skill()) {
+  <div class="skill-column__scale">
+    <span class="skill-column__level skill-column__level_next">{{ nextLevel() }}</span>
+    <div class="skill-column__meter">
+      @if (fillPercent() > 0) {
+        <div class="skill-column__fill" [style.height.%]="fillPercent()"></div>
+      }
+    </div>
+    <span class="skill-column__level">{{ currentLevel() }}</span>
+    @if (active()) {
+      <div class="skill-column__hint" (pointerdown)="$event.stopPropagation()" (click)="$event.stopPropagation()">
+        <div class="hint-panel">
+          <ul class="skill-column__facts">
+            <li>Опыт: {{ currentExp() }} / {{ requiredExp() }}</li>
+            @if (hasDecay()) {
+              <li>Откат через: {{ decayDelay() }}</li>
+              <li>Сила отката: {{ decayValue() }}</li>
+            }
+            <li>Доступных действий: {{ availableActions() }}</li>
+          </ul>
+          @if (description().trim()) {
+            <p class="skill-column__description">{{ description() }}</p>
+          }
+          <div class="skill-column__actions">
+            <button
+              type="button"
+              class="skill-column__action interactive hint hint_below"
+              data-hint="Редактировать"
+              aria-label="Редактировать"
+              (click)="edit($event)"
+            >
+              <span class="skill-column__action-icon skill-column__action-icon_edit"></span>
+            </button>
+            @if (showDelete()) {
+              <button
+                type="button"
+                class="skill-column__action interactive hint hint_below"
+                data-hint="Удалить"
+                aria-label="Удалить"
+                (click)="remove($event)"
+              >
+                <span class="skill-column__action-icon skill-column__action-icon_delete"></span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+  <p
+    #nameLabel
+    class="skill-column__name"
+    [class.hint]="nameOverflow()"
+    [class.hint_wrap]="nameOverflow()"
+    [attr.data-hint]="nameOverflow() ? name() : null"
+  >{{ name() }}</p>
+}

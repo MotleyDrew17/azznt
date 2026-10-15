@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { Skill } from '../classes/skill.class';
-import { CreateSkillData, readSkillSnapshots } from '../models/skill.model';
+import { Exercise, Skill } from '../classes/skill.class';
+import { CreateExerciseData, CreateSkillData, readSkillSnapshots } from '../models/skill.model';
 import { StorageService } from './storage.service';
 
 const SKILLS_KEY = 'skills';
@@ -28,6 +28,24 @@ export class SkillService {
     this.#save();
   }
 
+  addLayer(id: string, levelScore: number): void {
+    if (!Number.isInteger(levelScore) || levelScore <= 1) return;
+    const skill = this.skills().find((item) => item.id === id);
+    if (!skill) return;
+    skill.addLayer(levelScore);
+    this.skills.update((skills) => [...skills]);
+    this.#save();
+  }
+
+  removeLayer(id: string, levelScore: number): void {
+    if (levelScore <= 1) return;
+    const skill = this.skills().find((item) => item.id === id);
+    if (!skill) return;
+    skill.removeLayer(levelScore);
+    this.skills.update((skills) => [...skills]);
+    this.#save();
+  }
+
   removeSkill(id: string): void {
     const skills = this.skills().filter((skill) => skill.id !== id);
     if (skills.length === this.skills().length) return;
@@ -39,9 +57,27 @@ export class SkillService {
     const stored = readSkillSnapshots(this.storage.local.get(SKILLS_KEY));
     const skills = stored.map((snapshot) => Skill.fromSnapshot(snapshot));
     this.skills.set(skills);
-    if (skills.some((skill, index) => skill.getDecayTimestamp() !== (stored[index]?.level?.decay?.freezed_till_ms ?? 0))) {
-      this.#save();
-    }
+    const decayChanged = skills.some((skill, index) => skill.getDecayTimestamp() !== (stored[index]?.level?.decay?.freezed_till_ms ?? 0));
+    const layersMissing = stored.some((skill) => !skill.layers);
+    if (decayChanged || layersMissing) this.#save();
+  }
+
+  addExerciseToLayer(id: string, levelScore: number, data: CreateExerciseData): void {
+    const skill = this.skills().find((item) => item.id === id);
+    const level = skill?.getLevel();
+    if (!skill || !level) return;
+    const exercise = new Exercise(
+      level,
+      data.maxLevel,
+      data.availableOnLevel,
+      data.experience,
+      data.isFreezingDecay,
+      data.name,
+      data.description,
+    );
+    skill.addExerciseToLayer(levelScore, exercise);
+    this.skills.update((skills) => [...skills]);
+    this.#save();
   }
 
   #save(): void {

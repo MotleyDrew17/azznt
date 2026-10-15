@@ -1,0 +1,43 @@
+:host {
+  display: block;
+  flex: none;
+  height: 100px;
+}
+
+.exercise {
+  position: relative;
+  height: 100%;
+}
+
+.exercise__add {
+  --surface: transparent;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-green);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.2s ease;
+
+  .exercise:hover &,
+  &:focus-visible {
+    opacity: 1;
+  }
+}
+
+.exercise__add-icon {
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../../../../../src/app/assets/icons/plus.svg');
+}

@@ -1,0 +1,88 @@
+<div class="dialog">
+  <button type="button" class="dialog__close interactive" (click)="close()" aria-label="Закрыть">
+    ×
+  </button>
+
+  <h2 class="dialog__title">Добавить упражнение</h2>
+
+  <div class="dialog__body">
+    <div class="field">
+      <label class="field__label" for="exercise-name">Название</label>
+      @let nameError = exerciseForm.name().touched() && (exerciseForm.name().getError('required') || exerciseForm.name().getError('blank'));
+      <input id="exercise-name" class="control" type="text" [class.control_error]="nameError" [formField]="exerciseForm.name" />
+      @if (nameError) {
+        <span class="field__error">{{ nameError.message }}</span>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="exercise-description">Описание</label>
+      <textarea id="exercise-description" class="control control_area" rows="4" [formField]="exerciseForm.description"></textarea>
+    </div>
+
+    <div class="field">
+      <div class="field__heading">
+        <label class="field__label" for="exercise-experience">Опыт</label>
+        <button
+          type="button"
+          class="field__hint hint hint_wrap"
+          data-hint="Количество опыта, получаемое за выполнение упражнения."
+          aria-label="Подсказка"
+        >
+          <span class="field__hint-icon"></span>
+        </button>
+      </div>
+      @let experienceError = exerciseForm.experience().touched() && (exerciseForm.experience().getError('required') || exerciseForm.experience().getError('positive') || exerciseForm.experience().getError('parse'));
+      <input id="exercise-experience" class="control" type="number" step="any" [class.control_error]="experienceError" [formField]="exerciseForm.experience" />
+      @if (experienceError) {
+        <span class="field__error">{{ experienceError.message || 'Введите число' }}</span>
+      }
+    </div>
+
+    <div class="exercise-dialog__limit">
+      <div class="field">
+        <div class="field__heading">
+          <gm-checkbox controlId="exercise-limit" [formField]="exerciseForm.limitEnabled">Лимит уровня</gm-checkbox>
+          <button
+            type="button"
+            class="field__hint hint hint_wrap"
+            data-hint="При включенном лимите упражнение перестает давать опыт начиная с указанного уровня."
+            aria-label="Подсказка"
+          >
+            <span class="field__hint-icon"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="exercise-max-level">Максимальный уровень</label>
+        @let maxLevelError = exerciseForm.limitEnabled().value() && exerciseForm.maxLevel().touched() && (exerciseForm.maxLevel().getError('required') || exerciseForm.maxLevel().getError('integer') || exerciseForm.maxLevel().getError('min') || exerciseForm.maxLevel().getError('parse'));
+        <input id="exercise-max-level" class="control" type="number" step="1" [class.control_error]="maxLevelError" [formField]="exerciseForm.maxLevel" />
+        @if (maxLevelError) {
+          <span class="field__error">{{ maxLevelError.message || 'Введите число' }}</span>
+        }
+      </div>
+    </div>
+
+    @if (hasDecay) {
+      <div class="field">
+        <div class="field__heading">
+          <gm-checkbox controlId="exercise-reset-decay" [formField]="exerciseForm.resetsDecay">Сбрасывает откат</gm-checkbox>
+          <button
+            type="button"
+            class="field__hint hint hint_wrap"
+            data-hint="Выполнение упражнения сбрасывает таймер до начала отката навыка до исходного значения."
+            aria-label="Подсказка"
+          >
+            <span class="field__hint-icon"></span>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="dialog__footer">
+    <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="exerciseForm().invalid()">Добавить</gm-button>
+    <gm-button width="148px" (click)="close()">Отмена</gm-button>
+  </div>
+</div>

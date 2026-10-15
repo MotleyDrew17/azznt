@@ -13,7 +13,9 @@ import {
   WarningDialogData,
 } from '../components/warning-dialog/warning-dialog.component';
 import { SkillDialogComponent } from '../../../feature/skills/skill-dialog/skill-dialog.component';
-import { SkillDialogData } from '../models/skill.model';
+import { LayerDialogComponent } from '../../../feature/skills/layer-dialog/layer-dialog.component';
+import { ExerciseDialogComponent } from '../../../feature/skills/exercise-dialog/exercise-dialog.component';
+import { ExerciseDialogData, LayerDialogData, SkillDialogData } from '../models/skill.model';
 
 export interface DialogSize {
   width?: string;
@@ -58,6 +60,20 @@ export class DialogService {
   openSkillDialog(data: SkillDialogData, size?: DialogSize) {
     return this.dialog.open<void, SkillDialogData>(SkillDialogComponent, {
       ...this.#size(size),
+      data,
+    });
+  }
+
+  openExerciseDialog(data: ExerciseDialogData, size?: DialogSize) {
+    return this.dialog.open<void, ExerciseDialogData>(ExerciseDialogComponent, {
+      ...this.#size(size),
+      data,
+    });
+  }
+
+  openLayerDialog(data: LayerDialogData, size?: DialogSize) {
+    return this.dialog.open<void, LayerDialogData>(LayerDialogComponent, {
+      ...this.#size(size ?? { width: '360px' }),
       data,
     });
   }

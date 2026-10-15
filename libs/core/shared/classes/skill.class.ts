@@ -6,12 +6,20 @@ export interface Decay {
     freezed_interval_ms: number; /** Интервал в миллисекундах, через который будет уменьшаться откат навыка.                                  Нужен, чтобы обновлять дату до которой заморожен откат навыка */ 
 }
 
+export interface SkillLayer {
+    levelScore: number;
+    exercises: Exercise[]; // упражнения, которые становятся доступны на этом уровне навыка
+}
+
 export class Skill {
     #id: string = '';
     #name: string = '';
     #description: string = '';
     #level: Level | null = null; // текущий уровень навыка
     #exercises: Exercise[] = []; // упражнения, которые нужно выполнить для прокачки навыка
+    #layers: SkillLayer[] = [
+        { levelScore: 1, exercises: [] },
+    ]; // уровни навыка, на которых становятся доступны упражнения
     
 
     constructor(data: CreateSkillData) {
@@ -51,9 +59,40 @@ export class Skill {
         return this.#exercises;
     }
 
+    addLayer(levelScore: number) {
+        const hasLayer = this.#layers.some(layer => layer.levelScore === levelScore);
+        if(!hasLayer) this.#layers.push({ levelScore, exercises: [] }); // если слой навыка не существует, то добавляем его
+    }
+
+    removeLayer(levelScore: number) {
+        this.#layers = this.#layers.filter(layer => layer.levelScore !== levelScore);
+    }
+
+    getLayers() {
+        return this.#layers;
+    }
+
+    addExerciseToLayer(levelScore: number, exercise: Exercise): string | undefined {
+        const layer = this.#layers.find(layer => layer.levelScore === levelScore);
+        const hasExercise = layer?.exercises.some(e => e.id === exercise.id);
+        if(layer && !hasExercise) layer.exercises.push(exercise); // если слой навыка существует и упражнение не существует, то добавляем его
+        return hasExercise ? exercise.id : undefined;
+    }
+
+    removeExerciseFromLayer(levelScore: number, exercise: Exercise): string | undefined {
+        const layer = this.#layers.find(layer => layer.levelScore === levelScore);
+        const hasExercise = layer?.exercises.some(e => e.id === exercise.id);
+        if(layer && hasExercise) layer.exercises = layer.exercises.filter(e => e.id !== exercise.id); // если слой навыка существует и упражнение существует, то удаляем его
+        return hasExercise ? exercise.id : undefined;
+    }
+
+    getExercisesFromLayer(levelScore: number) {
+        const layer = this.#layers.find(layer => layer.levelScore === levelScore);
+        return layer?.exercises ?? [];
+    }
     addExercise(max_level: number, available_on_level: number) {
         if(!this.#level) throw new Error('Level is not set'); 
-        const exercise = new Exercise(this.#level, max_level, available_on_level);
+        const exercise = new Exercise(this.#level, max_level, available_on_level, 0, true, '', '');
         this.#exercises.push(exercise);
     }
 
@@ -89,6 +128,10 @@ export class Skill {
             description: this.#description,
             level: this.#level?.toSnapshot() ?? null,
             exercises: this.#exercises.map(exercise => exercise.toSnapshot()),
+            layers: this.#layers.map(layer => ({
+                levelScore: layer.levelScore,
+                exercises: layer.exercises.map(exercise => exercise.toSnapshot()),
+            })),
         };
     }
 
@@ -104,6 +147,12 @@ export class Skill {
         skill.#id = snapshot.id;
         skill.#level = level;
         skill.#exercises = level ? snapshot.exercises.map(exercise => Exercise.fromSnapshot(exercise, level)) : [];
+        if (snapshot.layers?.length) {
+            skill.#layers = snapshot.layers.map(layer => ({
+                levelScore: layer.levelScore,
+                exercises: level ? layer.exercises.map(exercise => Exercise.fromSnapshot(exercise, level)) : [],
+            }));
+        }
         return skill;
     }
 }
@@ -118,11 +167,15 @@ export class Exercise {
     #available_on_level: number = 0; // уровень навыка, на котором доступно выполнение упражнения
     #level: Level | null = null; // уровень навык. Нужен для работы с уровнем навыка
 
-    constructor(level: Level, max_level: number, available_on_level: number) {
+    constructor(level: Level, max_level: number, available_on_level: number, experience: number, is_freezing_decay: boolean, name: string, description: string) {
         this.#id = crypto.randomUUID();
+        this.#name = name;
+        this.#description = description;
         this.#level = level;
         this.#maxLevel = max_level;
         this.#available_on_level = available_on_level;
+        this.#experience = experience;
+        this.#is_freezing_decay = is_freezing_decay;
     }
 
     get id(): string {
@@ -162,7 +215,7 @@ export class Exercise {
         if(this.#is_freezing_decay) {
            this.#level.freezeDecay();
         }
-        if (this.#level.score < this.#maxLevel) {
+        if (this.#maxLevel <= 0 || this.#level.score < this.#maxLevel) {
             this.#level.addExp(this.#experience);
         }
         
@@ -181,12 +234,16 @@ export class Exercise {
     }
 
     static fromSnapshot(snapshot: ExerciseSnapshot, level: Level): Exercise {
-        const exercise = new Exercise(level, snapshot.maxLevel, snapshot.available_on_level);
+        const exercise = new Exercise(
+            level,
+            snapshot.maxLevel,
+            snapshot.available_on_level,
+            snapshot.experience,
+            snapshot.is_freezing_decay,
+            snapshot.name,
+            snapshot.description,
+        );
         exercise.#id = snapshot.id;
-        exercise.#name = snapshot.name;
-        exercise.#description = snapshot.description;
-        exercise.#experience = snapshot.experience;
-        exercise.#is_freezing_decay = snapshot.is_freezing_decay;
         return exercise;
     }
 

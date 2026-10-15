@@ -15,6 +15,24 @@ export interface SkillDialogData {
   id?: string;
 }
 
+export interface LayerDialogData {
+  skillId: string;
+}
+
+export interface CreateExerciseData {
+  name: string;
+  description: string;
+  experience: number;
+  maxLevel: number;
+  availableOnLevel: number;
+  isFreezingDecay: boolean;
+}
+
+export interface ExerciseDialogData {
+  skillId: string;
+  levelScore: number;
+}
+
 export interface DecaySnapshot {
   value: number;
   freezed_till_ms: number;
@@ -40,12 +58,18 @@ export interface ExerciseSnapshot {
   available_on_level: number;
 }
 
+export interface LayerSnapshot {
+  levelScore: number;
+  exercises: ExerciseSnapshot[];
+}
+
 export interface SkillSnapshot {
   id: string;
   name: string;
   description: string;
   level: LevelSnapshot | null;
   exercises: ExerciseSnapshot[];
+  layers?: LayerSnapshot[];
 }
 
 export function readSkillSnapshots(value: unknown): SkillSnapshot[] {
@@ -74,7 +98,25 @@ function isSkillSnapshot(value: unknown): value is SkillSnapshot {
     && typeof skill.description === 'string'
     && (skill.level === null || isLevelSnapshot(skill.level))
     && ids.size === skill.exercises.length
-    && (skill.level !== null || skill.exercises.length === 0);
+    && (skill.level !== null || skill.exercises.length === 0)
+    && isLayerList(skill.layers);
+}
+
+function isLayerList(value: unknown): boolean {
+  if (value === undefined) return true;
+  if (!Array.isArray(value) || !value.every(isLayerSnapshot)) return false;
+  const scores = new Set(value.map((layer) => layer.levelScore));
+  return scores.size === value.length;
+}
+
+function isLayerSnapshot(value: unknown): value is LayerSnapshot {
+  if (!value || typeof value !== 'object') return false;
+  const layer = value as LayerSnapshot;
+  if (!Array.isArray(layer.exercises) || !layer.exercises.every(isExerciseSnapshot)) return false;
+  const ids = new Set(layer.exercises.map((exercise) => exercise.id));
+  return Number.isInteger(layer.levelScore)
+    && layer.levelScore > 0
+    && ids.size === layer.exercises.length;
 }
 
 function isLevelSnapshot(value: unknown): value is LevelSnapshot {

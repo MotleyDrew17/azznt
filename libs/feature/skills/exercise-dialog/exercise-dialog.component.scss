@@ -1,0 +1,20 @@
+.exercise-dialog__limit {
+  display: flex;
+  align-items: flex-end;
+  gap: 15px;
+  margin-top: 14px;
+
+  > .field {
+    flex: 1 1 0;
+    width: 0;
+    margin-top: 0;
+  }
+
+  .control[type='number'] {
+    width: 100%;
+  }
+}
+
+.exercise-dialog__limit + .field {
+  margin-top: 14px;
+}

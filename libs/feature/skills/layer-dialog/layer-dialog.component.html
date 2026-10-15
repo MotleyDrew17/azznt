@@ -1,0 +1,24 @@
+<div class="dialog">
+  <button type="button" class="dialog__close interactive" (click)="close()" aria-label="Закрыть">
+    ×
+  </button>
+
+  <h2 class="dialog__title">Добавить уровень?</h2>
+
+  <div class="dialog__body">
+    <p class="dialog__message">Добавление уровня, на котором будут доступны новые упражнения</p>
+    <div class="field layer-dialog__field">
+      <label class="field__label" for="layer-level">Уровень</label>
+      @let levelError = levelForm.levelScore().touched() && (levelForm.levelScore().getError('required') || levelForm.levelScore().getError('integer') || levelForm.levelScore().getError('min') || levelForm.levelScore().getError('duplicate') || levelForm.levelScore().getError('parse'));
+      <input id="layer-level" class="control" type="number" step="1" [class.control_error]="levelError" [formField]="levelForm.levelScore" />
+      @if (levelError) {
+        <span class="field__error">{{ levelError.message || 'Введите число' }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="dialog__footer">
+    <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="levelForm().invalid()">Добавить</gm-button>
+    <gm-button width="148px" (click)="close()">Отмена</gm-button>
+  </div>
+</div>
