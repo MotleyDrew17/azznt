@@ -1,8 +1,15 @@
-import { Quest } from '../classes/quest.class';
+import { Quest, QuestPriority } from '../classes/quest.class';
+
+export interface QuestRequiredSkill {
+  skillId: string;
+  level: number;
+}
 
 export interface CreateQuestData {
   name: string;
   description: string;
+  priority?: QuestPriority;
+  requiredSkills?: QuestRequiredSkill[] | null;
   parent?: Quest;
   child?: Quest;
   pos_x?: number;
@@ -20,6 +27,9 @@ export interface QuestSnapshot {
   zIndex: number;
   layer: number | null;
   isRoot: boolean;
+  priority?: QuestPriority;
+  requiredSkills?: QuestRequiredSkill[];
+  requiredSkill?: QuestRequiredSkill;
 }
 
 export function parseQuestSnapshots(text: string): QuestSnapshot[] | null {
@@ -27,7 +37,10 @@ export function parseQuestSnapshots(text: string): QuestSnapshot[] | null {
     const data: unknown = JSON.parse(text);
     if (!Array.isArray(data) || !data.every(isQuestSnapshot)) return null;
     if (!linksResolve(data)) return null;
-    return data;
+    return data.map((quest) => ({
+      ...quest,
+      requiredSkills: quest.requiredSkills ?? (quest.requiredSkill ? [quest.requiredSkill] : undefined),
+    }));
   } catch {
     return null;
   }
@@ -46,7 +59,32 @@ function isQuestSnapshot(value: unknown): value is QuestSnapshot {
     && Number.isFinite(quest.pos_y)
     && Number.isFinite(quest.zIndex)
     && (quest.layer === null || Number.isFinite(quest.layer))
-    && typeof quest.isRoot === 'boolean';
+    && typeof quest.isRoot === 'boolean'
+    && isOptionalPriority(quest.priority)
+    && isOptionalRequiredSkills(quest.requiredSkills)
+    && isRequiredSkill(quest.requiredSkill);
+}
+
+function isOptionalPriority(value: unknown): value is QuestPriority | undefined {
+  return value === undefined
+    || (typeof value === 'number'
+      && Number.isInteger(value)
+      && value >= QuestPriority.Common
+      && value <= QuestPriority.Main);
+}
+
+function isRequiredSkill(value: unknown): value is QuestRequiredSkill | undefined {
+  if (value === undefined) return true;
+  if (!value || typeof value !== 'object') return false;
+  const skill = value as QuestRequiredSkill;
+  return typeof skill.skillId === 'string'
+    && skill.skillId.length > 0
+    && Number.isInteger(skill.level)
+    && skill.level >= 1;
+}
+
+function isOptionalRequiredSkills(value: unknown): value is QuestRequiredSkill[] | undefined {
+  return value === undefined || (Array.isArray(value) && value.every((item) => isRequiredSkill(item) && item !== undefined));
 }
 
 function isIdList(value: unknown): value is string[] | undefined {

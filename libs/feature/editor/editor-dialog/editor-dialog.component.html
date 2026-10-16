@@ -28,6 +28,61 @@
         </div>
 
         <div class="field">
+          <label class="field__label" for="quest-priority">Приоритет</label>
+          <gm-select
+            controlId="quest-priority"
+            [options]="priorityOptions"
+            [selected]="priorityLabel()"
+            (selectedChange)="setPriority($event)"
+          />
+        </div>
+
+        <div class="field">
+          <gm-checkbox
+            controlId="quest-require-skill"
+            [checked]="requireSkill()"
+            (checkedChange)="requireSkill.set($event)"
+          >Требовать навык</gm-checkbox>
+          @if (requireSkill()) {
+            <span class="field__label">Навыки</span>
+            <ul class="editor-dialog__skills">
+              @for (skill of skillDrafts(); track skill.key) {
+                <li class="editor-dialog__skill-row">
+                  <gm-select
+                    placeholder="Навык"
+                    [options]="skillOptions(skill)"
+                    [selected]="skillLabel(skill)"
+                    (selectedChange)="setSkill(skill.key, $event)"
+                  />
+                  <label class="editor-dialog__level">
+                    Ур.
+                    <input
+                      class="control"
+                      type="number"
+                      step="1"
+                      min="1"
+                      [attr.aria-label]="'Уровень'"
+                      [class.control_error]="levelInvalid(skill)"
+                      [value]="skill.level"
+                      (input)="setSkillLevel(skill.key, $event)"
+                    />
+                  </label>
+                  <button type="button" class="editor-dialog__remove" aria-label="Удалить навык" (click)="removeSkill(skill.key)">
+                    <span class="editor-dialog__remove-icon"></span>
+                  </button>
+                </li>
+              }
+            </ul>
+            @if (canAddSkill()) {
+              <button type="button" class="text-button editor-dialog__add" (click)="addSkill()">+ Добавить навык</button>
+            }
+            @if (skillError()) {
+              <span class="field__error">{{ skillError() }}</span>
+            }
+          }
+        </div>
+
+        <div class="field">
           <label class="field__label" for="storyline-description">Описание</label>
           <textarea id="storyline-description" class="control control_area" rows="4" [formField]="storylineForm.description"></textarea>
           <span class="field__error"></span>
@@ -38,7 +93,7 @@
 
   <div class="dialog__footer">
     @if (kind === EditorDialogKind.Storyline || kind === EditorDialogKind.Quest || kind === EditorDialogKind.Edit || kind === EditorDialogKind.Relation) {
-      <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="storylineForm().invalid()">
+      <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="storylineForm().invalid() || skillInvalid()">
         {{ kind === EditorDialogKind.Edit ? 'Сохранить' : 'Создать' }}
       </gm-button>
     }

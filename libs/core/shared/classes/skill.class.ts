@@ -58,6 +58,10 @@ export class Skill {
         return this.#layers.flatMap(layer => layer.exercises);
     }
 
+    get score(): number {
+        return this.#level?.score ?? 0;
+    }
+
     addLayer(levelScore: number) {
         const hasLayer = this.#layers.some(layer => layer.levelScore === levelScore);
         if(!hasLayer) this.#layers.push({ levelScore, exercises: [] }); // если слой навыка не существует, то добавляем его
@@ -144,8 +148,21 @@ export class Skill {
         };
     }
 
-    static fromSnapshot(snapshot: SkillSnapshot): Skill {
+    applySnapshot(snapshot: SkillSnapshot): void {
         const level = snapshot.level ? Level.fromSnapshot(snapshot.level) : null;
+        this.#id = snapshot.id;
+        this.#name = snapshot.name;
+        this.#description = snapshot.description;
+        this.#level = level;
+        if (snapshot.layers?.length) {
+            this.#layers = snapshot.layers.map(layer => ({
+                levelScore: layer.levelScore,
+                exercises: level ? layer.exercises.map(exercise => Exercise.fromSnapshot(exercise, level)) : [],
+            }));
+        }
+    }
+
+    static fromSnapshot(snapshot: SkillSnapshot): Skill {
         const skill = new Skill({
             name: snapshot.name,
             description: snapshot.description,
@@ -153,14 +170,7 @@ export class Skill {
             expIncreasePercent: snapshot.level?.coefficient ?? 0,
             decayEnabled: false,
         });
-        skill.#id = snapshot.id;
-        skill.#level = level;
-        if (snapshot.layers?.length) {
-            skill.#layers = snapshot.layers.map(layer => ({
-                levelScore: layer.levelScore,
-                exercises: level ? layer.exercises.map(exercise => Exercise.fromSnapshot(exercise, level)) : [],
-            }));
-        }
+        skill.applySnapshot(snapshot);
         return skill;
     }
 }

@@ -1,0 +1,64 @@
+.editor-dialog__skills {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.editor-dialog__skill-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  gm-select {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.editor-dialog__level {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: 14px;
+
+  .control {
+    width: 64px;
+  }
+}
+
+.editor-dialog__remove {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-silver);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-parchment);
+  }
+}
+
+.editor-dialog__remove-icon {
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../../../../src/app/assets/icons/close.svg');
+}
+
+.editor-dialog__add {
+  align-self: flex-start;
+  font-size: 16px;
+}

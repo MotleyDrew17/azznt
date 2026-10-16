@@ -1,16 +1,49 @@
 :host {
   display: block;
-
-  &:has(.is-disabled) {
-    pointer-events: none;
-  }
 }
 
 .quest-node {
+  --quest-metal-light: var(--color-quest-common-light);
+  --quest-metal: var(--color-quest-common);
+  --quest-metal-dark: var(--color-quest-common-dark);
+  --quest-metal-mid: var(--color-quest-common-mid);
+
   position: absolute;
   width: 48px;
   height: 48px;
-  border: 1px solid var(--surface-border, var(--surface));
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--quest-metal-light) 0%, var(--quest-metal) 46%, var(--quest-metal-dark) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 45%),
+    inset 0 -2px 3px rgb(0 0 0 / 35%),
+    0 1px 2px rgb(0 0 0 / 45%);
+  transition: box-shadow 0.2s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: calc(2px * var(--field-zoom, 1));
+    pointer-events: none;
+    background: linear-gradient(
+      155deg,
+      var(--quest-metal-light) 0%,
+      var(--quest-metal) 32%,
+      var(--quest-metal-dark) 58%,
+      var(--quest-metal-mid) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
 
   &_shift {
     cursor: grab;
@@ -24,29 +57,75 @@
     outline: calc(2px * var(--field-zoom, 1)) solid var(--color-parchment);
     outline-offset: calc(3px * var(--field-zoom, 1));
   }
-  border-radius: 50%;
-  background-color: var(--surface);
-  transition: box-shadow 0.2s ease;
 
-  &_active {
-    --surface: var(--color-gold);
-    --surface-border: var(--color-gold);
+  &_uncommon {
+    --quest-metal-light: var(--color-quest-uncommon-light);
+    --quest-metal: var(--color-quest-uncommon);
+    --quest-metal-dark: var(--color-quest-uncommon-dark);
+    --quest-metal-mid: var(--color-quest-uncommon-mid);
   }
 
-  &_root {
-    --surface: var(--color-epic);
-    --surface-border: var(--color-epic);
+  &_notable {
+    --quest-metal-light: var(--color-quest-notable-light);
+    --quest-metal: var(--color-quest-notable);
+    --quest-metal-dark: var(--color-quest-notable-dark);
+    --quest-metal-mid: var(--color-quest-notable-mid);
+  }
+
+  &_epic {
+    --quest-metal-light: var(--color-quest-epic-light);
+    --quest-metal: var(--color-quest-epic);
+    --quest-metal-dark: var(--color-quest-epic-dark);
+    --quest-metal-mid: var(--color-quest-epic-mid);
+  }
+
+  &_mythic {
+    --quest-metal-light: var(--color-quest-mythic-light);
+    --quest-metal: var(--color-quest-mythic);
+    --quest-metal-dark: var(--color-quest-mythic-dark);
+    --quest-metal-mid: var(--color-quest-mythic-mid);
+  }
+
+  &_legendary {
+    --quest-metal-light: var(--color-quest-legendary-light);
+    --quest-metal: var(--color-quest-legendary);
+    --quest-metal-dark: var(--color-quest-legendary-dark);
+    --quest-metal-mid: var(--color-quest-legendary-mid);
+  }
+
+  &_main {
+    --quest-metal-light: var(--color-quest-main-light);
+    --quest-metal: var(--color-quest-main);
+    --quest-metal-dark: var(--color-quest-main-dark);
+    --quest-metal-mid: var(--color-quest-main-mid);
   }
 
   &_completed {
-    --surface: var(--color-green);
-    --surface-border: var(--color-green);
+    --quest-metal-light: var(--color-quest-done-light);
+    --quest-metal: var(--color-quest-done);
+    --quest-metal-dark: var(--color-quest-done-dark);
+    --quest-metal-mid: var(--color-quest-done-mid);
   }
 
-  &:hover:not(:disabled):not(.is-disabled) {
+  &_blocked,
+  &_completed {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--quest-metal-dark) 42%, black) 0%,
+      color-mix(in srgb, var(--quest-metal-dark) 68%, black) 58%,
+      color-mix(in srgb, var(--quest-metal) 48%, black) 100%
+    );
     box-shadow:
-      0 0 6px color-mix(in srgb, var(--surface) 90%, transparent),
-      0 0 16px color-mix(in srgb, var(--surface) 55%, transparent),
-      0 0 32px color-mix(in srgb, var(--surface) 28%, transparent);
+      inset 0 6px 8px rgb(0 0 0 / 72%),
+      inset 0 -1px 1px rgb(255 255 255 / 14%);
+  }
+
+  &:hover:not(&_blocked):not(&_completed) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 45%),
+      inset 0 -2px 3px rgb(0 0 0 / 35%),
+      0 0 6px color-mix(in srgb, var(--quest-metal-light) 90%, transparent),
+      0 0 16px color-mix(in srgb, var(--quest-metal) 55%, transparent),
+      0 0 32px color-mix(in srgb, var(--quest-metal) 28%, transparent);
   }
 }

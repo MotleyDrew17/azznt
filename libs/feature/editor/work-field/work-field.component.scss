@@ -42,13 +42,49 @@
   pointer-events: none;
 }
 
+.quest-edges__gradient {
+  --edge-light: var(--color-skill-metal-light);
+  --edge-mid: var(--color-skill-metal-mid);
+  --edge-dark: var(--color-skill-metal-dark);
+
+  &_gold {
+    --edge-light: var(--color-quest-main-light);
+    --edge-mid: var(--color-quest-main-mid);
+    --edge-dark: var(--color-quest-main-dark);
+  }
+
+  &_done {
+    --edge-light: var(--color-quest-done-light);
+    --edge-mid: var(--color-quest-done-mid);
+    --edge-dark: var(--color-quest-done-dark);
+  }
+}
+
+.quest-edges__stop_light {
+  stop-color: var(--edge-light);
+}
+
+.quest-edges__stop_mid {
+  stop-color: var(--edge-mid);
+}
+
+.quest-edges__stop_dark {
+  stop-color: var(--edge-dark);
+}
+
 .quest-edges__line {
-  stroke: var(--color-gold);
-  stroke-width: calc(2px * var(--field-zoom));
+  fill: none;
+  stroke-width: calc(3px * var(--field-zoom));
+  stroke-linecap: round;
 }
 
 .quest-edges__arrow {
-  fill: var(--color-gold);
+  stroke: none;
+}
+
+.quest-edges__line_gold,
+.quest-edges__arrow_gold {
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--color-gold) 80%, transparent)) drop-shadow(0 0 6px color-mix(in srgb, var(--color-gold) 42%, transparent));
 }
 
 .context-menu {
@@ -70,10 +106,11 @@
 }
 
 .quest-card {
+  --quest-card-accent: var(--color-quest-common);
   position: absolute;
   z-index: var(--field-overlay-z);
   width: 260px;
-  border: 1px solid var(--quest-pin);
+  border: 1px solid var(--quest-card-accent);
   border-radius: 10px;
   background: var(--color-bg);
   color: var(--color-parchment);
@@ -96,7 +133,7 @@
     z-index: 0;
     bottom: -9px;
     border-width: 9px 8px 0;
-    border-color: var(--quest-pin) transparent transparent;
+    border-color: var(--quest-card-accent) transparent transparent;
   }
 
   &::after {
@@ -117,7 +154,7 @@
       bottom: auto;
       top: -9px;
       border-width: 0 8px 9px;
-      border-color: transparent transparent var(--quest-pin);
+      border-color: transparent transparent var(--quest-card-accent);
     }
 
     &::after {
@@ -174,6 +211,41 @@
 
 .quest-card__name + .quest-card__description {
   margin-top: 4px;
+}
+
+.quest-card__priority {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--quest-card-accent);
+}
+
+.quest-card__body > .quest-card__priority:first-child {
+  margin-top: 0;
+}
+
+.quest-card__skill {
+  margin: 2px 0 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.quest-card__skill-link {
+  color: var(--color-gold);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    text-shadow:
+      0 0 6px color-mix(in srgb, var(--color-gold) 90%, transparent),
+      0 0 16px color-mix(in srgb, var(--color-gold) 55%, transparent);
+    outline: none;
+  }
 }
 
 .quest-toolbar {

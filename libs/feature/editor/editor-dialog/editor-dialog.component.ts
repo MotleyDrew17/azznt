@@ -1,13 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ButtonComponent } from '../../../core/shared/components/button/button.component';
 import { SelectComponent } from '../../../core/shared/components/select/select.component';
-import { CreateQuestData } from '../../../core/shared/models/quest.model';
+import { CheckboxComponent } from '../../../core/shared/components/checkbox/checkbox.component';
+import { CreateQuestData, QuestRequiredSkill } from '../../../core/shared/models/quest.model';
 import { form, required, FormField } from '@angular/forms/signals';
 import { ClearInputDirective } from '../../../core/shared/directives/clear-input.directive';
 import { DisabledDirective } from '../../../core/shared/directives/disabled.directive';
 import { GraphService } from '../../../core/shared/services/graph.service';
 import { DialogService } from '../../../core/shared/services/dialog.service';
+import { SkillService } from '../../../core/shared/services/skill.service';
+import { QUEST_PRIORITY_LABEL, QuestPriority } from '../../../core/shared/classes/quest.class';
 
 export enum EditorDialogKind {
   Storyline = 'storyline',
@@ -25,6 +28,12 @@ export interface EditorDialogData extends CreateQuestData {
   relation?: QuestRelation;
 }
 
+interface SkillDraft {
+  key: string;
+  skillId: string | null;
+  level: number;
+}
+
 const TITLES: Record<Exclude<EditorDialogKind, EditorDialogKind.Relation>, string> = {
   [EditorDialogKind.Storyline]: 'Новая сюжетная линия',
   [EditorDialogKind.Quest]: 'Создание квеста',
@@ -33,8 +42,9 @@ const TITLES: Record<Exclude<EditorDialogKind, EditorDialogKind.Relation>, strin
 
 @Component({
   selector: 'gm-editor-dialog',
-  imports: [ButtonComponent, SelectComponent, DisabledDirective, ClearInputDirective, FormField],
+  imports: [ButtonComponent, SelectComponent, CheckboxComponent, DisabledDirective, ClearInputDirective, FormField],
   templateUrl: './editor-dialog.component.html',
+  styleUrl: './editor-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
   host: { class: 'dialog-host' },
 })
@@ -43,10 +53,27 @@ export class EditorDialogComponent {
   private dialogRef = inject(DialogRef<void, EditorDialogData>);
   private graphService = inject(GraphService);
   private dialogService = inject(DialogService);
+  private skillService = inject(SkillService);
 
   readonly EditorDialogKind = EditorDialogKind;
+  readonly priorityOptions = Object.values(QUEST_PRIORITY_LABEL);
   kind = this.data.kind;
   relation = signal<QuestRelation>(this.#initialRelation());
+  priority = signal<QuestPriority>(this.data.priority ?? QuestPriority.Common);
+  requireSkill = signal(false);
+  skillDrafts = signal<SkillDraft[]>([]);
+  private skills = computed(() => this.skillService.skills());
+  readonly skillInvalid = computed(() => {
+    if (!this.requireSkill()) return false;
+    const rows = this.skillDrafts();
+    if (!rows.length) return true;
+    return rows.some((row) => !row.skillId || !Number.isInteger(row.level) || row.level < 1);
+  });
+  readonly skillError = computed(() => {
+    if (!this.requireSkill() || !this.skillDrafts().length || !this.skillInvalid()) return '';
+    return 'Выберите навык и укажите уровень';
+  });
+  readonly canAddSkill = computed(() => this.skillDrafts().length < this.skills().length);
 
   get title(): string {
     if (this.kind !== EditorDialogKind.Relation) return TITLES[this.kind];
@@ -56,6 +83,17 @@ export class EditorDialogComponent {
   storylineForm = form(this.storylineModel, (fieldPath) => {
     required(fieldPath.name, {message: 'Название обязательно'})
   })
+
+  constructor() {
+    if (!this.skillService.skills().length) this.skillService.loadSkills();
+    const quest = this.data.id ? this.graphService.getQuestById(this.data.id) : undefined;
+    this.skillDrafts.set((quest?.requiredSkills ?? []).map((item) => ({
+      key: crypto.randomUUID(),
+      skillId: item.skill.id,
+      level: item.level,
+    })));
+    this.requireSkill.set(this.skillDrafts().length > 0);
+  }
 
   close(): void {
     this.dialogRef.close();
@@ -69,6 +107,55 @@ export class EditorDialogComponent {
     return this.relation() === 'previous' ? 'Предыдущий' : 'Следующий';
   }
 
+  priorityLabel(): string {
+    return QUEST_PRIORITY_LABEL[this.priority()];
+  }
+
+  setPriority(label: string): void {
+    const match = (Object.entries(QUEST_PRIORITY_LABEL) as [string, string][])
+      .find(([, text]) => text === label);
+    if (!match) return;
+    this.priority.set(Number(match[0]) as QuestPriority);
+  }
+
+  skillOptions(row: SkillDraft): string[] {
+    const taken = new Set(this.skillDrafts().filter((item) => item.key !== row.key && item.skillId).map((item) => item.skillId));
+    return this.skills()
+      .filter((skill) => skill.id === row.skillId || !taken.has(skill.id))
+      .map((skill) => skill.name);
+  }
+
+  skillLabel(row: SkillDraft): string | null {
+    if (!row.skillId) return null;
+    return this.skills().find((skill) => skill.id === row.skillId)?.name ?? null;
+  }
+
+  levelInvalid(row: SkillDraft): boolean {
+    return !Number.isInteger(row.level) || row.level < 1;
+  }
+
+  addSkill(): void {
+    this.skillDrafts.update((rows) => [...rows, { key: crypto.randomUUID(), skillId: null, level: 1 }]);
+  }
+
+  removeSkill(key: string): void {
+    this.skillDrafts.update((rows) => rows.filter((row) => row.key !== key));
+  }
+
+  setSkill(key: string, name: string): void {
+    const taken = new Set(this.skillDrafts().filter((row) => row.key !== key).map((row) => row.skillId));
+    const skill = this.skills().find((item) => item.name === name && !taken.has(item.id));
+    if (!skill) return;
+    this.skillDrafts.update((rows) => rows.map((row) => row.key === key ? { ...row, skillId: skill.id } : row));
+  }
+
+  setSkillLevel(key: string, event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    const level = Number(target.value);
+    this.skillDrafts.update((rows) => rows.map((row) => row.key === key ? { ...row, level } : row));
+  }
+
   setRelation(label: string): void {
     if (this.#anchorIsRoot()) {
       this.relation.set('previous');
@@ -78,11 +165,14 @@ export class EditorDialogComponent {
   }
 
   submit() {
+    if (this.skillInvalid()) return;
     switch (this.kind) {
       case EditorDialogKind.Storyline:
         const questData: CreateQuestData = {
           name: this.storylineForm.name().value(),
           description: this.storylineForm.description().value(),
+          priority: this.priority(),
+          requiredSkills: this.#requiredSkills(),
           pos_x: this.data.pos_x,
           pos_y: this.data.pos_y,
         };
@@ -92,6 +182,8 @@ export class EditorDialogComponent {
         if (this.#createQuest({
           name: this.storylineForm.name().value(),
           description: this.storylineForm.description().value(),
+          priority: this.priority(),
+          requiredSkills: this.#requiredSkills(),
           pos_x: this.data.pos_x,
           pos_y: this.data.pos_y,
         })) this.close();
@@ -104,6 +196,8 @@ export class EditorDialogComponent {
         if (this.#createQuest({
           name: this.storylineForm.name().value(),
           description: this.storylineForm.description().value(),
+          priority: this.priority(),
+          requiredSkills: this.#requiredSkills(),
           pos_x: this.data.pos_x,
           pos_y: this.data.pos_y,
           parent: relation === 'previous' ? anchor : root,
@@ -115,10 +209,19 @@ export class EditorDialogComponent {
         this.graphService.updateQuest(this.data.id, {
           name: this.storylineForm.name().value(),
           description: this.storylineForm.description().value(),
+          priority: this.priority(),
+          requiredSkills: this.#requiredSkills(),
         });
         this.close();
         break;
     }
+  }
+
+  #requiredSkills(): QuestRequiredSkill[] {
+    if (!this.requireSkill()) return [];
+    return this.skillDrafts()
+      .filter((row): row is SkillDraft & { skillId: string } => !!row.skillId && Number.isInteger(row.level) && row.level >= 1)
+      .map((row) => ({ skillId: row.skillId, level: row.level }));
   }
 
   #createQuest(data: CreateQuestData, isNewGraph = false): boolean {

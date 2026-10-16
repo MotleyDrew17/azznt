@@ -75,7 +75,13 @@ export class SkillService {
 
   loadSkills(): void {
     const stored = readSkillSnapshots(this.storage.local.get(SKILLS_KEY));
-    const skills = stored.map((snapshot) => Skill.fromSnapshot(snapshot));
+    const current = new Map(this.skills().map((skill) => [skill.id, skill]));
+    const skills = stored.map((snapshot) => {
+      const existing = current.get(snapshot.id);
+      if (!existing) return Skill.fromSnapshot(snapshot);
+      existing.applySnapshot(snapshot);
+      return existing;
+    });
     this.skills.set(skills);
     const decayChanged = skills.some((skill, index) => skill.getDecayTimestamp() !== (stored[index]?.level?.decay?.freezed_till_ms ?? 0));
     const layersMissing = stored.some((skill) => !skill.layers);

@@ -1,7 +1,9 @@
 import { inject, Injectable, signal } from '@angular/core';
 import {Quest, QUEST_CYCLE_ERROR} from '../classes/quest.class';
-import { CreateQuestData, parseQuestSnapshots, QuestSnapshot } from '../models/quest.model';
+import { CreateQuestData, parseQuestSnapshots, QuestRequiredSkill, QuestSnapshot } from '../models/quest.model';
+import { Skill } from '../classes/skill.class';
 import { StorageService } from './storage.service';
+import { SkillService } from './skill.service';
 import { hasCycle } from './graph.utils';
 
 @Injectable({
@@ -15,8 +17,10 @@ export class GraphService {
   readonly listVersion = signal(0);
   selectedQuestId = signal<string | null>(null);
   storageService = inject(StorageService);
+  private skillService = inject(SkillService);
 
   constructor() {
+    if (!this.skillService.skills().length) this.skillService.loadSkills();
     this.#initGraphFromStorage();
     this.graph.set(this.#graph);
   }
@@ -37,6 +41,8 @@ export class GraphService {
     const quest = new Quest();
     quest.name = data.name;
     quest.description = data.description;
+    if (data.priority !== undefined) quest.priority = data.priority;
+    this.#applyRequiredSkills(quest, data.requiredSkills);
     if (data.pos_x !== undefined) quest.pos_x = data.pos_x;
     if (data.pos_y !== undefined) quest.pos_y = data.pos_y;
     const cyclicBefore = hasCycle(this.questsList);
@@ -69,12 +75,14 @@ export class GraphService {
     return null;
   }
 
-  updateQuest(id: string, data: Pick<CreateQuestData, 'name' | 'description'>): void {
+  updateQuest(id: string, data: Pick<CreateQuestData, 'name' | 'description' | 'priority' | 'requiredSkills'>): void {
     const quest = this.#questsMap[id];
     if (!quest) return;
 
     quest.name = data.name;
     quest.description = data.description;
+    if (data.priority !== undefined) quest.priority = data.priority;
+    this.#applyRequiredSkills(quest, data.requiredSkills);
     this.listVersion.update((version) => version + 1);
     this.saveGraphToStorage();
   }
@@ -137,6 +145,8 @@ export class GraphService {
     const copy = new Quest();
     copy.name = quest.name;
     copy.description = quest.description;
+    copy.priority = quest.priority;
+    copy.requiredSkills = quest.requiredSkills.map((item) => ({ skill: item.skill, level: item.level }));
     this.#questsMap[copy.id] = copy;
     return copy;
   }
@@ -197,6 +207,17 @@ export class GraphService {
     this.saveGraphToStorage();
   }
 
+  #applyRequiredSkills(quest: Quest, required: QuestRequiredSkill[] | null | undefined): void {
+    quest.requiredSkills = this.#resolveRequiredSkills(required ?? []);
+  }
+
+  #resolveRequiredSkills(required: QuestRequiredSkill[]): { skill: Skill; level: number }[] {
+    return required.flatMap((item) => {
+      const skill = this.skillService.skills().find((entry) => entry.id === item.skillId);
+      return skill ? [{ skill, level: item.level }] : [];
+    });
+  }
+
   extractGraphFromSnapshot(snapshot: QuestSnapshot[]): Quest {
     snapshot.forEach(snapshot => {
       const quest = new Quest();
@@ -208,6 +229,9 @@ export class GraphService {
       quest.zIndex = snapshot.zIndex;
       quest.layer = snapshot.layer;
       quest.isRoot = snapshot.isRoot;
+      if (snapshot.priority !== undefined) quest.priority = snapshot.priority;
+      const required = snapshot.requiredSkills ?? (snapshot.requiredSkill ? [snapshot.requiredSkill] : []);
+      quest.requiredSkills = this.#resolveRequiredSkills(required);
       this.#questsMap[quest.id] = quest;
     });
     snapshot.forEach(snapshot => {

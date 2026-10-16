@@ -58,4 +58,53 @@
   --color-skill-fill-sheen-end: rgb(46 190 112 / 0%);
   --color-skill-fill-glow: rgb(46 210 122 / 48%);
   --color-skill-fill-inset: rgb(200 235 195 / 19%);
+
+  // Квест: light — блик, цвет — тело, dark — тень, mid — второй блик кромки.
+  // Common — светло-серый / белый.
+  --color-quest-common-light: #f5f7f8;
+  --color-quest-common: #c5ced6;
+  --color-quest-common-dark: #7d8894;
+  --color-quest-common-mid: #e4e9ed;
+
+  // Uncommon — синеватый.
+  --color-quest-uncommon-light: #d7e6f2;
+  --color-quest-uncommon: #7f9db8;
+  --color-quest-uncommon-dark: #3a5168;
+  --color-quest-uncommon-mid: #b3c9dc;
+
+  // Notable — синий.
+  --color-quest-notable-light: #a9cff8;
+  --color-quest-notable: #3a78d0;
+  --color-quest-notable-dark: #16325e;
+  --color-quest-notable-mid: #6aa2ea;
+
+  // Epic — фиолетовый.
+  --color-quest-epic-light: #d8c8f6;
+  --color-quest-epic: #7b62c4;
+  --color-quest-epic-dark: #322456;
+  --color-quest-epic-mid: #a88ee0;
+
+  // Mythic — бордовый, темнее и холоднее, чем --color-error.
+  --color-quest-mythic-light: #e0a8b4;
+  --color-quest-mythic: #8e3a52;
+  --color-quest-mythic-dark: #3c1826;
+  --color-quest-mythic-mid: #c16b80;
+
+  // Legendary — оранжевый.
+  --color-quest-legendary-light: #f8c99a;
+  --color-quest-legendary: #e07a2f;
+  --color-quest-legendary-dark: #6a3010;
+  --color-quest-legendary-mid: #f0a25a;
+
+  // Main — золотой.
+  --color-quest-main-light: #f3e6c8;
+  --color-quest-main: #c2a368;
+  --color-quest-main-dark: #5e4524;
+  --color-quest-main-mid: #e4d3b4;
+
+  // Выполненный квест.
+  --color-quest-done-light: #b7ebc8;
+  --color-quest-done: #2f9a62;
+  --color-quest-done-dark: #145236;
+  --color-quest-done-mid: #6dcf96;
 }

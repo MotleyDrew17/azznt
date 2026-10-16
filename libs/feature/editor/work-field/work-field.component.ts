@@ -10,28 +10,37 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { Quest } from '../../../core/shared/classes/quest.class';
+import { Quest, QUEST_PRIORITY_LABEL, QuestPriority } from '../../../core/shared/classes/quest.class';
 import { GraphService } from '../../../core/shared/services/graph.service';
 import { DialogService } from '../../../core/shared/services/dialog.service';
 import { EditorDialogKind } from '../editor-dialog/editor-dialog.component';
 import { ButtonComponent } from '../../../core/shared/components/button/button.component';
 import { QuestNodeComponent } from '../quest-node/quest-node.component';
-import { FieldAction, modeAllows } from '../../../core/shared/enums/field-mode.enum';
+import { FieldAction, FieldMode, modeAllows } from '../../../core/shared/enums/field-mode.enum';
 import { FieldModeService } from '../../../core/shared/services/field-mode.service';
 import { HintDirective } from '../../../core/shared/directives/hint.directive';
+import { RouterLink } from '@angular/router';
+
+type QuestEdgeTone = 'metal' | 'gold' | 'done';
 
 interface QuestEdge {
   id: string;
+  gradientId: string;
+  tone: QuestEdgeTone;
   x1: number;
   y1: number;
   x2: number;
   y2: number;
+  gx1: number;
+  gy1: number;
+  gx2: number;
+  gy2: number;
   arrow: string;
 }
 
 @Component({
   selector: 'gm-work-field',
-  imports: [QuestNodeComponent, ButtonComponent, HintDirective],
+  imports: [QuestNodeComponent, ButtonComponent, HintDirective, RouterLink],
   templateUrl: './work-field.component.html',
   styleUrl: './work-field.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,6 +61,7 @@ interface QuestEdge {
 })
 export class WorkFieldComponent implements OnInit, OnDestroy {
   readonly FieldAction = FieldAction;
+  readonly FieldMode = FieldMode;
 
   private host = inject(ElementRef<HTMLElement>);
   private graphService = inject(GraphService);
@@ -92,13 +102,13 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     const id = this.hoveredId();
     if (!id) return undefined;
     const quest = this.quests().find((item) => this.keyOf(item) === id);
-    if (!quest || (!quest.name.trim() && !quest.description.trim())) return undefined;
+    if (!quest || !this.#hasCard(quest)) return undefined;
     return quest;
   });
   readonly cardQuest = computed(() => {
     if (this.allows(FieldAction.PinCard)) {
       const selected = this.selectedQuest();
-      if (selected && (selected.name.trim() || selected.description.trim())) return selected;
+      if (selected && this.#hasCard(selected)) return selected;
     }
     return this.hoveredQuest();
   });
@@ -265,6 +275,16 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     return modeAllows(this.mode(), action);
   }
 
+  priorityLabel(priority: QuestPriority): string {
+    return QUEST_PRIORITY_LABEL[priority];
+  }
+
+  priorityAccent(priority: QuestPriority): string {
+    const name = QuestPriority[priority];
+    if (typeof name !== 'string') return 'var(--color-quest-common)';
+    return `var(--color-quest-${name.toLowerCase()})`;
+  }
+
   keyOf(quest: Quest): string {
     if (quest.id) return quest.id;
 
@@ -395,6 +415,7 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
       id: quest.id,
       name: quest.name,
       description: quest.description,
+      priority: quest.priority,
     });
   }
 
@@ -653,6 +674,10 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     return this.quests().find((quest) => this.keyOf(quest) === key);
   }
 
+  #hasCard(quest: Quest): boolean {
+    return !!quest.name.trim() || !!quest.description.trim() || quest.requiredSkills.length > 0;
+  }
+
   #isRoot(quest: Quest): boolean {
     return quest.id === this.rootId() || quest.isRoot;
   }
@@ -719,6 +744,7 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
       this.leftOf(parent) + radius,
       this.topOf(parent) + radius,
       radius,
+      this.#edgeTone(quest, parent),
     );
   }
 
@@ -734,7 +760,14 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     );
   }
 
-  #edge(id: string, fromX: number, fromY: number, toX: number, toY: number, endGap: number): QuestEdge | null {
+  #edgeTone(from: Quest, to: Quest): QuestEdgeTone {
+    if (this.mode() !== FieldMode.View) return 'gold';
+    if (from.isCompleted && to.isCompleted) return 'done';
+    if (to.isAvailable && !to.isCompleted) return 'gold';
+    return 'metal';
+  }
+
+  #edge(id: string, fromX: number, fromY: number, toX: number, toY: number, endGap: number, tone: QuestEdgeTone = 'metal'): QuestEdge | null {
     const radius = this.#screenNode() / 2;
     const dx = toX - fromX;
     const dy = toY - fromY;
@@ -753,13 +786,22 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     const wing = head * 0.55;
     const px = -uy;
     const py = ux;
+    const spread = Math.max(2, 3 * this.zoom());
+    const mx = (x1 + x2) / 2;
+    const my = (y1 + y2) / 2;
 
     return {
       id,
+      gradientId: `edge-${id.replace(/[^a-zA-Z0-9_-]/g, '-')}`,
+      tone,
       x1,
       y1,
       x2,
       y2,
+      gx1: mx + px * spread,
+      gy1: my + py * spread,
+      gx2: mx - px * spread,
+      gy2: my - py * spread,
       arrow: `${tipX},${tipY} ${x2 + px * wing},${y2 + py * wing} ${x2 - px * wing},${y2 - py * wing}`,
     };
   }

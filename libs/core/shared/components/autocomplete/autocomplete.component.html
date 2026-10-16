@@ -1,15 +1,17 @@
 <input
   class="control"
   type="text"
+  [id]="controlId()"
   [attr.placeholder]="placeholder()"
   [attr.aria-expanded]="open()"
+  [appDisabled]="disabled()"
   [value]="value()"
   (input)="onInput($event)"
-  (focus)="open.set(true)"
-  (click)="open.set(true)"
+  (focus)="show()"
+  (click)="show()"
   (blur)="close()"
 />
-@if (open()) {
+@if (open() && !disabled()) {
   <ul class="autocomplete__list">
     @for (option of filtered(); track option.id) {
       <li>

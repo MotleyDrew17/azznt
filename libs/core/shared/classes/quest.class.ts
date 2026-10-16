@@ -1,7 +1,28 @@
 import { QuestSnapshot } from "../models/quest.model";
 import { createsCycle } from "../services/graph.utils";
+import { Skill } from "./skill.class";
 
 export const QUEST_CYCLE_ERROR = 'Такая связь замкнёт цикл.';
+
+export enum QuestPriority {
+  Common,
+  Uncommon,
+  Notable,
+  Epic,
+  Mythic,
+  Legendary,
+  Main,
+}
+
+export const QUEST_PRIORITY_LABEL: Record<QuestPriority, string> = {
+  [QuestPriority.Common]: 'Обычный',
+  [QuestPriority.Uncommon]: 'Необычный',
+  [QuestPriority.Notable]: 'Примечательный',
+  [QuestPriority.Epic]: 'Эпический',
+  [QuestPriority.Mythic]: 'Мифический',
+  [QuestPriority.Legendary]: 'Легендарный',
+  [QuestPriority.Main]: 'Главный',
+};
 
 export class Quest {
   #id: string = '';
@@ -16,6 +37,8 @@ export class Quest {
   #layer: number | null = 0; // null - квест вне графа
   #isRoot: boolean = false;
   #zIndex: number = 0;
+  #requiredSkills: { skill: Skill; level: number }[] = [];
+  #priority: QuestPriority = QuestPriority.Common;
 
   constructor() {
     this.#id = crypto.randomUUID();
@@ -105,12 +128,37 @@ export class Quest {
     this.#zIndex = zIndex;
   }
 
+  get priority(): QuestPriority{
+    return this.#priority;
+  }
+
+  set priority(priority: QuestPriority){
+    this.#priority = priority;
+  }
+
+  get requiredSkills(): { skill: Skill; level: number }[] {
+    return this.#requiredSkills;
+  }
+
+  set requiredSkills(skills: { skill: Skill; level: number }[]) {
+    this.#requiredSkills = skills;
+  }
+
+  get isCompleted(): boolean{
+    return this.#isCompleted;
+  }
+
+  complete(){
+    this.#isCompleted = true;
+  }
+
   /**
-   * Пока на первой версии квест доступен, если у него выполнены все предквесты
-   * В дальнейшем доступность квеста также будет зависить от навыка
+   * Квест доступен, если выполнены все предквесты и каждый требуемый навык достиг своего уровня.
    * */
   get isAvailable(){
-    return this.parents.every((parent) => parent.#isCompleted)
+    const childrenDone = this.#children.every((child) => child.isCompleted);
+    const skillsReady = this.#requiredSkills.every((item) => item.skill.score >= item.level);
+    return childrenDone && skillsReady;
   }
 
   getParentById(id: string): Quest | undefined{
@@ -169,6 +217,10 @@ export class Quest {
       zIndex: this.#zIndex,
       layer: this.#layer,
       isRoot: this.#isRoot,
+      priority: this.#priority,
+      requiredSkills: this.#requiredSkills.length
+        ? this.#requiredSkills.map((item) => ({ skillId: item.skill.id, level: item.level }))
+        : undefined,
     };
   }
 

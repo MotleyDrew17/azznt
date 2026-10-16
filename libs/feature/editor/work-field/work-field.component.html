@@ -1,11 +1,73 @@
 <svg class="quest-edges" aria-hidden="true">
+  <defs>
+    @for (edge of edges(); track edge.id) {
+      <linearGradient
+        class="quest-edges__gradient"
+        [class.quest-edges__gradient_gold]="edge.tone === 'gold'"
+        [class.quest-edges__gradient_done]="edge.tone === 'done'"
+        [attr.id]="edge.gradientId"
+        gradientUnits="userSpaceOnUse"
+        [attr.x1]="edge.gx1"
+        [attr.y1]="edge.gy1"
+        [attr.x2]="edge.gx2"
+        [attr.y2]="edge.gy2"
+      >
+        <stop class="quest-edges__stop quest-edges__stop_light" offset="0" />
+        <stop class="quest-edges__stop quest-edges__stop_mid" offset="0.42" />
+        <stop class="quest-edges__stop quest-edges__stop_dark" offset="1" />
+      </linearGradient>
+    }
+    @if (draftEdge(); as edge) {
+      <linearGradient
+        class="quest-edges__gradient"
+        [class.quest-edges__gradient_gold]="edge.tone === 'gold'"
+        [class.quest-edges__gradient_done]="edge.tone === 'done'"
+        [attr.id]="edge.gradientId"
+        gradientUnits="userSpaceOnUse"
+        [attr.x1]="edge.gx1"
+        [attr.y1]="edge.gy1"
+        [attr.x2]="edge.gx2"
+        [attr.y2]="edge.gy2"
+      >
+        <stop class="quest-edges__stop quest-edges__stop_light" offset="0" />
+        <stop class="quest-edges__stop quest-edges__stop_mid" offset="0.42" />
+        <stop class="quest-edges__stop quest-edges__stop_dark" offset="1" />
+      </linearGradient>
+    }
+  </defs>
   @for (edge of edges(); track edge.id) {
-    <line class="quest-edges__line" [attr.x1]="edge.x1" [attr.y1]="edge.y1" [attr.x2]="edge.x2" [attr.y2]="edge.y2" />
-    <polygon class="quest-edges__arrow" [attr.points]="edge.arrow" />
+    <line
+      class="quest-edges__line"
+      [class.quest-edges__line_gold]="edge.tone === 'gold'"
+      [attr.stroke]="'url(#' + edge.gradientId + ')'"
+      [attr.x1]="edge.x1"
+      [attr.y1]="edge.y1"
+      [attr.x2]="edge.x2"
+      [attr.y2]="edge.y2"
+    />
+    <polygon
+      class="quest-edges__arrow"
+      [class.quest-edges__arrow_gold]="edge.tone === 'gold'"
+      [attr.fill]="'url(#' + edge.gradientId + ')'"
+      [attr.points]="edge.arrow"
+    />
   }
   @if (draftEdge(); as edge) {
-    <line class="quest-edges__line" [attr.x1]="edge.x1" [attr.y1]="edge.y1" [attr.x2]="edge.x2" [attr.y2]="edge.y2" />
-    <polygon class="quest-edges__arrow" [attr.points]="edge.arrow" />
+    <line
+      class="quest-edges__line"
+      [class.quest-edges__line_gold]="edge.tone === 'gold'"
+      [attr.stroke]="'url(#' + edge.gradientId + ')'"
+      [attr.x1]="edge.x1"
+      [attr.y1]="edge.y1"
+      [attr.x2]="edge.x2"
+      [attr.y2]="edge.y2"
+    />
+    <polygon
+      class="quest-edges__arrow"
+      [class.quest-edges__arrow_gold]="edge.tone === 'gold'"
+      [attr.fill]="'url(#' + edge.gradientId + ')'"
+      [attr.points]="edge.arrow"
+    />
   }
 </svg>
 
@@ -25,6 +87,7 @@
     [style.left.px]="cardLeft(quest)"
     [style.top.px]="cardTop(quest)"
     [style.--tail-x.px]="cardTail(quest)"
+    [style.--quest-card-accent]="priorityAccent(quest.priority)"
     (click)="$event.stopPropagation()"
     (pointerdown)="$event.stopPropagation()"
   >
@@ -35,6 +98,14 @@
       }
       @if (quest.description.trim()) {
         <p class="quest-card__description">{{ quest.description }}</p>
+      }
+      <p class="quest-card__priority">{{ priorityLabel(quest.priority) }}</p>
+      @for (required of quest.requiredSkills; track required.skill.id + required.level) {
+        <p class="quest-card__skill">
+          Навык:
+          <a class="quest-card__skill-link" [routerLink]="['/skill', required.skill.id]">{{ required.skill.name }}</a>
+          {{ required.level }} уровень. Текущий {{ required.skill.score }}
+        </p>
       }
     </div>
   </div>
@@ -81,6 +152,8 @@
     [shiftHeld]="allows(FieldAction.MoveQuest) && shiftHeld()"
     [grabbing]="allows(FieldAction.MoveQuest) && grabbedId() === keyOf(quest)"
     [selected]="selectedQuestId() === quest.id"
-    [root]="quest.id === rootId()"
+    [priority]="quest.priority"
+    [completed]="mode() === FieldMode.View && quest.isCompleted"
+    [available]="mode() !== FieldMode.View || quest.isAvailable"
   />
 }
