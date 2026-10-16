@@ -143,6 +143,10 @@
   background: currentColor;
   mask: center / contain no-repeat;
 
+  &_edit {
+    mask-image: url('../../../../../src/app/assets/icons/edit.svg');
+  }
+
   &_delete {
     mask-image: url('../../../../../src/app/assets/icons/delete.svg');
   }

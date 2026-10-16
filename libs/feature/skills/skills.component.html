@@ -7,15 +7,17 @@
         [(value)]="query"
         (picked)="showSkill($event)"
       />
-      <button
-        type="button"
-        class="skills__add interactive"
-        appHint="Добавить навык"
-        aria-label="Добавить навык"
-        (click)="openSkillDialog()"
-      >
-        <span class="skills__add-icon"></span>
-      </button>
+      @if (editor()) {
+        <button
+          type="button"
+          class="skills__add interactive"
+          appHint="Добавить навык"
+          aria-label="Добавить навык"
+          (click)="openSkillDialog()"
+        >
+          <span class="skills__add-icon"></span>
+        </button>
+      }
     </div>
   }
   @if (!skills().length) {

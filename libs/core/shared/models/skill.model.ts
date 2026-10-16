@@ -31,6 +31,12 @@ export interface CreateExerciseData {
 export interface ExerciseDialogData {
   skillId: string;
   levelScore: number;
+  exerciseId?: string;
+}
+
+export interface MoveExerciseDialogData {
+  skillId: string;
+  exerciseId: string;
 }
 
 export interface DecaySnapshot {
@@ -45,6 +51,7 @@ export interface LevelSnapshot {
   next_exp: number;
   prev_exp: number;
   coefficient: number;
+  base_exp?: number;
   decay: DecaySnapshot | null;
 }
 
@@ -56,6 +63,7 @@ export interface ExerciseSnapshot {
   maxLevel: number;
   is_freezing_decay: boolean;
   available_on_level: number;
+  performed_at?: number;
 }
 
 export interface LayerSnapshot {
@@ -127,6 +135,7 @@ function isLevelSnapshot(value: unknown): value is LevelSnapshot {
     && isFiniteNumber(level.next_exp)
     && isFiniteNumber(level.prev_exp)
     && isFiniteNumber(level.coefficient)
+    && (level.base_exp === undefined || isFiniteNumber(level.base_exp))
     && (level.decay === null || isDecaySnapshot(level.decay));
 }
 
@@ -148,7 +157,8 @@ function isExerciseSnapshot(value: unknown): value is ExerciseSnapshot {
     && isFiniteNumber(exercise.experience)
     && isFiniteNumber(exercise.maxLevel)
     && typeof exercise.is_freezing_decay === 'boolean'
-    && isFiniteNumber(exercise.available_on_level);
+    && isFiniteNumber(exercise.available_on_level)
+    && (exercise.performed_at === undefined || isFiniteNumber(exercise.performed_at));
 }
 
 function isFiniteNumber(value: unknown): value is number {

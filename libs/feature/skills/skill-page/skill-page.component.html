@@ -15,9 +15,11 @@
       <div class="skill-page__scroller no-scrollbar" appScroll="y" #layersScroll="scroll">
       <div class="skill-page__stack">
         <div class="skill-page__line skill-page__line_locked">
-          <button type="button" class="skill-page__add" appHint="Добавить уровень" aria-label="Добавить уровень" (click)="openLayerDialog()">
-            <span class="skill-page__add-icon"></span>
-          </button>
+          @if (editor()) {
+            <button type="button" class="skill-page__add" appHint="Добавить уровень" aria-label="Добавить уровень" (click)="openLayerDialog()">
+              <span class="skill-page__add-icon"></span>
+            </button>
+          }
         </div>
         @for (layer of layers(); track layer.levelScore) {
           <gm-exercise-row [exercises]="layer.exercises" (add)="openExerciseDialog(layer.levelScore)" />
@@ -28,7 +30,7 @@
             [class.skill-page__line_locked]="layer.state === 'locked'"
           >
             <span class="skill-page__mark">{{ layer.levelScore }}</span>
-            @if (layer.levelScore !== 1) {
+            @if (editor() && layer.levelScore !== 1) {
               <button
                 type="button"
                 class="skill-page__remove"

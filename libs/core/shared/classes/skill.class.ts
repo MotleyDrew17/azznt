@@ -1,4 +1,4 @@
-import { CreateSkillData, ExerciseSnapshot, LevelSnapshot, SkillSnapshot } from "../models/skill.model";
+import { CreateExerciseData, CreateSkillData, ExerciseSnapshot, LevelSnapshot, SkillSnapshot } from "../models/skill.model";
 
 export interface Decay {
     value: number; // значение отката навыка
@@ -78,6 +78,16 @@ export class Skill {
         return hasExercise ? exercise.id : undefined;
     }
 
+    moveExerciseToLayer(exerciseId: string, levelScore: number): void {
+        const source = this.#layers.find(layer => layer.exercises.some(exercise => exercise.id === exerciseId));
+        const target = this.#layers.find(layer => layer.levelScore === levelScore);
+        const exercise = source?.exercises.find(item => item.id === exerciseId);
+        if (!source || !target || !exercise || source.levelScore === target.levelScore) return;
+        source.exercises = source.exercises.filter(item => item.id !== exerciseId);
+        exercise.availableOnLevel = levelScore;
+        target.exercises.push(exercise);
+    }
+
     removeExerciseFromLayer(levelScore: number, exercise: Exercise): string | undefined {
         const layer = this.#layers.find(layer => layer.levelScore === levelScore);
         const hasExercise = layer?.exercises.some(e => e.id === exercise.id);
@@ -155,6 +165,11 @@ export class Skill {
     }
 }
 
+function localDayStamp(time: number): string {
+    const date = new Date(time);
+    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+}
+
 export class Exercise {
     #id: string = '';
     #name: string = '';
@@ -163,6 +178,7 @@ export class Exercise {
     #maxLevel: number = 0; // максимальный уровень навыка, до которого упражнение дает опыт
     #is_freezing_decay: boolean = true; // признак того, что выполнение упражнения замораживает откат навыка
     #available_on_level: number = 0; // уровень навыка, на котором доступно выполнение упражнения
+    #performedAt: number = 0;
     #level: Level | null = null; // уровень навык. Нужен для работы с уровнем навыка
 
     constructor(level: Level, max_level: number, available_on_level: number, experience: number, is_freezing_decay: boolean, name: string, description: string) {
@@ -200,6 +216,27 @@ export class Exercise {
         return this.#experience;
     }
 
+    get availableOnLevel(): number {
+        return this.#available_on_level;
+    }
+
+    set availableOnLevel(level: number) {
+        this.#available_on_level = level;
+    }
+
+    get isFreezingDecay(): boolean {
+        return this.#is_freezing_decay;
+    }
+
+    update(data: CreateExerciseData): void {
+        this.#name = data.name;
+        this.#description = data.description;
+        this.#experience = data.experience;
+        this.#maxLevel = data.maxLevel;
+        this.#available_on_level = data.availableOnLevel;
+        this.#is_freezing_decay = data.isFreezingDecay;
+    }
+
     get currentLevel(): number {
         return this.#level?.score ?? 0;
     }
@@ -221,6 +258,11 @@ export class Exercise {
         return this.#level.score >= this.#maxLevel;
     }
 
+    performedToday(now: number): boolean {
+        if (this.#performedAt <= 0) return false;
+        return localDayStamp(this.#performedAt) === localDayStamp(now);
+    }
+
     do() {
         if(!this.#level) throw new Error('Level is not set');
         if(this.#is_freezing_decay) {
@@ -229,7 +271,7 @@ export class Exercise {
         if (this.#maxLevel <= 0 || this.#level.score < this.#maxLevel) {
             this.#level.addExp(this.#experience);
         }
-        
+        this.#performedAt = Date.now();
     }
 
     toSnapshot(): ExerciseSnapshot {
@@ -241,6 +283,7 @@ export class Exercise {
             maxLevel: this.#maxLevel,
             is_freezing_decay: this.#is_freezing_decay,
             available_on_level: this.#available_on_level,
+            performed_at: this.#performedAt,
         };
     }
 
@@ -255,6 +298,7 @@ export class Exercise {
             snapshot.description,
         );
         exercise.#id = snapshot.id;
+        exercise.#performedAt = snapshot.performed_at ?? 0;
         return exercise;
     }
 
@@ -263,14 +307,16 @@ export class Exercise {
 export class Level {
     #score: number = 1; // текущий уровень навыка
     #current_exp: number = 0; // текущее количество опыта
-    #next_exp: number = 0; // количество опыта, необходимое для следующего уровня
-    #prev_exp: number = 0; // количество опыта, необходимое для предыдущего уровня
-    #coefficient: number = 1.1; // коэффициент, на который умножается количество опыта, необходимое для следующего уровня
+    #baseExp: number = 0; // опыт для перехода с 1 на 2 уровень
+    #next_exp: number = 0; // накопленный опыт, при котором открывается следующий уровень
+    #prev_exp: number = 0; // накопленный опыт, при котором был открыт текущий уровень
+    #coefficient: number = 0; // процент, на который растёт требуемый опыт каждого следующего уровня
     #decay: Decay | null = null;
 
     constructor(requiredExp: number, expIncreasePercent: number, decayEnabled: boolean, inactivityDays: number, lostExp: number) {
-        this.#next_exp = requiredExp;
+        this.#baseExp = requiredExp;
         this.#coefficient = expIncreasePercent;
+        this.#applyThresholds();
         if(decayEnabled) {
             const interval = inactivityDays * 24 * 60 * 60 * 1000;
             this.#decay = {
@@ -294,8 +340,16 @@ export class Level {
         return this.#next_exp;
     }
 
+    get prev_exp(): number {
+        return this.#prev_exp;
+    }
+
     get coefficient(): number {
         return this.#coefficient;
+    }
+
+    get baseExp(): number {
+        return this.#baseExp;
     }
 
     get decay(): Decay | null{
@@ -312,7 +366,7 @@ export class Level {
     }
 
     update(data: CreateSkillData): void {
-        this.#next_exp = data.requiredExp;
+        this.#baseExp = data.requiredExp;
         this.#coefficient = data.expIncreasePercent;
         if (!data.decayEnabled) {
             this.#decay = null;
@@ -343,12 +397,12 @@ export class Level {
     }
 
     addExp(exp: number) {
-        this.#current_exp += exp;
+        this.#current_exp = roundExp(this.#current_exp + exp);
         this.handleNextOrPrevLevel();
     }
 
     removeExp(exp: number) {
-        this.#current_exp -= exp;
+        this.#current_exp = roundExp(this.#current_exp - exp);
         this.handleNextOrPrevLevel();
     }
 
@@ -358,15 +412,42 @@ export class Level {
 
     /** Метод, который обрабатывает переход на следующий или предыдущий уровень */
     handleNextOrPrevLevel() {
-        if(this.#current_exp >= this.#next_exp) { // если текущее количество опыта больше или равно количеству опыта, необходимого для следующего уровня
-            this.#score++; // переход на следующий уровень
-            this.#prev_exp = this.#next_exp; // предыдущее количество опыта становится равным количеству опыта, необходимого для того уровня, на котором находились до перехода
-            this.#next_exp = this.#next_exp + (this.#next_exp * this.#coefficient); // увеличиваем количество опыта, необходимого для следующего уровня
-        } else if(this.#current_exp < this.#prev_exp) { // если текущее количество опыта меньше количества опыта, необходимого для предыдущего уровня
-            this.#score--; // переход на предыдущий уровень
-            this.#next_exp = this.#prev_exp; // следующее количество опыта становится равным количеству опыта, необходимого для предыдущего уровня
-            this.#prev_exp = this.#prev_exp - (this.#prev_exp * this.#coefficient); // уменьшаем количество опыта, необходимого для следующего уровня
+        let guard = 0;
+        while (this.#current_exp >= this.#next_exp && this.#next_exp > this.#prev_exp && guard < 1000) {
+            const reached = this.#next_exp;
+            this.#score++;
+            this.#prev_exp = reached;
+            this.#next_exp = roundExp(reached + this.#span(this.#score));
+            guard++;
         }
+        while (this.#score > 1 && this.#current_exp < this.#prev_exp && guard < 1000) {
+            const fallen = this.#prev_exp;
+            this.#score--;
+            this.#next_exp = fallen;
+            this.#prev_exp = roundExp(Math.max(0, fallen - this.#span(this.#score)));
+            if (this.#next_exp <= this.#prev_exp) break;
+            guard++;
+        }
+    }
+
+    #applyThresholds(): void {
+        this.#prev_exp = this.#threshold(this.#score);
+        this.#next_exp = this.#threshold(this.#score + 1);
+    }
+
+    #span(score: number): number {
+        const steps = Math.max(0, score - 1);
+        const rate = 1 + this.#coefficient / 100;
+        if (rate === 1) return roundExp(this.#baseExp);
+        return roundExp(this.#baseExp * rate ** steps);
+    }
+
+    #threshold(score: number): number {
+        if (score <= 1) return 0;
+        const steps = score - 1;
+        const rate = 1 + this.#coefficient / 100;
+        if (rate === 1) return roundExp(this.#baseExp * steps);
+        return roundExp(this.#baseExp * (rate ** steps - 1) / (rate - 1));
     }
 
     get decay_value(): number {
@@ -381,15 +462,24 @@ export class Level {
             next_exp: this.#next_exp,
             prev_exp: this.#prev_exp,
             coefficient: this.#coefficient,
+            base_exp: this.#baseExp,
             decay: this.#decay ? { ...this.#decay } : null,
         };
     }
 
     static fromSnapshot(snapshot: LevelSnapshot): Level {
-        const level = new Level(snapshot.next_exp, snapshot.coefficient, false, 0, 0);
-        level.#score = snapshot.score;
+        const legacy = snapshot.base_exp == null;
+        const base = snapshot.base_exp ?? storedBaseExp(snapshot);
+        const level = new Level(base, snapshot.coefficient, false, 0, 0);
+        level.#score = Math.max(1, snapshot.score);
         level.#current_exp = snapshot.current_exp;
-        level.#prev_exp = snapshot.prev_exp;
+        if (legacy) {
+            level.#applyThresholds();
+            level.handleNextOrPrevLevel();
+        } else {
+            level.#prev_exp = snapshot.prev_exp;
+            level.#next_exp = snapshot.next_exp;
+        }
         level.#decay = snapshot.decay ? { ...snapshot.decay } : null;
         if (level.#decay && level.#decay.freezed_till_ms <= 0 && level.#decay.freezed_interval_ms > 0) {
             level.#decay.freezed_till_ms = Date.now() + level.#decay.freezed_interval_ms;
@@ -397,4 +487,15 @@ export class Level {
         return level;
     }
     
+}
+
+export function roundExp(value: number): number {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+function storedBaseExp(snapshot: LevelSnapshot): number {
+    if (snapshot.score <= 1 || snapshot.coefficient === 0) return snapshot.next_exp;
+    const factor = (1 + snapshot.coefficient) ** (snapshot.score - 1);
+    if (!Number.isFinite(factor) || factor === 0) return snapshot.next_exp;
+    return snapshot.next_exp / factor;
 }

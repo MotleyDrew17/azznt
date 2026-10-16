@@ -13,11 +13,19 @@
 
   &.is-space {
     cursor: grab;
+
+    .quest-card {
+      pointer-events: none;
+    }
   }
 
   &.is-grabbing,
   &.is-panning {
     cursor: grabbing;
+
+    .quest-card {
+      pointer-events: none;
+    }
   }
 
   &.is-linking {

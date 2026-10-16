@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
+import { FieldMode } from '../../../core/shared/enums/field-mode.enum';
 import { HintDirective } from '../../../core/shared/directives/hint.directive';
 import { ScrollDirective } from '../../../core/shared/directives/scroll.directive';
 import { DialogService } from '../../../core/shared/services/dialog.service';
+import { FieldModeService } from '../../../core/shared/services/field-mode.service';
 import { SkillService } from '../../../core/shared/services/skill.service';
 import { SkillColumnComponent } from '../skill-column/skill-column.component';
 import { ExerciseRowComponent } from './exercise/exercise.component';
@@ -19,7 +21,10 @@ export class SkillPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private skillService = inject(SkillService);
   private dialogService = inject(DialogService);
+  private fieldMode = inject(FieldModeService);
   private params = toSignal(this.route.paramMap);
+
+  readonly editor = computed(() => this.fieldMode.mode() === FieldMode.Editor);
 
   readonly skill = computed(() => {
     const id = this.params()?.get('id');

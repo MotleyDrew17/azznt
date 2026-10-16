@@ -23,15 +23,10 @@ export class ExerciseDialogComponent {
   private skillService = inject(SkillService);
 
   readonly hasDecay = !!this.skillService.skills().find((item) => item.id === this.data.skillId)?.getLevel()?.decay;
+  readonly editing = !!this.data.exerciseId;
+  readonly title = this.editing ? 'Редактирование' : 'Добавить упражнение';
 
-  readonly exerciseModel = signal({
-    name: '',
-    description: '',
-    experience: null as number | null,
-    limitEnabled: false,
-    maxLevel: null as number | null,
-    resetsDecay: this.hasDecay,
-  });
+  readonly exerciseModel = signal(this.#draft());
 
   readonly exerciseForm = form(this.exerciseModel, (path) => {
     required(path.name, { message: 'Название обязательно' });
@@ -82,7 +77,35 @@ export class ExerciseDialogComponent {
       isFreezingDecay: this.hasDecay && value.resetsDecay,
     };
 
-    this.skillService.addExerciseToLayer(this.data.skillId, this.data.levelScore, data);
+    if (this.data.exerciseId) {
+      this.skillService.updateExercise(this.data.skillId, this.data.exerciseId, data);
+    } else {
+      this.skillService.addExerciseToLayer(this.data.skillId, this.data.levelScore, data);
+    }
     this.close();
+  }
+
+  #draft() {
+    const empty = {
+      name: '',
+      description: '',
+      experience: null as number | null,
+      limitEnabled: false,
+      maxLevel: null as number | null,
+      resetsDecay: this.hasDecay,
+    };
+    if (!this.data.exerciseId) return empty;
+
+    const exercise = this.skillService.skills().find((item) => item.id === this.data.skillId)?.getExercise(this.data.exerciseId);
+    if (!exercise) return empty;
+
+    return {
+      name: exercise.name,
+      description: exercise.description,
+      experience: exercise.experience,
+      limitEnabled: exercise.maxLevel > 0,
+      maxLevel: exercise.maxLevel > 0 ? exercise.maxLevel : null,
+      resetsDecay: exercise.isFreezingDecay,
+    };
   }
 }

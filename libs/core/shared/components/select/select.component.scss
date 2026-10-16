@@ -60,7 +60,7 @@
 
 .select__list {
   position: absolute;
-  z-index: 2;
+  z-index: var(--z-pop);
   top: calc(100% + 4px);
   left: 0;
   right: 0;

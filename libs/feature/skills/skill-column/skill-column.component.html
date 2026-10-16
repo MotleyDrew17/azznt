@@ -1,9 +1,17 @@
 @if (skill()) {
   <div class="skill-column__scale" appHint>
+    @for (burst of levelMarks(); track burst) {
+      <span class="skill-column__gleam"></span>
+      <span class="skill-column__gleam skill-column__gleam_sweep"></span>
+      @for (spark of sparks; track spark.left + ':' + spark.top) {
+        <span class="skill-column__spark" [style.left.%]="spark.left" [style.top.%]="spark.top" [style.animation-delay.ms]="spark.delay"></span>
+      }
+    }
     <span class="skill-column__level skill-column__level_next">{{ nextLevel() }}</span>
-    <div class="skill-column__meter">
-      @if (fillPercent() > 0) {
-        <div class="skill-column__fill" [style.height.%]="fillPercent()"></div>
+    <div class="skill-column__meter" [style.--drop-fill]="fillPercent() + '%'">
+      <div class="skill-column__fill" [style.height.%]="fillPercent()"></div>
+      @for (drop of drops(); track drop.id) {
+        <span class="skill-column__drop" [style.left.%]="drop.left" [style.animation-delay.ms]="drop.delay"></span>
       }
     </div>
     <span class="skill-column__level">{{ currentLevel() }}</span>
@@ -21,6 +29,7 @@
           @if (description().trim()) {
             <p class="skill-column__description">{{ description() }}</p>
           }
+          @if (editor()) {
           <div class="skill-column__actions">
             <button
               type="button"
@@ -43,6 +52,7 @@
               </button>
             }
           </div>
+          }
         </div>
       </div>
     }

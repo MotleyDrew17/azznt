@@ -32,7 +32,7 @@
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  z-index: 5;
+  z-index: var(--z-pop);
   min-width: 196px;
   margin: 0;
   padding: 6px;

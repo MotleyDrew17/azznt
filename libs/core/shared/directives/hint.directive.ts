@@ -21,6 +21,7 @@ export class HintDirective implements OnDestroy {
   private element = inject<ElementRef<HTMLElement>>(ElementRef);
   private bubble: HTMLDivElement | null = null;
   private contentBound: HTMLElement | null = null;
+  private contentHome: { parent: Node; next: ChildNode | null } | null = null;
   private hideTimer = 0;
   private anchorKey = '';
 
@@ -97,7 +98,9 @@ export class HintDirective implements OnDestroy {
   private close(): void {
     window.clearTimeout(this.hideTimer);
     this.hideTimer = 0;
-    this.markOpen(this.content(), false);
+    const content = this.content();
+    this.markOpen(content, false);
+    if (content) this.restoreContent(content);
     document.removeEventListener('scroll', this.onScroll, true);
     document.removeEventListener('pointermove', this.onPointerMove, true);
   }
@@ -114,6 +117,7 @@ export class HintDirective implements OnDestroy {
   }
 
   private content(): HTMLElement | null {
+    if (this.contentHome && this.contentBound?.isConnected) return this.contentBound;
     const found = this.element.nativeElement.querySelector('[appHintContent]');
     return found instanceof HTMLElement ? found : null;
   }
@@ -147,6 +151,7 @@ export class HintDirective implements OnDestroy {
   }
 
   private placeContent(content: HTMLElement): void {
+    this.mountContent(content);
     const rect = this.element.nativeElement.getBoundingClientRect();
     content.style.position = 'fixed';
     content.style.zIndex = '1000001';
@@ -170,7 +175,30 @@ export class HintDirective implements OnDestroy {
     if (top < MARGIN) top = MARGIN;
     const left = placeRight ? rect.right : Math.max(MARGIN, rect.left - width);
     content.style.top = `${top}px`;
-    content.style.left = `${left}px`;
+    content.style.left = `${clamp(left, MARGIN, window.innerWidth - MARGIN - width)}px`;
+  }
+
+  private mountContent(content: HTMLElement): void {
+    if (content.parentNode === document.body) return;
+    const parent = content.parentNode;
+    if (!parent) return;
+    this.contentHome = { parent, next: content.nextSibling };
+    document.body.appendChild(content);
+  }
+
+  private restoreContent(content: HTMLElement): void {
+    content.style.left = '';
+    content.style.top = '';
+    content.style.paddingLeft = '';
+    content.style.paddingRight = '';
+    content.style.zIndex = '';
+    content.style.position = '';
+    const panel = content.querySelector('.hint-panel');
+    if (panel instanceof HTMLElement) panel.style.maxWidth = '';
+    const home = this.contentHome;
+    this.contentHome = null;
+    if (!home || content.parentNode !== document.body) return;
+    home.parent.insertBefore(content, home.next);
   }
 
   private markOpen(content: HTMLElement | null, open: boolean): void {

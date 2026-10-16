@@ -1,3 +1,9 @@
+@property --skill-gleam-turn {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
 :host {
   display: flex;
   flex-direction: column;
@@ -92,6 +98,102 @@
   }
 }
 
+.skill-column__gleam {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: 3px;
+  pointer-events: none;
+  background: linear-gradient(155deg, var(--color-skill-rim-light) 0%, var(--color-gold) 34%, var(--color-skill-rim-deep) 62%, var(--color-skill-rim) 100%);
+  animation: skill-column-gleam 4s ease forwards;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+
+  &_sweep {
+    background: conic-gradient(
+      from var(--skill-gleam-turn),
+      transparent 0 68%,
+      var(--color-skill-rim-light) 80%,
+      var(--color-gold) 88%,
+      transparent 100%
+    );
+    animation: skill-column-gleam-sweep 4s linear forwards;
+  }
+}
+
+.skill-column__spark {
+  position: absolute;
+  z-index: 4;
+  width: 13px;
+  height: 13px;
+  margin: -6px 0 0 -6px;
+  pointer-events: none;
+  background:
+    linear-gradient(#fff6d0, #fff6d0) center / 2px 100% no-repeat,
+    linear-gradient(#fff6d0, #fff6d0) center / 100% 2px no-repeat;
+  filter: drop-shadow(0 0 2px #fff3c4) drop-shadow(0 0 7px #ffd56a);
+  opacity: 0;
+  animation: skill-column-spark 1.3s ease-in-out forwards;
+}
+
+@keyframes skill-column-gleam {
+  0% {
+    opacity: 0;
+  }
+
+  40% {
+    opacity: 1;
+  }
+
+  68% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes skill-column-gleam-sweep {
+  0% {
+    opacity: 0;
+    --skill-gleam-turn: 0deg;
+  }
+
+  16% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    --skill-gleam-turn: 360deg;
+  }
+}
+
+@keyframes skill-column-spark {
+  0% {
+    opacity: 0;
+    transform: scale(0.35) rotate(0deg);
+  }
+
+  28% {
+    opacity: 1;
+    transform: scale(1) rotate(20deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.2) rotate(40deg);
+  }
+}
+
 .skill-column__meter {
   position: absolute;
   z-index: 0;
@@ -112,6 +214,36 @@
   box-shadow:
     0 0 10px var(--color-skill-fill-glow),
     inset 0 0 10px var(--color-skill-fill-inset);
+  transition: height 1.5s cubic-bezier(0.22, 0.75, 0.2, 1);
+}
+
+.skill-column__drop {
+  position: absolute;
+  z-index: 1;
+  top: 6px;
+  width: 8px;
+  height: 12px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: var(--color-skill-fill-light);
+  opacity: 0;
+  animation: skill-column-drop 0.85s ease-in forwards;
+}
+
+@keyframes skill-column-drop {
+  0% {
+    top: 6px;
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    top: calc(100% - var(--drop-fill, 0%) - 8px);
+    opacity: 0;
+  }
 }
 
 .skill-column__level {

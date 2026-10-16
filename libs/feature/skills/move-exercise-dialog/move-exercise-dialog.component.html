@@ -1,0 +1,28 @@
+<div class="dialog">
+  <button type="button" class="dialog__close interactive" (click)="close()" aria-label="Закрыть">
+    ×
+  </button>
+
+  <h2 class="dialog__title">Переместить упражнение?</h2>
+
+  <div class="dialog__body">
+    <p class="dialog__message">Выберите уровень, на который будет перемещено упражнение</p>
+    <div class="field move-exercise-dialog__field">
+      <label class="field__label" for="move-exercise-level">Уровень</label>
+      <gm-select
+        controlId="move-exercise-level"
+        [options]="options()"
+        [selected]="selected()"
+        (selectedChange)="selected.set($event)"
+      />
+      @if (!options().length) {
+        <span class="field__error">Нет других уровней</span>
+      }
+    </div>
+  </div>
+
+  <div class="dialog__footer">
+    <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="!selected()">Переместить</gm-button>
+    <gm-button width="148px" (click)="close()">Отмена</gm-button>
+  </div>
+</div>

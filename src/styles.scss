@@ -201,6 +201,30 @@ select {
   @include hint.panel;
 }
 
+.exercise-gain {
+  position: fixed;
+  z-index: 1000000;
+  margin: 0;
+  pointer-events: none;
+  color: var(--color-skill-fill-light);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  animation: exercise-gain 1s ease-out forwards;
+}
+
+@keyframes exercise-gain {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 40px));
+  }
+}
+
 .no-scrollbar {
   @include scrollbar.hidden;
 }

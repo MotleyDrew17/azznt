@@ -139,7 +139,7 @@ export class SkillDialogComponent {
     return {
       name: skill.name,
       description: skill.description,
-      requiredExp: level.next_exp,
+      requiredExp: level.baseExp,
       expIncreasePercent: level.coefficient,
       decayEnabled: !!decay,
       inactivityDays: decay ? decay.freezed_interval_ms / (24 * 60 * 60 * 1000) : null,

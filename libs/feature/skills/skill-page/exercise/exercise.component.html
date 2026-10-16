@@ -1,13 +1,15 @@
 <div class="exercise">
-  <button
-    type="button"
-    class="exercise__add interactive"
-    appHint="Добавить упражнение"
-    aria-label="Добавить упражнение"
-    (click)="add.emit()"
-  >
-    <span class="exercise__add-icon"></span>
-  </button>
+  @if (editor()) {
+    <button
+      type="button"
+      class="exercise__add interactive"
+      appHint="Добавить упражнение"
+      aria-label="Добавить упражнение"
+      (click)="add.emit()"
+    >
+      <span class="exercise__add-icon"></span>
+    </button>
+  }
   @if (exercisesScroll.canBack()) {
     <button type="button" class="scroll-nav exercise__nav exercise__nav_prev" appHint="Влево" aria-label="Влево" (click)="exercisesScroll.step(-1)">
       <span class="scroll-nav__icon"></span>

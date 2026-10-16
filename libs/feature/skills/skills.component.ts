@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { FieldMode } from '../../core/shared/enums/field-mode.enum';
 import { DialogService } from '../../core/shared/services/dialog.service';
+import { FieldModeService } from '../../core/shared/services/field-mode.service';
 import { SkillService } from '../../core/shared/services/skill.service';
 import { SkillDialogKind } from '../../core/shared/enums/skill-dialog-kind.enum';
 import { Skill } from '../../core/shared/classes/skill.class';
@@ -36,6 +38,8 @@ interface SkillSlide {
 export class SkillsComponent implements OnInit {
   private dialogService = inject(DialogService);
   private skillService = inject(SkillService);
+  private fieldMode = inject(FieldModeService);
+  readonly editor = computed(() => this.fieldMode.mode() === FieldMode.Editor);
   private cursor = signal(0);
   private moving = signal(false);
   private animId = 0;

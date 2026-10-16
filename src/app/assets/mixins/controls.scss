@@ -253,7 +253,7 @@
   top: calc(100% + 4px);
   right: 0;
   left: 0;
-  z-index: 5;
+  z-index: var(--z-pop);
   max-height: 240px;
   margin: 0;
   padding: 6px;

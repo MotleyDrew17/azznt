@@ -29,6 +29,8 @@ export class HeaderComponent {
   private fileInput = viewChild<ElementRef<HTMLInputElement>>('file');
 
   readonly mode = this.fieldMode.mode;
+
+  readonly showMode = signal(this.#showsMode(this.router.url));
   readonly showTools = signal(this.#showsTools(this.router.url));
   readonly title = signal(this.#title(this.router.url));
   readonly canBack = signal(false);
@@ -40,6 +42,7 @@ export class HeaderComponent {
       takeUntilDestroyed(),
     ).subscribe((event) => {
       this.#remember(event.urlAfterRedirects);
+      this.showMode.set(this.#showsMode(this.router.url));
       this.showTools.set(this.#showsTools(this.router.url));
       this.title.set(this.#title(this.router.url));
     });
@@ -97,6 +100,11 @@ export class HeaderComponent {
     if (this.history[this.history.length - 1] === path) return;
     this.history.push(path);
     this.canBack.set(true);
+  }
+
+  #showsMode(url: string): boolean {
+    const path = this.#path(url);
+    return path === '/quest-tree' || path === '/skills' || /^\/skill\/[^/]+$/.test(path);
   }
 
   #showsTools(url: string): boolean {

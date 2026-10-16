@@ -1,4 +1,4 @@
-<button type="button" class="exercise__button" [appDisabled]="view().unavailable" (click)="doExercise()">
+<button type="button" class="exercise__button" [appDisabled]="view().unavailable" (click)="doExercise($event)">
   <span class="exercise__label">{{ view().name }}</span>
 </button>
 <div class="exercise__hint" appHintContent>
@@ -10,7 +10,17 @@
     @if (view().showExperience) {
       <p class="exercise__experience">Опыт: {{ view().experience }}</p>
     }
+    @if (editor()) {
     <div class="exercise__actions">
+      <button
+        type="button"
+        class="exercise__action interactive"
+        appHint="Редактировать"
+        aria-label="Редактировать"
+        (click)="edit($event)"
+      >
+        <span class="exercise__action-icon exercise__action-icon_edit"></span>
+      </button>
       <button
         type="button"
         class="exercise__action interactive"
@@ -25,9 +35,11 @@
         class="exercise__action interactive"
         appHint="Переместить"
         aria-label="Переместить"
+        (click)="move($event)"
       >
         <span class="exercise__action-icon exercise__action-icon_move"></span>
       </button>
     </div>
+    }
   </div>
 </div>

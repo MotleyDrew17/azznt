@@ -8,6 +8,7 @@ import {
   effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { Quest } from '../../../core/shared/classes/quest.class';
 import { GraphService } from '../../../core/shared/services/graph.service';
@@ -204,10 +205,10 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     this.onPointerUp(event);
   };
 
-  #onPointerLeavePage = (): void => {
+  #onPointerLeavePage = (event: PointerEvent): void => {
+    if (this.panning() || this.grabbedId() !== null || event.buttons !== 0) return;
     this.spaceHeld.set(false);
-    this.#endGesture();
-    this.#commit();
+    this.shiftHeld.set(false);
   };
 
   #onWindowBlur = (): void => {
@@ -230,7 +231,7 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
   constructor() {
     effect(() => {
       this.mode();
-      this.#applyMode();
+      untracked(() => this.#applyMode());
     });
     effect(() => {
       this.graphService.listVersion();
@@ -579,7 +580,9 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
   #applyMode(): void {
     if (!this.allows(FieldAction.LinkQuest)) this.linkDraft.set(null);
     if (!this.allows(FieldAction.CreateQuest)) this.contextMenu.set(null);
-    if (!this.allows(FieldAction.MoveQuest)) this.#endGesture();
+    if (this.allows(FieldAction.MoveQuest) || this.grabbedId() === null) return;
+    this.#endGesture();
+    this.#commit();
   }
 
   #syncViewport(): void {

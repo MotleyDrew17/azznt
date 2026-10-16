@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { Exercise, Skill } from '../classes/skill.class';
 import { CreateExerciseData, CreateSkillData, readSkillSnapshots } from '../models/skill.model';
 import { StorageService } from './storage.service';
@@ -12,6 +12,13 @@ export class SkillService {
   private storage = inject(StorageService);
 
   readonly skills = signal<Skill[]>([]);
+  readonly now = signal(Date.now());
+  readonly exerciseDone = signal<{ skillId: string; count: number } | null>(null);
+
+  constructor() {
+    const timer = window.setInterval(() => this.now.set(Date.now()), 60_000);
+    inject(DestroyRef).onDestroy(() => window.clearInterval(timer));
+  }
 
   addSkill(data: CreateSkillData): Skill {
     const skill = new Skill(data);
@@ -72,7 +79,13 @@ export class SkillService {
     this.skills.set(skills);
     const decayChanged = skills.some((skill, index) => skill.getDecayTimestamp() !== (stored[index]?.level?.decay?.freezed_till_ms ?? 0));
     const layersMissing = stored.some((skill) => !skill.layers);
-    if (decayChanged || layersMissing) this.#save();
+    const thresholdsChanged = skills.some((skill, index) => {
+      const level = skill.getLevel();
+      const saved = stored[index]?.level;
+      if (!level || !saved) return false;
+      return saved.base_exp == null || saved.score !== level.score || saved.next_exp !== level.next_exp || saved.prev_exp !== level.prev_exp;
+    });
+    if (decayChanged || layersMissing || thresholdsChanged) this.#save();
   }
 
   addExerciseToLayer(id: string, levelScore: number, data: CreateExerciseData): void {
@@ -93,12 +106,32 @@ export class SkillService {
     this.#save();
   }
 
-  doExercise(skillId: string, exerciseId: string): void {
+  moveExercise(skillId: string, exerciseId: string, levelScore: number): void {
     const skill = this.skills().find((item) => item.id === skillId);
     if (!skill) return;
+    skill.moveExerciseToLayer(exerciseId, levelScore);
+    this.skills.update((skills) => [...skills]);
+    this.#save();
+  }
+
+  updateExercise(skillId: string, exerciseId: string, data: CreateExerciseData): void {
+    const exercise = this.skills().find((item) => item.id === skillId)?.getExercise(exerciseId);
+    if (!exercise) return;
+    exercise.update(data);
+    this.skills.update((skills) => [...skills]);
+    this.#save();
+  }
+
+  doExercise(skillId: string, exerciseId: string): number {
+    const skill = this.skills().find((item) => item.id === skillId);
+    const exercise = skill?.getExercise(exerciseId);
+    if (!skill || !exercise) return 0;
+    const gained = exercise.reachedMaxLevel() ? 0 : exercise.experience;
     skill.doExercise(exerciseId);
     this.skills.update((skills) => [...skills]);
     this.#save();
+    this.exerciseDone.update((done) => ({ skillId, count: (done?.count ?? 0) + 1 }));
+    return gained;
   }
 
   #save(): void {
