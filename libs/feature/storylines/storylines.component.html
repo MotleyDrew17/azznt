@@ -1,0 +1,8 @@
+<div class="storylines">
+  <button type="button" class="storylines__add interactive" aria-label="Новая сюжетная линия" (click)="create()">
+    <span class="storylines__plus"></span>
+  </button>
+  @for (storyline of storylines(); track storyline.id) {
+    <gm-storyline [name]="title(storyline)" (open)="open(storyline.id)" (remove)="remove(storyline)" />
+  }
+</div>

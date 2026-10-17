@@ -2,8 +2,9 @@ import { inject, Injectable, signal } from '@angular/core';
 import {Quest, QUEST_CYCLE_ERROR} from '../classes/quest.class';
 import { CreateQuestData, parseQuestSnapshots, QuestRequiredSkill, QuestSnapshot } from '../models/quest.model';
 import { Skill } from '../classes/skill.class';
-import { StorageService } from './storage.service';
+import { UserService } from './user.service';
 import { SkillService } from './skill.service';
+import { parseUserFile } from '../models/user.model';
 import { hasCycle } from './graph.utils';
 
 @Injectable({
@@ -16,13 +17,16 @@ export class GraphService {
   graph = signal<Quest | undefined>(undefined);
   readonly listVersion = signal(0);
   selectedQuestId = signal<string | null>(null);
-  storageService = inject(StorageService);
+  // Запрос центрировать карту на квесте. tick нужен, чтобы повторный выбор того же квеста тоже сдвигал карту.
+  readonly focusRequest = signal<{ id: string; tick: number } | null>(null);
+  #focusTick = 0;
+  #storylineId?: string;
+  private user = inject(UserService);
   private skillService = inject(SkillService);
 
   constructor() {
     if (!this.skillService.skills().length) this.skillService.loadSkills();
-    this.#initGraphFromStorage();
-    this.graph.set(this.#graph);
+    this.#restoreActive();
   }
 
   get questsList(): Quest[]{
@@ -35,6 +39,12 @@ export class GraphService {
 
   selectQuest(id: string | null): void {
     this.selectedQuestId.set(id);
+  }
+
+  // Выбрать квест и попросить карту встать на него
+  focusQuest(id: string): void {
+    this.selectQuest(id);
+    this.focusRequest.set({ id, tick: ++this.#focusTick });
   }
 
   createQuest(data: CreateQuestData, isNewGraph: boolean = false): string | null {
@@ -69,10 +79,29 @@ export class GraphService {
       quest.isRoot = true;
       this.#graph = quest;
       this.graph.set(this.#graph);
+      this.#storylineId = crypto.randomUUID();
     }
     this.listVersion.update((version) => version + 1);
     this.saveGraphToStorage();
     return null;
+  }
+
+  // Отметить квест выполненным
+  completeQuest(id: string): void {
+    const quest = this.#questsMap[id];
+    if (!quest || quest.isCompleted || !quest.isAvailable) return;
+    quest.complete(true);
+    this.listVersion.update((version) => version + 1);
+    this.saveGraphToStorage();
+  }
+
+  // Снять выполнение квеста
+  resetCompletedQuest(id: string): void {
+    const quest = this.#questsMap[id];
+    if (!quest || !quest.isCompleted) return;
+    quest.uncomplete();
+    this.listVersion.update((version) => version + 1);
+    this.saveGraphToStorage();
   }
 
   updateQuest(id: string, data: Pick<CreateQuestData, 'name' | 'description' | 'priority' | 'requiredSkills'>): void {
@@ -151,60 +180,98 @@ export class GraphService {
     return copy;
   }
 
+  // Открыть сохранённую сюжетную линию
+  openStoryline(id: string): void {
+    const storyline = this.user.storylines().find((item) => item.id === id);
+    if (!storyline) return;
+    this.#storylineId = id;
+    this.#loadQuests(storyline.quests);
+    this.user.activate(id);
+  }
+
+  // Открыть редактор без проекта
+  openEmpty(): void {
+    this.#storylineId = undefined;
+    this.#loadQuests([]);
+    this.user.clearActive();
+  }
+
+  // Удалить сюжетную линию
+  removeStoryline(id: string): void {
+    this.user.removeStoryline(id);
+    if (this.#storylineId !== id) return;
+    this.#storylineId = undefined;
+    this.#loadQuests([]);
+  }
+
   saveGraphToStorage(){
-    const graphSnapshot = this.createGraphSnapshot();
-    this.storageService.local.set('graph', graphSnapshot);
+    if (!this.#graph) return;
+    if (!this.#storylineId) this.#storylineId = crypto.randomUUID();
+    this.user.upsert(this.#storylineId, this.createGraphSnapshot());
   }
 
   graphFileName(): string {
-    const name = this.#graph?.name.trim() || 'graph';
-    const safe = name.replace(/[<>:"/\\|?*\u0000-\u001f]/g, '').trim() || 'graph';
-    return `${safe}.gm`;
+    return 'user.gm';
   }
 
   toGraphFile(): string {
-    return JSON.stringify(this.createGraphSnapshot());
+    return this.user.toFile();
   }
 
+  // Загрузить файл пользователя. Старый файл квестов добавляется отдельным проектом
   loadGraphFile(text: string): string | null {
-    const snapshot = parseQuestSnapshots(text);
-    if (!snapshot) return 'Файл не похож на сохранение.';
-    this.#replaceGraph(snapshot);
+    const file = parseUserFile(text);
+    if (file) {
+      this.user.replace(file);
+      this.skillService.loadSkills();
+      this.#storylineId = undefined;
+      this.#restoreActive();
+      return null;
+    }
+    const quests = parseQuestSnapshots(text);
+    if (!quests) return 'Файл не похож на сохранение.';
+    this.#storylineId = crypto.randomUUID();
+    this.#loadQuests(quests);
+    this.saveGraphToStorage();
     return null;
   }
 
-  #initGraphFromStorage(){
-    const graphSnapshot = this.storageService.local.get<QuestSnapshot[]>('graph');
-    if(graphSnapshot){
-      const graph = this.extractGraphFromSnapshot(graphSnapshot);
-      this.#graph = graph;
-      this.graph.set(this.#graph);
-      const maxZ = this.questsList.reduce((max, quest) => Math.max(max, quest.zIndex), 0);
-      this.#zIndex = maxZ + 1;
+  // Вернуть активный проект после загрузки
+  #restoreActive(): void {
+    const id = this.user.activeId;
+    const storyline = id ? this.user.storylines().find((item) => item.id === id) : undefined;
+    if (!storyline) {
+      this.#storylineId = undefined;
+      this.#loadQuests([]);
+      return;
     }
+    this.#storylineId = storyline.id;
+    this.#loadQuests(storyline.quests);
   }
 
-  createGraphSnapshot(): QuestSnapshot[] {
-   return this.questsList.map(quest => quest.toSnapshot());
-  }
-
-  #replaceGraph(snapshot: QuestSnapshot[]): void {
+  // Поставить квесты на поле
+  #loadQuests(snapshot: QuestSnapshot[]): void {
     this.#questsMap = {};
     this.selectedQuestId.set(null);
+    this.focusRequest.set(null);
     if (snapshot.length === 0) {
       this.#graph = undefined;
       this.graph.set(undefined);
       this.#zIndex = 1;
-    } else {
-      this.extractGraphFromSnapshot(snapshot);
-      const root = this.questsList.find((quest) => quest.isRoot) ?? this.questsList[0];
-      this.#graph = root;
-      this.graph.set(root);
-      const maxZ = this.questsList.reduce((max, quest) => Math.max(max, quest.zIndex), 0);
-      this.#zIndex = maxZ + 1;
+      this.listVersion.update((version) => version + 1);
+      return;
     }
+    this.extractGraphFromSnapshot(snapshot);
+    const root = this.questsList.find((quest) => quest.isRoot) ?? this.questsList[0];
+    this.#graph = root;
+    this.graph.set(root);
+    const maxZ = this.questsList.reduce((max, quest) => Math.max(max, quest.zIndex), 0);
+    this.#zIndex = maxZ + 1;
     this.listVersion.update((version) => version + 1);
-    this.saveGraphToStorage();
+  }
+
+  createGraphSnapshot(): QuestSnapshot[] {
+   return this.questsList.map(quest => quest.toSnapshot());
   }
 
   #applyRequiredSkills(quest: Quest, required: QuestRequiredSkill[] | null | undefined): void {
@@ -230,6 +297,7 @@ export class GraphService {
       quest.layer = snapshot.layer;
       quest.isRoot = snapshot.isRoot;
       if (snapshot.priority !== undefined) quest.priority = snapshot.priority;
+      if (snapshot.isCompleted) quest.complete();
       const required = snapshot.requiredSkills ?? (snapshot.requiredSkill ? [snapshot.requiredSkill] : []);
       quest.requiredSkills = this.#resolveRequiredSkills(required);
       this.#questsMap[quest.id] = quest;

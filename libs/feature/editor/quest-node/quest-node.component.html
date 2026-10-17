@@ -10,11 +10,22 @@
   [class.quest-node_mythic]="priority() === QuestPriority.Mythic"
   [class.quest-node_legendary]="priority() === QuestPriority.Legendary"
   [class.quest-node_main]="priority() === QuestPriority.Main"
-  [class.quest-node_completed]="completed()"
+  [class.quest-node_press]="pressing()"
+  [class.quest-node_completed]="shownCompleted()"
   [class.quest-node_blocked]="!completed() && !available()"
   [style.left.px]="left()"
   [style.top.px]="top()"
   [style.width.px]="size()"
   [style.height.px]="size()"
   [style.z-index]="quest()?.zIndex"
-></div>
+>
+  <span class="quest-node__fill"></span>
+  <!-- Вспышка обода -->
+  @for (burst of bursts(); track burst) {
+    <span class="quest-node__gleam"></span>
+    <span class="quest-node__gleam quest-node__gleam_sweep"></span>
+    @for (spark of sparks; track spark.left + ':' + spark.top) {
+      <span class="quest-node__spark" [style.left.%]="spark.left" [style.top.%]="spark.top" [style.animation-delay.ms]="spark.delay"></span>
+    }
+  }
+</div>

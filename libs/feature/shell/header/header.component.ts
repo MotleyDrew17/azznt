@@ -109,11 +109,12 @@ export class HeaderComponent {
 
   #showsTools(url: string): boolean {
     const path = this.#path(url);
-    return path === '/quest-tree' || /^\/skill\/[^/]+$/.test(path);
+    return path === '/storylines' || path === '/quest-tree' || path === '/skills' || /^\/skill\/[^/]+$/.test(path);
   }
 
   #title(url: string): string {
     const path = this.#path(url);
+    if (path === '/storylines') return 'Сюжетные линии';
     if (path === '/quest-tree' || path === '/editor') return 'Квесты';
     if (path === '/skills') return 'Навыки';
     if (path === '/settings') return 'Настройки';

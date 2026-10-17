@@ -33,6 +33,7 @@
   }
 }
 
+// Стрелки между квестами
 .quest-edges {
   position: absolute;
   inset: 0;
@@ -42,6 +43,7 @@
   pointer-events: none;
 }
 
+// Сталь, золото у доступного квеста, зелень между выполненными
 .quest-edges__gradient {
   --edge-light: var(--color-skill-metal-light);
   --edge-mid: var(--color-skill-metal-mid);
@@ -191,6 +193,15 @@
   overflow: auto;
 }
 
+// Кнопка «Отменить»
+.quest-card__undo {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 13px;
+  line-height: 1.2;
+  text-align: left;
+}
+
 .quest-card__name,
 .quest-card__description {
   margin: 0;
@@ -213,6 +224,7 @@
   margin-top: 4px;
 }
 
+// Приоритет квеста
 .quest-card__priority {
   margin: 8px 0 0;
   font-size: 13px;
@@ -221,10 +233,7 @@
   color: var(--quest-card-accent);
 }
 
-.quest-card__body > .quest-card__priority:first-child {
-  margin-top: 0;
-}
-
+// Строка требуемого навыка
 .quest-card__skill {
   margin: 2px 0 0;
   color: var(--color-text-muted);
@@ -232,6 +241,7 @@
   line-height: 1.35;
 }
 
+// Ссылка на навык
 .quest-card__skill-link {
   color: var(--color-gold);
   font-weight: 600;
@@ -246,6 +256,111 @@
       0 0 16px color-mix(in srgb, var(--color-gold) 55%, transparent);
     outline: none;
   }
+}
+
+// Кнопка «Выполнить»
+.quest-card__complete {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 40px;
+  margin-top: 10px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--color-skill-metal-light) 0%, var(--color-skill-metal) 46%, var(--color-skill-metal-dark) 100%);
+  color: var(--color-parchment);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 42%),
+    inset 0 -2px 0 rgb(0 0 0 / 38%),
+    0 2px 0 var(--color-skill-metal-dark),
+    0 4px 8px rgb(0 0 0 / 35%);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+
+  &:disabled {
+    pointer-events: none;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    pointer-events: none;
+    background: linear-gradient(155deg, var(--color-skill-metal-light) 0%, var(--color-skill-metal) 32%, var(--color-skill-metal-dark) 58%, var(--color-skill-metal-mid) 100%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+
+  &:active:not(:disabled):not(.is-disabled) {
+    transform: translateY(2px);
+    box-shadow:
+      inset 0 4px 8px rgb(0 0 0 / 45%),
+      inset 0 -1px 0 rgb(255 255 255 / 16%);
+  }
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+// Выполненная кнопка
+.quest-card__complete_done {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-quest-done-dark) 42%, black) 0%,
+    color-mix(in srgb, var(--color-quest-done-dark) 68%, black) 58%,
+    color-mix(in srgb, var(--color-quest-done) 48%, black) 100%
+  );
+  color: var(--color-parchment);
+  cursor: default;
+  box-shadow:
+    inset 0 6px 8px rgb(0 0 0 / 72%),
+    inset 0 -1px 1px rgb(255 255 255 / 14%);
+
+  &::before {
+    background: linear-gradient(155deg, var(--color-quest-done-light) 0%, var(--color-quest-done) 32%, var(--color-quest-done-dark) 58%, var(--color-quest-done-mid) 100%);
+  }
+}
+
+// Недоступная кнопка
+.quest-card__complete_locked {
+  background: linear-gradient(180deg, var(--color-skill-metal-dark) 0%, color-mix(in srgb, var(--color-skill-metal-dark) 55%, black) 100%);
+  color: color-mix(in srgb, var(--color-parchment) 36%, var(--color-skill-metal-dark));
+  cursor: default;
+  box-shadow: none;
+
+  &::before {
+    background: linear-gradient(155deg, var(--color-skill-metal) 0%, var(--color-skill-metal-dark) 48%, color-mix(in srgb, var(--color-skill-metal-dark) 40%, black) 100%);
+  }
+}
+
+.quest-card__complete-label,
+.quest-card__complete-icon {
+  position: relative;
+  z-index: 1;
+}
+
+// Галочка выполненного квеста
+.quest-card__complete-icon {
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../../../../src/app/assets/icons/check.svg');
 }
 
 .quest-toolbar {

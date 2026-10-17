@@ -1,15 +1,13 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { Exercise, Skill } from '../classes/skill.class';
-import { CreateExerciseData, CreateSkillData, readSkillSnapshots } from '../models/skill.model';
-import { StorageService } from './storage.service';
-
-const SKILLS_KEY = 'skills';
+import { CreateExerciseData, CreateSkillData } from '../models/skill.model';
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SkillService {
-  private storage = inject(StorageService);
+  private user = inject(UserService);
 
   readonly skills = signal<Skill[]>([]);
   readonly now = signal(Date.now());
@@ -73,8 +71,10 @@ export class SkillService {
     this.#save();
   }
 
+  // Загрузить навыки из сохранения
   loadSkills(): void {
-    const stored = readSkillSnapshots(this.storage.local.get(SKILLS_KEY));
+    const stored = this.user.skills();
+    // Уже загруженные навыки обновляются на месте
     const current = new Map(this.skills().map((skill) => [skill.id, skill]));
     const skills = stored.map((snapshot) => {
       const existing = current.get(snapshot.id);
@@ -141,6 +141,6 @@ export class SkillService {
   }
 
   #save(): void {
-    this.storage.local.set(SKILLS_KEY, this.skills().map((skill) => skill.toSnapshot()));
+    this.user.setSkills(this.skills().map((skill) => skill.toSnapshot()));
   }
 }

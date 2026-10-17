@@ -2,6 +2,13 @@
   display: block;
 }
 
+@property --quest-gleam-turn {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+// Квест на поле: выпуклый металл приоритета
 .quest-node {
   --quest-metal-light: var(--color-quest-common-light);
   --quest-metal: var(--color-quest-common);
@@ -21,7 +28,9 @@
     0 1px 2px rgb(0 0 0 / 45%);
   transition: box-shadow 0.2s ease;
 
+  // Ободок цвета приоритета
   &::before {
+    z-index: 2;
     content: '';
     position: absolute;
     inset: 0;
@@ -45,19 +54,23 @@
     mask-composite: exclude;
   }
 
+  // Перетаскивание
   &_shift {
     cursor: grab;
   }
 
+  // Квест схвачен
   &_grabbing {
     cursor: grabbing;
   }
 
+  // Выбранный квест
   &_selected {
     outline: calc(2px * var(--field-zoom, 1)) solid var(--color-parchment);
     outline-offset: calc(3px * var(--field-zoom, 1));
   }
 
+  // Цвета приоритетов
   &_uncommon {
     --quest-metal-light: var(--color-quest-uncommon-light);
     --quest-metal: var(--color-quest-uncommon);
@@ -100,15 +113,20 @@
     --quest-metal-mid: var(--color-quest-main-mid);
   }
 
-  &_completed {
-    --quest-metal-light: var(--color-quest-done-light);
-    --quest-metal: var(--color-quest-done);
-    --quest-metal-dark: var(--color-quest-done-dark);
-    --quest-metal-mid: var(--color-quest-done-mid);
+  // Плавная вмятина
+  &_press {
+    transition: box-shadow 0.9s cubic-bezier(0.22, 0.7, 0.2, 1);
   }
 
-  &_blocked,
+  // Вмятина выполненного квеста
   &_completed {
+    box-shadow:
+      inset 0 6px 8px rgb(0 0 0 / 72%),
+      inset 0 -1px 1px rgb(255 255 255 / 14%);
+  }
+
+  // Недоступный квест
+  &_blocked {
     background: linear-gradient(
       180deg,
       color-mix(in srgb, var(--quest-metal-dark) 42%, black) 0%,
@@ -120,6 +138,7 @@
       inset 0 -1px 1px rgb(255 255 255 / 14%);
   }
 
+  // Свечение доступного квеста
   &:hover:not(&_blocked):not(&_completed) {
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 45%),
@@ -127,5 +146,134 @@
       0 0 6px color-mix(in srgb, var(--quest-metal-light) 90%, transparent),
       0 0 16px color-mix(in srgb, var(--quest-metal) 55%, transparent),
       0 0 32px color-mix(in srgb, var(--quest-metal) 28%, transparent);
+  }
+}
+
+// Зелёная заливка выполненного квеста
+.quest-node__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-quest-done-dark) 42%, black) 0%,
+    color-mix(in srgb, var(--color-quest-done-dark) 68%, black) 58%,
+    color-mix(in srgb, var(--color-quest-done) 48%, black) 100%
+  );
+  transition: opacity 0.9s cubic-bezier(0.22, 0.7, 0.2, 1);
+
+  .quest-node_completed & {
+    opacity: 1;
+  }
+}
+
+// Блик обода при выполнении
+.quest-node__gleam {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: calc(2px * var(--field-zoom, 1));
+  pointer-events: none;
+  background: linear-gradient(
+    155deg,
+    var(--quest-metal-light) 0%,
+    var(--quest-metal) 34%,
+    var(--quest-metal-dark) 62%,
+    var(--quest-metal-mid) 100%
+  );
+  animation: quest-node-gleam 4s ease forwards;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+
+  // Бегущий свет по ободу
+  &_sweep {
+    background: conic-gradient(
+      from var(--quest-gleam-turn),
+      transparent 0 68%,
+      var(--quest-metal-light) 80%,
+      var(--quest-metal) 88%,
+      transparent 100%
+    );
+    animation: quest-node-gleam-sweep 4s linear forwards;
+  }
+}
+
+// Искры вокруг квеста
+.quest-node__spark {
+  position: absolute;
+  z-index: 4;
+  width: 13px;
+  height: 13px;
+  margin: -6px 0 0 -6px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--quest-metal-light), var(--quest-metal-light)) center / 2px 100% no-repeat,
+    linear-gradient(var(--quest-metal-light), var(--quest-metal-light)) center / 100% 2px no-repeat;
+  filter: drop-shadow(0 0 2px var(--quest-metal-light)) drop-shadow(0 0 7px var(--quest-metal));
+  opacity: 0;
+  animation: quest-node-spark 1.3s ease-in-out forwards;
+}
+
+// Появление блика
+@keyframes quest-node-gleam {
+  0% {
+    opacity: 0;
+  }
+
+  8% {
+    opacity: 1;
+  }
+
+  55% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+// Оборот блика
+@keyframes quest-node-gleam-sweep {
+  0% {
+    opacity: 0;
+    --quest-gleam-turn: 0deg;
+  }
+
+  6% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    --quest-gleam-turn: 360deg;
+  }
+}
+
+// Вспышка искры
+@keyframes quest-node-spark {
+  0% {
+    opacity: 0;
+    transform: scale(0.35) rotate(0deg);
+  }
+
+  28% {
+    opacity: 1;
+    transform: scale(1) rotate(20deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.2) rotate(40deg);
   }
 }

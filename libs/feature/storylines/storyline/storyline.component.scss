@@ -1,0 +1,48 @@
+:host {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+
+// Карточка проекта
+.storyline__open {
+  --surface: var(--color-plum);
+  flex: 1;
+  min-width: 0;
+  padding: 28px 16px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--color-parchment);
+  font: inherit;
+  text-align: center;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+// Удаление проекта
+.storyline__delete {
+  --surface: transparent;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-parchment);
+  cursor: pointer;
+}
+
+.storyline__icon {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../../../../src/app/assets/icons/delete.svg');
+}

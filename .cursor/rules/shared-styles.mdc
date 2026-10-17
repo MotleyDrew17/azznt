@@ -13,7 +13,13 @@ alwaysApply: true
 
 ## Куда смотреть
 
-- `src/app/assets/colors.scss` — палитра, в том числе `--color-error`
+- `src/app/assets/colors.scss` — палитра, в том числе `--color-error` и уровни поверхности
+
+## Уровни поверхности
+
+Фон страницы — `--color-bg`, это уровень 0. Следующий уровень светлее на 3% белого: `--color-lvl-1`, потом `--color-lvl-2` и `--color-lvl-3`. Проценты уже в токене, заново их не смешивай.
+
+Панель на уровень выше поля красится как шапка: `background: var(--color-lvl-1)`.
 - `src/app/assets/variables.scss` — токены полей `--field-*`
 - `src/app/assets/mixins/controls.scss` — миксины поля и контролов
 - `src/app/assets/mixins/text-button.scss` — текстовая кнопка

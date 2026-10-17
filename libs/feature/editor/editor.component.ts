@@ -3,6 +3,7 @@ import { GraphService } from '../../core/shared/services/graph.service';
 import { DialogService } from '../../core/shared/services/dialog.service';
 import { EditorDialogKind } from './editor-dialog/editor-dialog.component';
 import { WorkFieldComponent } from './work-field/work-field.component';
+import { QuestMenuComponent } from './quest-menu/quest-menu.component';
 
 @Component({
   selector: 'gm-editor',
@@ -10,13 +11,14 @@ import { WorkFieldComponent } from './work-field/work-field.component';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './editor.component.scss',
-  imports: [WorkFieldComponent]
+  imports: [WorkFieldComponent, QuestMenuComponent]
 })
 export class EditorComponent {
   private dialogService = inject(DialogService);
   private host = inject(ElementRef<HTMLElement>);
   graphService = inject(GraphService);
   graph = this.graphService.graph;
+  // Размер квеста при создании сюжетной линии по центру поля
   #nodeSize = 48;
 
   openStorylineDialog(): void {

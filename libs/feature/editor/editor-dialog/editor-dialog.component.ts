@@ -73,6 +73,7 @@ export class EditorDialogComponent {
     if (!this.requireSkill() || !this.skillDrafts().length || !this.skillInvalid()) return '';
     return 'Выберите навык и укажите уровень';
   });
+  // Можно ли добавить ещё строку навыка
   readonly canAddSkill = computed(() => this.skillDrafts().length < this.skills().length);
 
   get title(): string {
@@ -118,6 +119,7 @@ export class EditorDialogComponent {
     this.priority.set(Number(match[0]) as QuestPriority);
   }
 
+  // Навыки, которые ещё можно выбрать в этой строке
   skillOptions(row: SkillDraft): string[] {
     const taken = new Set(this.skillDrafts().filter((item) => item.key !== row.key && item.skillId).map((item) => item.skillId));
     return this.skills()
@@ -125,23 +127,28 @@ export class EditorDialogComponent {
       .map((skill) => skill.name);
   }
 
+  // Название выбранного навыка
   skillLabel(row: SkillDraft): string | null {
     if (!row.skillId) return null;
     return this.skills().find((skill) => skill.id === row.skillId)?.name ?? null;
   }
 
+  // Уровень не задан
   levelInvalid(row: SkillDraft): boolean {
     return !Number.isInteger(row.level) || row.level < 1;
   }
 
+  // Пустая строка навыка
   addSkill(): void {
     this.skillDrafts.update((rows) => [...rows, { key: crypto.randomUUID(), skillId: null, level: 1 }]);
   }
 
+  // Удалить строку навыка
   removeSkill(key: string): void {
     this.skillDrafts.update((rows) => rows.filter((row) => row.key !== key));
   }
 
+  // Выбрать навык в строке
   setSkill(key: string, name: string): void {
     const taken = new Set(this.skillDrafts().filter((row) => row.key !== key).map((row) => row.skillId));
     const skill = this.skills().find((item) => item.name === name && !taken.has(item.id));
@@ -149,6 +156,7 @@ export class EditorDialogComponent {
     this.skillDrafts.update((rows) => rows.map((row) => row.key === key ? { ...row, skillId: skill.id } : row));
   }
 
+  // Уровень навыка в строке
   setSkillLevel(key: string, event: Event): void {
     const target = event.target;
     if (!(target instanceof HTMLInputElement)) return;
@@ -217,6 +225,7 @@ export class EditorDialogComponent {
     }
   }
 
+  // Навыки для сохранения
   #requiredSkills(): QuestRequiredSkill[] {
     if (!this.requireSkill()) return [];
     return this.skillDrafts()

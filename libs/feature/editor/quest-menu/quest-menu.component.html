@@ -1,0 +1,134 @@
+<aside class="quest-menu" [class.quest-menu_collapsed]="collapsed()">
+  <div class="quest-menu__bar">
+    <button
+      type="button"
+      class="quest-menu__toggle interactive"
+      [attr.aria-label]="collapsed() ? 'Развернуть меню' : 'Свернуть меню'"
+      (click)="toggleMenu()"
+    >
+      <span class="quest-menu__glyph quest-menu__glyph_chevron" [class.quest-menu__glyph_right]="collapsed()"></span>
+    </button>
+    @if (!collapsed()) {
+      <input id="quest-menu-search" class="control quest-menu__search" type="text" placeholder="Поиск" [value]="query()" (input)="onQuery($event)" />
+      <button
+        type="button"
+        class="text-button quest-menu__filters-button"
+        [class.quest-menu__filters-button_on]="filtersActive()"
+        [attr.aria-expanded]="filtersOpen()"
+        (click)="toggleFilters()"
+      >Фильтры</button>
+    }
+  </div>
+
+  @if (!collapsed() && filtersOpen()) {
+    <button type="button" class="quest-menu__shade" aria-label="Закрыть фильтры" (click)="filtersOpen.set(false)"></button>
+    <div class="quest-menu__panel">
+      <div class="field">
+        <label class="field__label" for="quest-menu-sort">Сортировка</label>
+        <gm-select
+          controlId="quest-menu-sort"
+          [options]="sortOptions"
+          [selected]="sort()"
+          (selectedChange)="setSort($event)"
+        />
+      </div>
+      <div class="quest-menu__checks">
+        <gm-checkbox controlId="quest-menu-available" [checked]="availableOnly()" (checkedChange)="availableOnly.set($event)">Доступные</gm-checkbox>
+        <gm-checkbox controlId="quest-menu-completed" [checked]="completedOnly()" (checkedChange)="completedOnly.set($event)">Выполненные</gm-checkbox>
+        <gm-checkbox controlId="quest-menu-blocked" [checked]="blockedOnly()" (checkedChange)="blockedOnly.set($event)">Недоступные</gm-checkbox>
+        <gm-checkbox controlId="quest-menu-reward" [checked]="reward()" (checkedChange)="reward.set($event)">С наградой</gm-checkbox>
+      </div>
+      <div class="field">
+        <label class="field__label" for="quest-menu-priority">Приоритет</label>
+        <gm-select
+          controlId="quest-menu-priority"
+          [options]="priorityOptions"
+          [selected]="prioritySelected()"
+          (selectedChange)="setPriority($event)"
+        />
+      </div>
+      <div class="field">
+        <label class="field__label" for="quest-menu-skill">Навык</label>
+        <gm-autocomplete
+          controlId="quest-menu-skill"
+          placeholder="Навык"
+          [options]="skillOptions()"
+          [(value)]="skillQuery"
+          (picked)="pickSkill($event)"
+        />
+      </div>
+    </div>
+  }
+
+  @if (!collapsed()) {
+    <p class="quest-menu__count">{{ countLabel() }}</p>
+    <ul class="quest-menu__list">
+        @for (quest of filtered(); track quest.id) {
+          <li class="quest-menu__item">
+            <div class="quest-menu__row" [class.quest-menu__row_picked]="pickedId() === quest.id">
+              <button type="button" class="quest-menu__name" [style.color]="priorityAccent(quest.priority)" (click)="pick(quest)">
+                {{ quest.name.trim() || 'Без названия' }}
+              </button>
+              @if (pickedId() === quest.id) {
+                <button type="button" class="quest-menu__icon interactive" aria-label="Показать на карте" (click)="showOnMap(quest)">
+                  <span class="quest-menu__glyph quest-menu__glyph_loupe"></span>
+                </button>
+              }
+              <button
+                type="button"
+                class="quest-menu__icon interactive"
+                [attr.aria-label]="expanded().has(quest.id) ? 'Свернуть' : 'Развернуть'"
+                [attr.aria-expanded]="expanded().has(quest.id)"
+                (click)="toggleDetails(quest)"
+              >
+                <span class="quest-menu__glyph quest-menu__glyph_chevron" [class.quest-menu__glyph_down]="!expanded().has(quest.id)" [class.quest-menu__glyph_up]="expanded().has(quest.id)"></span>
+              </button>
+              @if (editor()) {
+                <button type="button" class="quest-menu__icon interactive" aria-label="Редактировать" (click)="edit(quest)">
+                  <span class="quest-menu__glyph quest-menu__glyph_edit"></span>
+                </button>
+                @if (!quest.isRoot) {
+                  <button type="button" class="quest-menu__icon interactive" aria-label="Удалить" (click)="remove(quest)">
+                    <span class="quest-menu__glyph quest-menu__glyph_delete"></span>
+                  </button>
+                }
+              }
+            </div>
+            @if (expanded().has(quest.id)) {
+              <div class="quest-menu__details">
+                @if (editor()) {
+                  <button type="button" class="text-button quest-menu__undo" [appDisabled]="!quest.isCompleted" (click)="reset(quest)">Отменить</button>
+                }
+                @if (quest.description.trim()) {
+                  <p class="quest-menu__description">{{ quest.description }}</p>
+                }
+                @for (required of quest.requiredSkills; track required.skill.id + required.level) {
+                  <p class="quest-menu__skill">
+                    Навык:
+                    <a class="quest-menu__skill-link" [routerLink]="['/skill', required.skill.id]">{{ required.skill.name }}</a>
+                    {{ required.level }} уровень. Текущий {{ required.skill.score }}
+                  </p>
+                }
+                <button
+                  type="button"
+                  class="quest-menu__complete"
+                  [class.quest-menu__complete_done]="quest.isCompleted"
+                  [class.quest-menu__complete_locked]="!quest.isCompleted && !quest.isAvailable"
+                  [appDisabled]="quest.isCompleted || !quest.isAvailable"
+                  (click)="complete(quest)"
+                >
+                  @if (quest.isCompleted) {
+                    <span class="quest-menu__complete-icon"></span>
+                  }
+                  {{ quest.isCompleted ? 'Выполнено' : 'Выполнить' }}
+                </button>
+                <p class="quest-menu__priority" [style.color]="priorityAccent(quest.priority)">{{ priorityLabel(quest.priority) }}</p>
+              </div>
+            }
+          </li>
+        } @empty {
+          <li class="quest-menu__empty">Ничего не найдено</li>
+        }
+      </ul>
+  }
+</aside>

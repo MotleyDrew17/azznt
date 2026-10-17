@@ -19,9 +19,13 @@ import { QuestNodeComponent } from '../quest-node/quest-node.component';
 import { FieldAction, FieldMode, modeAllows } from '../../../core/shared/enums/field-mode.enum';
 import { FieldModeService } from '../../../core/shared/services/field-mode.service';
 import { HintDirective } from '../../../core/shared/directives/hint.directive';
+import { DisabledDirective } from '../../../core/shared/directives/disabled.directive';
 import { RouterLink } from '@angular/router';
 
 type QuestEdgeTone = 'metal' | 'gold' | 'done';
+
+// Вмятина квеста: 1500 мс до начала и 900 мс сам переход
+const EDGE_DONE_DELAY_MS = 2400;
 
 interface QuestEdge {
   id: string;
@@ -40,7 +44,7 @@ interface QuestEdge {
 
 @Component({
   selector: 'gm-work-field',
-  imports: [QuestNodeComponent, ButtonComponent, HintDirective, RouterLink],
+  imports: [QuestNodeComponent, ButtonComponent, HintDirective, RouterLink, DisabledDirective],
   templateUrl: './work-field.component.html',
   styleUrl: './work-field.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,6 +80,8 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
   });
   #keys = new WeakMap<Quest, string>();
   #keyIndex = 0;
+  #edgeTick = signal(0);
+  #edgeTimers = new Map<string, number>();
 
   readonly mode = inject(FieldModeService).mode;
   readonly showToolbar = computed(() =>
@@ -247,6 +253,21 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
       this.graphService.listVersion();
       this.#overrides.set(new Map());
     });
+    effect(() => {
+      const request = this.graphService.focusRequest();
+      if (!request) return;
+      untracked(() => {
+        const quest = this.quests().find((item) => item.id === request.id);
+        if (quest) this.#centerOn(quest);
+      });
+    });
+    effect(() => {
+      const pending = this.quests().filter((quest) => {
+        const pressedAt = quest.pressedAt;
+        return quest.isCompleted && pressedAt != null && Date.now() < pressedAt + EDGE_DONE_DELAY_MS;
+      });
+      untracked(() => this.#armEdgeTimers(pending));
+    });
   }
 
   ngOnInit(): void {
@@ -269,6 +290,17 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     this.#resizeObserver?.disconnect();
     this.#endGesture();
     this.#commit();
+    for (const timer of this.#edgeTimers.values()) window.clearTimeout(timer);
+  }
+
+  // Отметить квест выполненным
+  completeQuest(quest: Quest): void {
+    this.graphService.completeQuest(quest.id);
+  }
+
+  // Снять выполнение квеста
+  resetQuest(quest: Quest): void {
+    this.graphService.resetCompletedQuest(quest.id);
   }
 
   allows(action: FieldAction): boolean {
@@ -649,6 +681,16 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     return this.#overrides().get(this.keyOf(quest))?.y ?? quest.pos_y ?? 0;
   }
 
+  // Центр карты на выбранном квесте
+  #centerOn(quest: Quest): void {
+    const field = this.host.nativeElement;
+    const zoom = this.zoom();
+    this.pan.set({
+      x: this.#worldX(quest) + this.#nodeWidth / 2 - field.clientWidth / (2 * zoom),
+      y: this.#worldY(quest) + this.#nodeHeight / 2 - field.clientHeight / (2 * zoom),
+    });
+  }
+
   #commit(): void {
     const overrides = this.#overrides();
     if (overrides.size === 0) return;
@@ -760,11 +802,41 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
     );
   }
 
+  // Цвет стрелки. Свежее выполнение красится после вмятины
   #edgeTone(from: Quest, to: Quest): QuestEdgeTone {
-    if (this.mode() !== FieldMode.View) return 'gold';
-    if (from.isCompleted && to.isCompleted) return 'done';
-    if (to.isAvailable && !to.isCompleted) return 'gold';
+    this.#edgeTick();
+    const fromDone = this.#arrowDone(from);
+    const toDone = this.#arrowDone(to);
+    if (fromDone && toDone) return 'done';
+    if (to.isAvailable && !toDone) return 'gold';
     return 'metal';
+  }
+
+  // Выполнение уже видно на стрелке
+  #arrowDone(quest: Quest): boolean {
+    if (!quest.isCompleted) return false;
+    const pressedAt = quest.pressedAt;
+    if (pressedAt == null) return true;
+    return Date.now() >= pressedAt + EDGE_DONE_DELAY_MS;
+  }
+
+  // Таймер покраски стрелки после вмятины
+  #armEdgeTimers(pending: Quest[]): void {
+    const ids = new Set(pending.map((quest) => quest.id));
+    for (const [id, timer] of this.#edgeTimers) {
+      if (ids.has(id)) continue;
+      window.clearTimeout(timer);
+      this.#edgeTimers.delete(id);
+    }
+    for (const quest of pending) {
+      if (this.#edgeTimers.has(quest.id) || quest.pressedAt == null) continue;
+      const wait = quest.pressedAt + EDGE_DONE_DELAY_MS - Date.now();
+      const timer = window.setTimeout(() => {
+        this.#edgeTimers.delete(quest.id);
+        this.#edgeTick.update((tick) => tick + 1);
+      }, Math.max(0, wait));
+      this.#edgeTimers.set(quest.id, timer);
+    }
   }
 
   #edge(id: string, fromX: number, fromY: number, toX: number, toY: number, endGap: number, tone: QuestEdgeTone = 'metal'): QuestEdge | null {

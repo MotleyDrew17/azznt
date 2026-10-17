@@ -27,6 +27,7 @@ export interface QuestSnapshot {
   zIndex: number;
   layer: number | null;
   isRoot: boolean;
+  isCompleted?: boolean;
   priority?: QuestPriority;
   requiredSkills?: QuestRequiredSkill[];
   requiredSkill?: QuestRequiredSkill;
@@ -34,16 +35,20 @@ export interface QuestSnapshot {
 
 export function parseQuestSnapshots(text: string): QuestSnapshot[] | null {
   try {
-    const data: unknown = JSON.parse(text);
-    if (!Array.isArray(data) || !data.every(isQuestSnapshot)) return null;
-    if (!linksResolve(data)) return null;
-    return data.map((quest) => ({
-      ...quest,
-      requiredSkills: quest.requiredSkills ?? (quest.requiredSkill ? [quest.requiredSkill] : undefined),
-    }));
+    return readQuestSnapshots(JSON.parse(text));
   } catch {
     return null;
   }
+}
+
+// Список квестов из уже разобранного JSON
+export function readQuestSnapshots(value: unknown): QuestSnapshot[] | null {
+  if (!Array.isArray(value) || !value.every(isQuestSnapshot)) return null;
+  if (!linksResolve(value)) return null;
+  return value.map((quest) => ({
+    ...quest,
+    requiredSkills: quest.requiredSkills ?? (quest.requiredSkill ? [quest.requiredSkill] : undefined),
+  }));
 }
 
 function isQuestSnapshot(value: unknown): value is QuestSnapshot {
@@ -60,6 +65,7 @@ function isQuestSnapshot(value: unknown): value is QuestSnapshot {
     && Number.isFinite(quest.zIndex)
     && (quest.layer === null || Number.isFinite(quest.layer))
     && typeof quest.isRoot === 'boolean'
+    && (quest.isCompleted === undefined || typeof quest.isCompleted === 'boolean')
     && isOptionalPriority(quest.priority)
     && isOptionalRequiredSkills(quest.requiredSkills)
     && isRequiredSkill(quest.requiredSkill);

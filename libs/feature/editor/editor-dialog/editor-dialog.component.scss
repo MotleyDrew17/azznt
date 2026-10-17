@@ -1,3 +1,4 @@
+// Список требуемых навыков
 .editor-dialog__skills {
   display: flex;
   flex-direction: column;
@@ -7,6 +8,7 @@
   list-style: none;
 }
 
+// Строка: навык, уровень, удаление
 .editor-dialog__skill-row {
   display: flex;
   align-items: center;
@@ -18,6 +20,7 @@
   }
 }
 
+// Поле уровня
 .editor-dialog__level {
   display: flex;
   align-items: center;
@@ -31,6 +34,7 @@
   }
 }
 
+// Удалить навык
 .editor-dialog__remove {
   display: grid;
   place-items: center;
@@ -50,6 +54,7 @@
   }
 }
 
+// Крестик удаления
 .editor-dialog__remove-icon {
   width: 14px;
   height: 14px;
@@ -58,6 +63,7 @@
   mask-image: url('../../../../src/app/assets/icons/close.svg');
 }
 
+// Добавить навык
 .editor-dialog__add {
   align-self: flex-start;
   font-size: 16px;

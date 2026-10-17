@@ -5,7 +5,12 @@ export const routes: Routes = [
         path: '', 
         loadComponent: () => import('../../libs/feature/shell/shell.component').then(m => m.ShellComponent),
         children: [
+            { path: '', redirectTo: 'storylines', pathMatch: 'full' },
             { path: 'editor', redirectTo: '/quest-tree', pathMatch: 'full' },
+            {
+                path: 'storylines',
+                loadComponent: () => import('../../libs/feature/storylines/storylines.component').then(m => m.StorylinesComponent)
+            },
             {
                 path: 'quest-tree',
                 loadComponent: () => import('../../libs/feature/editor/editor.component').then(m => m.EditorComponent)

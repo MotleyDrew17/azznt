@@ -1,0 +1,12 @@
+<button type="button" class="storyline__open interactive" (click)="open.emit()">
+  {{ name() }}
+</button>
+<button
+  type="button"
+  class="storyline__delete interactive"
+  appHint="Удалить"
+  aria-label="Удалить"
+  (click)="onRemove($event)"
+>
+  <span class="storyline__icon"></span>
+</button>

@@ -1,0 +1,336 @@
+:host {
+  display: flex;
+  flex: none;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  padding: 12px 0;
+}
+
+// Панель списка квестов. На уровень выше поля редактора
+.quest-menu {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  border-radius: 12px;
+  background: var(--color-lvl-1);
+  transition: width 0.25s ease;
+
+  &_collapsed {
+    width: 40px;
+  }
+}
+
+// Строка сворачивания и поиска
+.quest-menu__bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding-right: 8px;
+}
+
+// Свернуть меню влево
+.quest-menu__toggle {
+  --surface: transparent;
+  --surface-border: transparent;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--color-parchment);
+  cursor: pointer;
+}
+
+// Поиск квестов
+.quest-menu__search {
+  flex: 1;
+  min-width: 0;
+}
+
+// Кнопка панели фильтров
+.quest-menu__filters-button {
+  flex: none;
+  font-size: 14px;
+
+  &_on {
+    color: var(--color-gold);
+  }
+}
+
+// Закрыть панель фильтров
+.quest-menu__shade {
+  position: absolute;
+  z-index: 2;
+  inset: 40px 0 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+// Панель фильтров
+.quest-menu__panel {
+  position: absolute;
+  z-index: 3;
+  top: 48px;
+  right: 8px;
+  left: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--color-silver) 35%, transparent);
+  border-radius: 10px;
+  background: var(--color-bg);
+}
+
+.quest-menu__checks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+// Список квестов
+// Число квестов в списке
+.quest-menu__count {
+  flex: none;
+  margin: 0;
+  padding: 8px 12px 4px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.quest-menu__list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  margin: 0;
+  padding: 0 8px 12px;
+  overflow: auto;
+  list-style: none;
+}
+
+.quest-menu__item {
+  display: flex;
+  flex-direction: column;
+}
+
+// Строка квеста
+.quest-menu__row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 32px;
+  border-radius: 8px;
+
+  &_picked {
+    background: var(--color-lvl-2);
+  }
+}
+
+// Название цветом приоритета
+.quest-menu__name {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+// Лупа, раскрытие, редактирование, удаление
+.quest-menu__icon {
+  --surface: transparent;
+  --surface-border: transparent;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-parchment);
+  cursor: pointer;
+}
+
+.quest-menu__glyph {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+
+  &_chevron {
+    mask-image: url('../../../../src/app/assets/icons/chevron.svg');
+  }
+
+  &_right {
+    transform: rotate(180deg);
+  }
+
+  &_down {
+    transform: rotate(-90deg);
+  }
+
+  &_up {
+    transform: rotate(90deg);
+  }
+
+  &_loupe {
+    mask-image: url('../../../../src/app/assets/icons/search.svg');
+  }
+
+  &_edit {
+    mask-image: url('../../../../src/app/assets/icons/edit.svg');
+  }
+
+  &_delete {
+    mask-image: url('../../../../src/app/assets/icons/delete.svg');
+  }
+}
+
+// Подсказка квеста под строкой
+.quest-menu__details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 4px 8px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--color-lvl-1);
+}
+
+.quest-menu__undo {
+  align-self: flex-start;
+  font-size: 13px;
+}
+
+.quest-menu__description,
+.quest-menu__skill,
+.quest-menu__priority {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.quest-menu__description,
+.quest-menu__skill {
+  color: var(--color-text-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+// Ссылка на навык
+.quest-menu__skill-link {
+  color: var(--color-gold);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.quest-menu__priority {
+  font-weight: 700;
+}
+
+// Кнопка «Выполнить»
+.quest-menu__complete {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--color-skill-metal-light) 0%, var(--color-skill-metal) 46%, var(--color-skill-metal-dark) 100%);
+  color: var(--color-parchment);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 42%),
+    inset 0 -2px 0 rgb(0 0 0 / 38%),
+    0 2px 0 var(--color-skill-metal-dark);
+
+  &:disabled {
+    pointer-events: none;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    pointer-events: none;
+    background: linear-gradient(155deg, var(--color-skill-metal-light) 0%, var(--color-skill-metal) 32%, var(--color-skill-metal-dark) 58%, var(--color-skill-metal-mid) 100%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+}
+
+// Выполненная кнопка
+.quest-menu__complete_done {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-quest-done-dark) 42%, black) 0%,
+    color-mix(in srgb, var(--color-quest-done-dark) 68%, black) 58%,
+    color-mix(in srgb, var(--color-quest-done) 48%, black) 100%
+  );
+  box-shadow:
+    inset 0 6px 8px rgb(0 0 0 / 72%),
+    inset 0 -1px 1px rgb(255 255 255 / 14%);
+
+  &::before {
+    background: linear-gradient(155deg, var(--color-quest-done-light) 0%, var(--color-quest-done) 32%, var(--color-quest-done-dark) 58%, var(--color-quest-done-mid) 100%);
+  }
+}
+
+// Недоступная кнопка
+.quest-menu__complete_locked {
+  background: linear-gradient(180deg, var(--color-skill-metal-dark) 0%, color-mix(in srgb, var(--color-skill-metal-dark) 55%, black) 100%);
+  color: color-mix(in srgb, var(--color-parchment) 36%, var(--color-skill-metal-dark));
+  box-shadow: none;
+}
+
+.quest-menu__complete-icon {
+  position: relative;
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../../../../src/app/assets/icons/check.svg');
+}
+
+.quest-menu__empty {
+  padding: 8px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}

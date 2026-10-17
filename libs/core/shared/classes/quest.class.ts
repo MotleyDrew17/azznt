@@ -33,6 +33,7 @@ export class Quest {
   #name: string = '';
   #description: string = '';
   #isCompleted: boolean = false;
+  #pressedAt?: number;
   #ancestors: Quest[] = [];
   #layer: number | null = 0; // null - квест вне графа
   #isRoot: boolean = false;
@@ -148,8 +149,14 @@ export class Quest {
     return this.#isCompleted;
   }
 
-  complete(){
+  get pressedAt(): number | undefined {
+    return this.#pressedAt;
+  }
+
+  // Отметить выполненным. mark — только что нажали, стрелка подождёт вмятину
+  complete(mark = false){
     this.#isCompleted = true;
+    if (mark) this.#pressedAt = Date.now();
   }
 
   /**
@@ -199,10 +206,16 @@ export class Quest {
     const child = this.#detachChild(id);
     if (!child) return false;
 
-    // child удаляет у себя this из parents — приватным методом!
+    // child удаляет у себя this из parents — приватным методом
     child.#detachParent(this.#id);
 
     return true;
+  }
+
+  // Снять выполнение
+  uncomplete(){
+    this.#isCompleted = false;
+    this.#pressedAt = undefined;
   }
 
   toSnapshot(): QuestSnapshot {
@@ -217,6 +230,7 @@ export class Quest {
       zIndex: this.#zIndex,
       layer: this.#layer,
       isRoot: this.#isRoot,
+      isCompleted: this.#isCompleted || undefined,
       priority: this.#priority,
       requiredSkills: this.#requiredSkills.length
         ? this.#requiredSkills.map((item) => ({ skillId: item.skill.id, level: item.level }))

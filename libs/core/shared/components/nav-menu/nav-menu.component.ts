@@ -29,8 +29,8 @@ export class NavMenuComponent {
   readonly routes: NavRoute[] = [
     {
       label: 'Сюжетные линии',
-      path: '/quest-tree',
-      active: (path) => path === '/quest-tree' || path === '/editor',
+      path: '/storylines',
+      active: (path) => path === '/storylines' || path === '/quest-tree' || path === '/editor',
     },
     {
       label: 'Навыки',

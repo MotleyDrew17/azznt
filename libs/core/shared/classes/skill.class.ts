@@ -148,6 +148,7 @@ export class Skill {
         };
     }
 
+    // Обновить навык на месте
     applySnapshot(snapshot: SkillSnapshot): void {
         const level = snapshot.level ? Level.fromSnapshot(snapshot.level) : null;
         this.#id = snapshot.id;
@@ -162,6 +163,7 @@ export class Skill {
         }
     }
 
+    // Собрать навык из снимка
     static fromSnapshot(snapshot: SkillSnapshot): Skill {
         const skill = new Skill({
             name: snapshot.name,
@@ -372,7 +374,7 @@ export class Level {
     }
 
     set current_exp(current_exp: number) {
-        this.#current_exp = current_exp;
+        this.#current_exp = roundExp(Math.max(0, current_exp));
     }
 
     update(data: CreateSkillData): void {
@@ -407,12 +409,13 @@ export class Level {
     }
 
     addExp(exp: number) {
-        this.#current_exp = roundExp(this.#current_exp + exp);
+        this.#setExp(this.#current_exp + exp);
         this.handleNextOrPrevLevel();
     }
 
+    // Опыт при списании не уходит ниже нуля
     removeExp(exp: number) {
-        this.#current_exp = roundExp(this.#current_exp - exp);
+        this.#setExp(this.#current_exp - exp);
         this.handleNextOrPrevLevel();
     }
 
@@ -438,6 +441,11 @@ export class Level {
             if (this.#next_exp <= this.#prev_exp) break;
             guard++;
         }
+    }
+
+    // Опыт не бывает отрицательным
+    #setExp(value: number): void {
+        this.#current_exp = roundExp(Math.max(0, value));
     }
 
     #applyThresholds(): void {
@@ -482,7 +490,7 @@ export class Level {
         const base = snapshot.base_exp ?? storedBaseExp(snapshot);
         const level = new Level(base, snapshot.coefficient, false, 0, 0);
         level.#score = Math.max(1, snapshot.score);
-        level.#current_exp = snapshot.current_exp;
+        level.#setExp(snapshot.current_exp);
         if (legacy) {
             level.#applyThresholds();
             level.handleNextOrPrevLevel();

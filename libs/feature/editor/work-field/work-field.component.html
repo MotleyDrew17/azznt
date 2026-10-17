@@ -93,13 +93,21 @@
   >
     <span class="quest-card__bridge"></span>
     <div class="quest-card__body">
+      <!-- Снять выполнение, только в редакторе -->
+      @if (mode() === FieldMode.Editor) {
+        <button
+          type="button"
+          class="text-button quest-card__undo"
+          [appDisabled]="!quest.isCompleted"
+          (click)="resetQuest(quest)"
+        >Отменить</button>
+      }
       @if (quest.name.trim()) {
         <p class="quest-card__name">{{ quest.name }}</p>
       }
       @if (quest.description.trim()) {
         <p class="quest-card__description">{{ quest.description }}</p>
       }
-      <p class="quest-card__priority">{{ priorityLabel(quest.priority) }}</p>
       @for (required of quest.requiredSkills; track required.skill.id + required.level) {
         <p class="quest-card__skill">
           Навык:
@@ -107,6 +115,21 @@
           {{ required.level }} уровень. Текущий {{ required.skill.score }}
         </p>
       }
+      <!-- Выполнить квест -->
+      <button
+        type="button"
+        class="quest-card__complete"
+        [class.quest-card__complete_done]="quest.isCompleted"
+        [class.quest-card__complete_locked]="!quest.isCompleted && !quest.isAvailable"
+        [appDisabled]="quest.isCompleted || !quest.isAvailable"
+        (click)="completeQuest(quest)"
+      >
+        @if (quest.isCompleted) {
+          <span class="quest-card__complete-icon"></span>
+        }
+        <span class="quest-card__complete-label">{{ quest.isCompleted ? 'Выполнено' : 'Выполнить' }}</span>
+      </button>
+      <p class="quest-card__priority">{{ priorityLabel(quest.priority) }}</p>
     </div>
   </div>
 }
@@ -143,6 +166,7 @@
 }
 
 @for (quest of visibleQuests(); track keyOf(quest)) {
+  <!-- Выполненный и недоступный вид -->
   <gm-quest-node
     [quest]="quest"
     [nodeId]="keyOf(quest)"
@@ -153,7 +177,7 @@
     [grabbing]="allows(FieldAction.MoveQuest) && grabbedId() === keyOf(quest)"
     [selected]="selectedQuestId() === quest.id"
     [priority]="quest.priority"
-    [completed]="mode() === FieldMode.View && quest.isCompleted"
-    [available]="mode() !== FieldMode.View || quest.isAvailable"
+    [completed]="quest.isCompleted"
+    [available]="quest.isAvailable"
   />
 }
