@@ -3,7 +3,7 @@
 @mixin thin {
   @supports not selector(::-webkit-scrollbar) {
     scrollbar-width: thin;
-    scrollbar-color: rgb(228 211 180 / 30%) transparent;
+    scrollbar-color: var(--color-scrollbar) transparent;
   }
 
   &::-webkit-scrollbar {
@@ -21,7 +21,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgb(228 211 180 / 30%);
+    background: var(--color-scrollbar);
     border-radius: 999px;
   }
 

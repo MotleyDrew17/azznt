@@ -3,12 +3,12 @@
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 
   &:hover:not(:disabled):not(.is-disabled) {
-    background-color: color-mix(in srgb, white var(--interactive-hover), var(--surface));
-    border-color: color-mix(in srgb, white var(--interactive-hover), var(--surface-border, var(--surface)));
+    background-color: color-mix(in srgb, var(--color-highlight) var(--interactive-hover), var(--surface));
+    border-color: color-mix(in srgb, var(--color-highlight) var(--interactive-hover), var(--surface-border, var(--surface)));
   }
 
   &:active:not(:disabled):not(.is-disabled) {
-    background-color: color-mix(in srgb, white var(--interactive-active), var(--surface));
-    border-color: color-mix(in srgb, white var(--interactive-active), var(--surface-border, var(--surface)));
+    background-color: color-mix(in srgb, var(--color-highlight) var(--interactive-active), var(--surface));
+    border-color: color-mix(in srgb, var(--color-highlight) var(--interactive-active), var(--surface-border, var(--surface)));
   }
 }

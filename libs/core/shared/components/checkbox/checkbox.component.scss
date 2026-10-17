@@ -78,8 +78,8 @@
   transition: var(--field-transition);
 
   .checkbox:hover:not(.is-disabled) & {
-    background-color: color-mix(in srgb, white var(--interactive-hover), var(--color-lvl-1));
-    border-color: color-mix(in srgb, white var(--interactive-hover), var(--color-lvl-3));
+    background-color: color-mix(in srgb, var(--color-highlight) var(--interactive-hover), var(--color-lvl-1));
+    border-color: color-mix(in srgb, var(--color-highlight) var(--interactive-hover), var(--color-lvl-3));
   }
 
   .checkbox:hover:not(.is-disabled) .checkbox__input:checked + & {

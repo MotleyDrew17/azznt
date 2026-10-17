@@ -136,9 +136,9 @@
   margin: -6px 0 0 -6px;
   pointer-events: none;
   background:
-    linear-gradient(#fff6d0, #fff6d0) center / 2px 100% no-repeat,
-    linear-gradient(#fff6d0, #fff6d0) center / 100% 2px no-repeat;
-  filter: drop-shadow(0 0 2px #fff3c4) drop-shadow(0 0 7px #ffd56a);
+    linear-gradient(var(--color-skill-spark), var(--color-skill-spark)) center / 2px 100% no-repeat,
+    linear-gradient(var(--color-skill-spark), var(--color-skill-spark)) center / 100% 2px no-repeat;
+  filter: drop-shadow(0 0 2px var(--color-skill-spark-core)) drop-shadow(0 0 7px var(--color-skill-spark-glow));
   opacity: 0;
   animation: skill-column-spark 1.3s ease-in-out forwards;
 }

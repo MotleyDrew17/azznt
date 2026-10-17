@@ -27,18 +27,18 @@
 
   &_confirm {
     --surface: var(--color-gold);
-    --surface-border: color-mix(in srgb, white var(--interactive-hover), var(--color-gold));
+    --surface-border: color-mix(in srgb, var(--color-highlight) var(--interactive-hover), var(--color-gold));
     color: var(--color-midnight);
 
     &:active:not(:disabled):not(.is-disabled) {
-      background-color: color-mix(in srgb, white 20%, var(--surface));
-      border-color: color-mix(in srgb, white 26%, var(--surface));
+      background-color: color-mix(in srgb, var(--color-highlight) 20%, var(--surface));
+      border-color: color-mix(in srgb, var(--color-highlight) 26%, var(--surface));
     }
   }
 
   &_reject {
     --surface: var(--color-plum);
-    --surface-border: color-mix(in srgb, white var(--interactive-hover), var(--color-plum));
+    --surface-border: color-mix(in srgb, var(--color-highlight) var(--interactive-hover), var(--color-plum));
   }
 
   &_disabled,

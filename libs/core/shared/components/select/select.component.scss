@@ -72,7 +72,7 @@
   list-style: none;
   border: var(--field-border-width) solid var(--color-lvl-3);
   border-radius: var(--field-radius);
-  --select-list-bg: color-mix(in srgb, white 6%, var(--color-bg));
+  --select-list-bg: color-mix(in srgb, var(--color-highlight) 6%, var(--color-bg));
   background: var(--select-list-bg);
   background-clip: padding-box;
   color-scheme: dark;
@@ -95,6 +95,6 @@
   @include interactive.states;
 
   &_selected {
-    background-color: color-mix(in srgb, white var(--interactive-hover), var(--surface));
+    background-color: color-mix(in srgb, var(--color-highlight) var(--interactive-hover), var(--surface));
   }
 }

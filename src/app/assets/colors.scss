@@ -14,12 +14,18 @@
   --color-error: #D98980;
   --color-green: #7DAA86;
 
+  // Блик и тень. Смеси в компонентах берутся отсюда.
+  --color-highlight: #fff;
+  --color-shadow: #000;
+  --color-backdrop: color-mix(in srgb, var(--color-shadow) 50%, transparent);
+  --color-scrollbar: color-mix(in srgb, var(--color-parchment) 30%, transparent);
+
   // Уровни. lvl 0 — непрозрачный фон.
-  // Каждый следующий — белый ещё на 3% альфы поверх родителя.
+  // Каждый следующий — блик ещё на 3% альфы поверх родителя.
   --color-bg: var(--color-midnight);
-  --color-lvl-1: rgb(255 255 255 / 3%);
-  --color-lvl-2: rgb(255 255 255 / 6%);
-  --color-lvl-3: rgb(255 255 255 / 9%);
+  --color-lvl-1: color-mix(in srgb, var(--color-highlight) 3%, transparent);
+  --color-lvl-2: color-mix(in srgb, var(--color-highlight) 6%, transparent);
+  --color-lvl-3: color-mix(in srgb, var(--color-highlight) 9%, transparent);
 
   --color-text: var(--color-parchment);
   --color-text-muted: var(--color-silver);
@@ -31,11 +37,11 @@
 
   // Шкала навыка: колодец, металлическая рамка, золотая рамка наведения, заливка опыта.
   --color-skill-well: #142824;
-  --color-skill-shade: rgb(0 0 0 / 55%);
-  --color-skill-shade-side: rgb(0 0 0 / 35%);
-  --color-skill-shade-side-soft: rgb(0 0 0 / 28%);
-  --color-skill-glint: rgb(255 255 255 / 5%);
-  --color-skill-edge: rgb(255 255 255 / 14%);
+  --color-skill-shade: color-mix(in srgb, var(--color-shadow) 55%, transparent);
+  --color-skill-shade-side: color-mix(in srgb, var(--color-shadow) 35%, transparent);
+  --color-skill-shade-side-soft: color-mix(in srgb, var(--color-shadow) 28%, transparent);
+  --color-skill-glint: color-mix(in srgb, var(--color-highlight) 5%, transparent);
+  --color-skill-edge: color-mix(in srgb, var(--color-highlight) 14%, transparent);
   --color-skill-level-next: color-mix(in srgb, var(--color-parchment) 38%, transparent);
 
   --color-skill-metal-light: #8b9692;
@@ -51,6 +57,11 @@
   --color-skill-rim-light: #f3e6c8;
   --color-skill-rim-deep: #8d7344;
   --color-skill-rim: #e7d7b4;
+
+  // Искра при наборе опыта
+  --color-skill-spark: #fff6d0;
+  --color-skill-spark-core: #fff3c4;
+  --color-skill-spark-glow: #ffd56a;
 
   --color-skill-fill-light: #3ed888;
   --color-skill-fill: #1a9a58;

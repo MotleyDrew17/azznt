@@ -23,9 +23,9 @@
   cursor: pointer;
   background: linear-gradient(180deg, var(--quest-metal-light) 0%, var(--quest-metal) 46%, var(--quest-metal-dark) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 45%),
-    inset 0 -2px 3px rgb(0 0 0 / 35%),
-    0 1px 2px rgb(0 0 0 / 45%);
+    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 45%, transparent),
+    inset 0 -2px 3px color-mix(in srgb, var(--color-shadow) 35%, transparent),
+    0 1px 2px color-mix(in srgb, var(--color-shadow) 45%, transparent);
   transition: box-shadow 0.2s ease;
 
   // Ободок цвета приоритета
@@ -121,28 +121,28 @@
   // Вмятина выполненного квеста
   &_completed {
     box-shadow:
-      inset 0 6px 8px rgb(0 0 0 / 72%),
-      inset 0 -1px 1px rgb(255 255 255 / 14%);
+      inset 0 6px 8px color-mix(in srgb, var(--color-shadow) 72%, transparent),
+      inset 0 -1px 1px color-mix(in srgb, var(--color-highlight) 14%, transparent);
   }
 
   // Недоступный квест
   &_blocked {
     background: linear-gradient(
       180deg,
-      color-mix(in srgb, var(--quest-metal-dark) 42%, black) 0%,
-      color-mix(in srgb, var(--quest-metal-dark) 68%, black) 58%,
-      color-mix(in srgb, var(--quest-metal) 48%, black) 100%
+      color-mix(in srgb, var(--quest-metal-dark) 42%, var(--color-shadow)) 0%,
+      color-mix(in srgb, var(--quest-metal-dark) 68%, var(--color-shadow)) 58%,
+      color-mix(in srgb, var(--quest-metal) 48%, var(--color-shadow)) 100%
     );
     box-shadow:
-      inset 0 6px 8px rgb(0 0 0 / 72%),
-      inset 0 -1px 1px rgb(255 255 255 / 14%);
+      inset 0 6px 8px color-mix(in srgb, var(--color-shadow) 72%, transparent),
+      inset 0 -1px 1px color-mix(in srgb, var(--color-highlight) 14%, transparent);
   }
 
   // Свечение доступного квеста
   &:hover:not(&_blocked):not(&_completed) {
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 45%),
-      inset 0 -2px 3px rgb(0 0 0 / 35%),
+      inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 45%, transparent),
+      inset 0 -2px 3px color-mix(in srgb, var(--color-shadow) 35%, transparent),
       0 0 6px color-mix(in srgb, var(--quest-metal-light) 90%, transparent),
       0 0 16px color-mix(in srgb, var(--quest-metal) 55%, transparent),
       0 0 32px color-mix(in srgb, var(--quest-metal) 28%, transparent);
@@ -159,9 +159,9 @@
   opacity: 0;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--color-quest-done-dark) 42%, black) 0%,
-    color-mix(in srgb, var(--color-quest-done-dark) 68%, black) 58%,
-    color-mix(in srgb, var(--color-quest-done) 48%, black) 100%
+    color-mix(in srgb, var(--color-quest-done-dark) 42%, var(--color-shadow)) 0%,
+    color-mix(in srgb, var(--color-quest-done-dark) 68%, var(--color-shadow)) 58%,
+    color-mix(in srgb, var(--color-quest-done) 48%, var(--color-shadow)) 100%
   );
   transition: opacity 0.9s cubic-bezier(0.22, 0.7, 0.2, 1);
 
