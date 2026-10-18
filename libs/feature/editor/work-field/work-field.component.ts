@@ -742,6 +742,8 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
 
   #hoverTargetId(target: EventTarget | null): string | null {
     if (!(target instanceof Element)) return null;
+    // Алмаз награды не открывает карточку квеста
+    if (target.closest('gm-reward-gem')) return null;
     const nodeId = target.closest('[data-quest-id]')?.getAttribute('data-quest-id');
     if (nodeId) return nodeId;
     return target.closest('[data-quest-card]')?.getAttribute('data-quest-card') ?? null;

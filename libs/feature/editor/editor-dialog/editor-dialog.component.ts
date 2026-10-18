@@ -4,7 +4,7 @@ import { ButtonComponent } from '../../../core/shared/components/button/button.c
 import { SelectComponent } from '../../../core/shared/components/select/select.component';
 import { CheckboxComponent } from '../../../core/shared/components/checkbox/checkbox.component';
 import { AutocompleteComponent } from '../../../core/shared/components/autocomplete/autocomplete.component';
-import { CreateQuestData, QuestRequiredSkill, QuestStreakData } from '../../../core/shared/models/quest.model';
+import { CreateQuestData, QuestRequiredSkill, QuestRewardData, QuestStreakData } from '../../../core/shared/models/quest.model';
 import { form, required, FormField } from '@angular/forms/signals';
 import { ClearInputDirective } from '../../../core/shared/directives/clear-input.directive';
 import { DisabledDirective } from '../../../core/shared/directives/disabled.directive';
@@ -12,7 +12,8 @@ import { HintDirective } from '../../../core/shared/directives/hint.directive';
 import { GraphService } from '../../../core/shared/services/graph.service';
 import { DialogService } from '../../../core/shared/services/dialog.service';
 import { SkillService } from '../../../core/shared/services/skill.service';
-import { QUEST_PRIORITY_LABEL, QuestPriority } from '../../../core/shared/classes/quest.class';
+import { QUEST_PRIORITY_LABEL, QuestPriority, expRewardCopy } from '../../../core/shared/classes/quest.class';
+import { roundExp } from '../../../core/shared/classes/skill.class';
 
 export enum EditorDialogKind {
   Storyline = 'storyline',
@@ -34,6 +35,24 @@ interface SkillDraft {
   key: string;
   skillId: string | null;
   level: number;
+}
+
+type RewardKind = 'custom' | 'exp';
+
+interface RewardSkillDraft {
+  key: string;
+  skillId: string | null;
+  experience: number;
+}
+
+interface RewardDraft {
+  key: string;
+  id: string;
+  kind: RewardKind;
+  name: string;
+  description: string;
+  skills: RewardSkillDraft[];
+  isTaken: boolean;
 }
 
 function positiveInt(value: number): boolean {
@@ -63,6 +82,7 @@ export class EditorDialogComponent {
 
   readonly EditorDialogKind = EditorDialogKind;
   readonly priorityOptions = Object.values(QUEST_PRIORITY_LABEL);
+  readonly rewardKinds = ['Своя', 'Опыт'];
   kind = this.data.kind;
   relation = signal<QuestRelation>(this.#initialRelation());
   priority = signal<QuestPriority>(this.data.priority ?? QuestPriority.Common);
@@ -74,6 +94,8 @@ export class EditorDialogComponent {
   durationDays = signal(1);
   perDay = signal(1);
   successDays = signal(1);
+  rewardOn = signal(false);
+  rewardDrafts = signal<RewardDraft[]>([]);
   private streakStartedAt: number | undefined;
   private skills = computed(() => this.skillService.skills());
   readonly skillInvalid = computed(() => {
@@ -110,6 +132,19 @@ export class EditorDialogComponent {
     }
     return 'Успешных дней не может быть больше длительности';
   });
+  readonly rewardInvalid = computed(() => {
+    if (!this.rewardOn()) return false;
+    const rewards = this.rewardDrafts();
+    if (!rewards.length) return true;
+    return rewards.some((reward) => reward.kind === 'custom'
+      ? !reward.name.trim() || !reward.description.trim()
+      : !reward.skills.length || reward.skills.some((row) => !row.skillId || !positiveInt(row.experience)));
+  });
+  readonly rewardError = computed(() => {
+    if (!this.rewardOn() || !this.rewardInvalid()) return '';
+    if (!this.rewardDrafts().length) return 'Добавьте награду';
+    return 'Заполните награду: своя — название и описание, опыт — навык и количество';
+  });
 
   get title(): string {
     if (this.kind !== EditorDialogKind.Relation) return TITLES[this.kind];
@@ -142,6 +177,20 @@ export class EditorDialogComponent {
       this.successDays.set(streak.mustBeDoneCount);
       this.streakStartedAt = streak.startedAtTimestamp;
     }
+    this.rewardDrafts.set((quest?.rewards ?? []).map((reward) => ({
+      key: crypto.randomUUID(),
+      id: reward.id,
+      kind: reward.is_exp ? 'exp' : 'custom',
+      name: reward.is_exp ? '' : reward.name,
+      description: reward.is_exp ? '' : reward.description,
+      isTaken: reward.isTaken,
+      skills: (reward.skills ?? []).map((item) => ({
+        key: crypto.randomUUID(),
+        skillId: item.skill.id,
+        experience: item.experience,
+      })),
+    })));
+    this.rewardOn.set(this.rewardDrafts().length > 0);
     effect(() => {
       const id = this.exerciseId();
       if (!id || !this.streakOn()) return;
@@ -233,6 +282,119 @@ export class EditorDialogComponent {
     return positiveInt(value);
   }
 
+  // Включить награды и сразу дать первую строку
+  setRewardOn(on: boolean): void {
+    this.rewardOn.set(on);
+    if (on && !this.rewardDrafts().length) this.addReward();
+  }
+
+  rewardKindLabel(reward: RewardDraft): string {
+    return reward.kind === 'exp' ? 'Опыт' : 'Своя';
+  }
+
+  // Своя награда или опыт навыков
+  setRewardKind(key: string, label: string): void {
+    const kind: RewardKind = label === 'Опыт' ? 'exp' : 'custom';
+    this.rewardDrafts.update((rows) => rows.map((row) => {
+      if (row.key !== key) return row;
+      const skills = kind === 'exp' && !row.skills.length
+        ? [{ key: crypto.randomUUID(), skillId: null, experience: 1 }]
+        : row.skills;
+      return { ...row, kind, skills };
+    }));
+  }
+
+  // Текст названия и описания
+  setRewardText(key: string, field: 'name' | 'description', event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) return;
+    const value = target.value;
+    this.rewardDrafts.update((rows) => rows.map((row) => row.key === key ? { ...row, [field]: value } : row));
+  }
+
+  // Ещё одна награда
+  addReward(): void {
+    this.rewardDrafts.update((rows) => [...rows, {
+      key: crypto.randomUUID(),
+      id: crypto.randomUUID(),
+      kind: 'custom',
+      name: '',
+      description: '',
+      skills: [],
+      isTaken: false,
+    }]);
+  }
+
+  // Удалить награду
+  removeReward(key: string): void {
+    this.rewardDrafts.update((rows) => rows.filter((row) => row.key !== key));
+  }
+
+  // Навыки, которые ещё можно выбрать в награде
+  rewardSkillOptions(reward: RewardDraft, row: RewardSkillDraft): string[] {
+    const taken = new Set(reward.skills.filter((item) => item.key !== row.key && item.skillId).map((item) => item.skillId));
+    return this.skills()
+      .filter((skill) => skill.id === row.skillId || !taken.has(skill.id))
+      .map((skill) => skill.name);
+  }
+
+  rewardSkillLabel(row: RewardSkillDraft): string | null {
+    if (!row.skillId) return null;
+    return this.skills().find((skill) => skill.id === row.skillId)?.name ?? null;
+  }
+
+  // Можно ли добавить ещё навык в награду
+  canAddRewardSkill(reward: RewardDraft): boolean {
+    return reward.skills.length < this.skills().length;
+  }
+
+  // Строка навыка в награде опытом
+  addRewardSkill(rewardKey: string): void {
+    this.rewardDrafts.update((rows) => rows.map((row) => row.key === rewardKey
+      ? { ...row, skills: [...row.skills, { key: crypto.randomUUID(), skillId: null, experience: 1 }] }
+      : row));
+  }
+
+  // Удалить навык из награды
+  removeRewardSkill(rewardKey: string, skillKey: string): void {
+    this.rewardDrafts.update((rows) => rows.map((row) => row.key === rewardKey
+      ? { ...row, skills: row.skills.filter((skill) => skill.key !== skillKey) }
+      : row));
+  }
+
+  // Выбрать навык награды
+  setRewardSkill(rewardKey: string, skillKey: string, name: string): void {
+    const reward = this.rewardDrafts().find((row) => row.key === rewardKey);
+    if (!reward) return;
+    const taken = new Set(reward.skills.filter((row) => row.key !== skillKey).map((row) => row.skillId));
+    const skill = this.skills().find((item) => item.name === name && !taken.has(item.id));
+    if (!skill) return;
+    this.rewardDrafts.update((rows) => rows.map((row) => row.key === rewardKey
+      ? { ...row, skills: row.skills.map((item) => item.key === skillKey ? { ...item, skillId: skill.id } : item) }
+      : row));
+  }
+
+  // Количество опыта за навык
+  setRewardExperience(rewardKey: string, skillKey: string, event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    const experience = Number(target.value);
+    this.rewardDrafts.update((rows) => rows.map((row) => row.key === rewardKey
+      ? { ...row, skills: row.skills.map((item) => item.key === skillKey ? { ...item, experience } : item) }
+      : row));
+  }
+
+  // Как будет звучать награда опытом
+  rewardPreview(reward: RewardDraft): string {
+    const items = reward.skills.flatMap((row) => {
+      const name = this.rewardSkillLabel(row);
+      if (!name || !positiveInt(row.experience)) return [];
+      return [{ name, experience: row.experience }];
+    });
+    if (!items.length) return '';
+    return expRewardCopy(items).description;
+  }
+
   setRelation(label: string): void {
     if (this.#anchorIsRoot()) {
       this.relation.set('previous');
@@ -242,7 +404,7 @@ export class EditorDialogComponent {
   }
 
   submit() {
-    if (this.skillInvalid() || this.streakInvalid()) return;
+    if (this.skillInvalid() || this.streakInvalid() || this.rewardInvalid()) return;
     const fields = this.#questFields();
     switch (this.kind) {
       case EditorDialogKind.Storyline:
@@ -278,6 +440,7 @@ export class EditorDialogComponent {
       priority: this.priority(),
       requiredSkills: this.#requiredSkills(),
       streak: this.#streakData(),
+      rewards: this.#rewardData(),
       pos_x: this.data.pos_x,
       pos_y: this.data.pos_y,
     };
@@ -294,6 +457,36 @@ export class EditorDialogComponent {
       mustBeDoneCount: this.successDays(),
       startedAt: this.streakStartedAt,
     };
+  }
+
+  // Награды, если чекбокс включён
+  #rewardData(): QuestRewardData[] | null {
+    if (!this.rewardOn()) return null;
+    return this.rewardDrafts().map((reward) => {
+      if (reward.kind === 'custom') {
+        return {
+          id: reward.id,
+          name: reward.name.trim(),
+          description: reward.description.trim(),
+          is_exp: false,
+          isTaken: reward.isTaken || undefined,
+        };
+      }
+      const skills = reward.skills.flatMap((row) => {
+        const name = row.skillId ? this.skills().find((skill) => skill.id === row.skillId)?.name : undefined;
+        if (!row.skillId || !name || !positiveInt(row.experience)) return [];
+        return [{ skillId: row.skillId, experience: roundExp(row.experience), name }];
+      });
+      const copy = expRewardCopy(skills);
+      return {
+        id: reward.id,
+        name: copy.name,
+        description: copy.description,
+        is_exp: true,
+        isTaken: reward.isTaken || undefined,
+        skills: skills.map(({ skillId, experience }) => ({ skillId, experience })),
+      };
+    });
   }
 
   // Навыки для сохранения

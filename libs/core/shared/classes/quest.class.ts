@@ -1,6 +1,6 @@
 import { QuestSnapshot } from "../models/quest.model";
 import { createsCycle } from "../services/graph.utils";
-import { Exercise, Skill, startOfLocalDay } from "./skill.class";
+import { Exercise, roundExp, Skill, startOfLocalDay } from "./skill.class";
 
 export const QUEST_CYCLE_ERROR = 'Такая связь замкнёт цикл.';
 
@@ -29,6 +29,24 @@ export interface StreakDay {
   was_done: boolean;
   must_be_done: number;
   done_count: number;
+}
+
+export interface Reward {
+  id: string;
+  name: string;
+  is_exp: boolean;
+  description: string;
+  skills?: { skill: Skill; experience: number }[];
+  isTaken: boolean;
+}
+
+// Название и описание награды опытом
+export function expRewardCopy(items: { name: string; experience: number }[]): { name: string; description: string } {
+  const lines = items.map((item) => `+${roundExp(item.experience)} опыта за навык «${item.name}»`);
+  return {
+    name: lines.join(', '),
+    description: `${lines.join('. ')}.`,
+  };
 }
 
 export class Streak {
@@ -158,6 +176,7 @@ export class Quest {
   #priority: QuestPriority = QuestPriority.Common;
   #streak: Streak | null = null;
   #streakFailed = false;
+  #rewards: Reward[] = [];
 
   constructor() {
     this.#id = crypto.randomUUID();
@@ -271,8 +290,46 @@ export class Quest {
     this.#requiredSkills = skills;
   }
 
+  get rewards(): Reward[] {
+    return this.#rewards;
+  }
+
+  set rewards(rewards: Reward[]) {
+    this.#rewards = rewards;
+  }
+
+  addReward(reward: Reward): string | null {
+    this.#rewards.push(reward);
+    return null;
+  }
+
+  removeReward(id: string): boolean {
+    const index = this.#rewards.findIndex(reward => reward.id === id);
+    if (index === -1) return false;
+    this.#rewards.splice(index, 1);
+    return true;
+  }
+
+  // Забрать награду один раз
+  takeReward(id: string): boolean {
+    const reward = this.#rewards.find(reward => reward.id === id);
+    if (!reward || reward.isTaken) return false;
+    reward.isTaken = true;
+    if (reward.is_exp) {
+      reward.skills?.forEach(skill => {
+        skill.skill.addExperience(skill.experience);
+      });
+    }
+    return true;
+  }
+
   get isCompleted(): boolean{
     return this.#isCompleted;
+  }
+
+  // Награду можно забрать после выполнения
+  get rewardClaimable(): boolean {
+    return this.#streak ? this.isStreakSuccess : this.#isCompleted;
   }
 
   get pressedAt(): number | undefined {
@@ -416,6 +473,16 @@ export class Quest {
       priority: this.#priority,
       requiredSkills: this.#requiredSkills.length
         ? this.#requiredSkills.map((item) => ({ skillId: item.skill.id, level: item.level }))
+        : undefined,
+      rewards: this.#rewards.length
+        ? this.#rewards.map((reward) => ({
+          id: reward.id,
+          name: reward.name,
+          description: reward.description,
+          is_exp: reward.is_exp,
+          isTaken: reward.isTaken || undefined,
+          skills: reward.skills?.map((item) => ({ skillId: item.skill.id, experience: item.experience })),
+        }))
         : undefined,
       streak: this.#streak?.exercise ? {
         exerciseId: this.#streak.exercise.id,

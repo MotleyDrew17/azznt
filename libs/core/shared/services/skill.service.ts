@@ -140,6 +140,12 @@ export class SkillService {
     return gained;
   }
 
+  // Сохранить навыки после награды опытом
+  persist(): void {
+    this.skills.update((skills) => [...skills]);
+    this.#save();
+  }
+
   #save(): void {
     this.user.setSkills(this.skills().map((skill) => skill.toSnapshot()));
   }

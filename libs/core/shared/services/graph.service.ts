@@ -1,6 +1,6 @@
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
-import {Quest, QUEST_CYCLE_ERROR, Streak} from '../classes/quest.class';
-import { CreateQuestData, parseQuestSnapshots, QuestRequiredSkill, QuestSnapshot, QuestStreakData } from '../models/quest.model';
+import {Quest, QUEST_CYCLE_ERROR, Reward, Streak, expRewardCopy} from '../classes/quest.class';
+import { CreateQuestData, parseQuestSnapshots, QuestRequiredSkill, QuestRewardData, QuestSnapshot, QuestStreakData } from '../models/quest.model';
 import { Exercise, Skill } from '../classes/skill.class';
 import { UserService } from './user.service';
 import { SkillService } from './skill.service';
@@ -59,6 +59,7 @@ export class GraphService {
     if (data.priority !== undefined) quest.priority = data.priority;
     this.#applyRequiredSkills(quest, data.requiredSkills);
     this.#applyStreak(quest, data.streak);
+    this.#applyRewards(quest, data.rewards);
     if (data.pos_x !== undefined) quest.pos_x = data.pos_x;
     if (data.pos_y !== undefined) quest.pos_y = data.pos_y;
     const cyclicBefore = hasCycle(this.questsList);
@@ -133,6 +134,15 @@ export class GraphService {
     this.saveGraphToStorage();
   }
 
+  // Забрать награду выполненного квеста
+  takeReward(questId: string, rewardId: string): void {
+    const quest = this.#questsMap[questId];
+    if (!quest?.rewardClaimable || !quest.takeReward(rewardId)) return;
+    this.skillService.persist();
+    this.listVersion.update((version) => version + 1);
+    this.saveGraphToStorage();
+  }
+
   // Снять выполнение квеста
   resetCompletedQuest(id: string): void {
     const quest = this.#questsMap[id];
@@ -142,7 +152,7 @@ export class GraphService {
     this.saveGraphToStorage();
   }
 
-  updateQuest(id: string, data: Pick<CreateQuestData, 'name' | 'description' | 'priority' | 'requiredSkills' | 'streak'>): void {
+  updateQuest(id: string, data: Pick<CreateQuestData, 'name' | 'description' | 'priority' | 'requiredSkills' | 'streak' | 'rewards'>): void {
     const quest = this.#questsMap[id];
     if (!quest) return;
 
@@ -151,6 +161,7 @@ export class GraphService {
     if (data.priority !== undefined) quest.priority = data.priority;
     this.#applyRequiredSkills(quest, data.requiredSkills);
     if (data.streak !== undefined) this.#applyStreak(quest, data.streak);
+    if (data.rewards !== undefined) this.#applyRewards(quest, data.rewards);
     this.listVersion.update((version) => version + 1);
     this.saveGraphToStorage();
     this.syncStreaks();
@@ -319,6 +330,39 @@ export class GraphService {
     quest.requiredSkills = this.#resolveRequiredSkills(required ?? []);
   }
 
+  // Награды квеста: своя или опыт навыков
+  #applyRewards(quest: Quest, data: QuestRewardData[] | null | undefined): void {
+    if (!data?.length) {
+      quest.rewards = [];
+      return;
+    }
+    quest.rewards = data.flatMap((item): Reward[] => {
+      if (!item.is_exp) {
+        return [{
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          is_exp: false,
+          isTaken: !!item.isTaken,
+        }];
+      }
+      const skills = (item.skills ?? []).flatMap((row) => {
+        const skill = this.skillService.skills().find((entry) => entry.id === row.skillId);
+        return skill ? [{ skill, experience: row.experience }] : [];
+      });
+      if (!skills.length) return [];
+      const copy = expRewardCopy(skills.map((row) => ({ name: row.skill.name, experience: row.experience })));
+      return [{
+        id: item.id,
+        name: copy.name,
+        description: copy.description,
+        is_exp: true,
+        isTaken: !!item.isTaken,
+        skills,
+      }];
+    });
+  }
+
   // Серия выполнений упражнения на квесте
   #applyStreak(quest: Quest, data: QuestStreakData | null | undefined, keepResult = false): void {
     if (!data) {
@@ -381,6 +425,7 @@ export class GraphService {
       const required = snapshot.requiredSkills ?? (snapshot.requiredSkill ? [snapshot.requiredSkill] : []);
       quest.requiredSkills = this.#resolveRequiredSkills(required);
       this.#applyStreak(quest, snapshot.streak, true);
+      this.#applyRewards(quest, snapshot.rewards);
       if (snapshot.streakFailed) quest.streakFailed = true;
       this.#questsMap[quest.id] = quest;
     });

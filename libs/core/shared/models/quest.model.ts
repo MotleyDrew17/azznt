@@ -13,12 +13,27 @@ export interface QuestStreakData {
   startedAt?: number;
 }
 
+export interface QuestRewardSkillData {
+  skillId: string;
+  experience: number;
+}
+
+export interface QuestRewardData {
+  id: string;
+  name: string;
+  description: string;
+  is_exp: boolean;
+  isTaken?: boolean;
+  skills?: QuestRewardSkillData[];
+}
+
 export interface CreateQuestData {
   name: string;
   description: string;
   priority?: QuestPriority;
   requiredSkills?: QuestRequiredSkill[] | null;
   streak?: QuestStreakData | null;
+  rewards?: QuestRewardData[] | null;
   parent?: Quest;
   child?: Quest;
   pos_x?: number;
@@ -42,6 +57,7 @@ export interface QuestSnapshot {
   requiredSkills?: QuestRequiredSkill[];
   requiredSkill?: QuestRequiredSkill;
   streak?: QuestStreakData;
+  rewards?: QuestRewardData[];
 }
 
 export function parseQuestSnapshots(text: string): QuestSnapshot[] | null {
@@ -81,7 +97,8 @@ function isQuestSnapshot(value: unknown): value is QuestSnapshot {
     && isOptionalPriority(quest.priority)
     && isOptionalRequiredSkills(quest.requiredSkills)
     && isRequiredSkill(quest.requiredSkill)
-    && isStreak(quest.streak);
+    && isStreak(quest.streak)
+    && isRewards(quest.rewards);
 }
 
 function isOptionalPriority(value: unknown): value is QuestPriority | undefined {
@@ -119,6 +136,35 @@ function isStreak(value: unknown): value is QuestStreakData | undefined {
     && Number.isInteger(streak.mustBeDoneCount)
     && streak.mustBeDoneCount >= 1
     && (streak.startedAt === undefined || Number.isFinite(streak.startedAt));
+}
+
+function isRewards(value: unknown): value is QuestRewardData[] | undefined {
+  return value === undefined || (Array.isArray(value) && value.every(isReward));
+}
+
+function isReward(value: unknown): value is QuestRewardData {
+  if (!value || typeof value !== 'object') return false;
+  const reward = value as QuestRewardData;
+  return typeof reward.id === 'string'
+    && reward.id.length > 0
+    && typeof reward.name === 'string'
+    && typeof reward.description === 'string'
+    && typeof reward.is_exp === 'boolean'
+    && (reward.isTaken === undefined || typeof reward.isTaken === 'boolean')
+    && isRewardSkills(reward.skills);
+}
+
+function isRewardSkills(value: unknown): value is QuestRewardSkillData[] | undefined {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every((item) => {
+    if (!item || typeof item !== 'object') return false;
+    const skill = item as QuestRewardSkillData;
+    return typeof skill.skillId === 'string'
+      && skill.skillId.length > 0
+      && Number.isFinite(skill.experience)
+      && skill.experience > 0;
+  });
 }
 
 function isIdList(value: unknown): value is string[] | undefined {

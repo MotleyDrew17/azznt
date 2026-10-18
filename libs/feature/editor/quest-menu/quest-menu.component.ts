@@ -13,6 +13,7 @@ import { GraphService } from '../../../core/shared/services/graph.service';
 import { SkillService } from '../../../core/shared/services/skill.service';
 import { EditorDialogKind } from '../editor-dialog/editor-dialog.component';
 import { StreakChainComponent } from '../streak-chain/streak-chain.component';
+import { RewardGemComponent } from '../reward-gem/reward-gem.component';
 
 const ANY_PRIORITY = 'Любой';
 const SORT_BY_NAME = 'По алфавиту';
@@ -20,7 +21,7 @@ const SORT_BY_PRIORITY = 'По приоритету';
 
 @Component({
   selector: 'gm-quest-menu',
-  imports: [AutocompleteComponent, CheckboxComponent, SelectComponent, DisabledDirective, HintDirective, RouterLink, StreakChainComponent],
+  imports: [AutocompleteComponent, CheckboxComponent, SelectComponent, DisabledDirective, HintDirective, RouterLink, StreakChainComponent, RewardGemComponent],
   templateUrl: './quest-menu.component.html',
   styleUrl: './quest-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -86,6 +87,7 @@ export class QuestMenuComponent {
       if (query && !name.includes(query)) return false;
       if (priority != null && quest.priority !== priority) return false;
       if (skillId && !quest.requiredSkills.some((item) => item.skill.id === skillId)) return false;
+      if (this.reward() && !quest.rewards.length) return false;
       if (!byStatus) return true;
       if (completed && quest.isCompleted) return true;
       if (available && quest.isAvailable && !quest.isCompleted) return true;

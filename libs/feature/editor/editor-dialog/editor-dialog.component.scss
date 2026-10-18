@@ -71,6 +71,40 @@
   margin-top: 10px;
 }
 
+// Список наград
+.editor-dialog__rewards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+// Одна награда
+.editor-dialog__reward {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.editor-dialog__reward-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  gm-select {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+// Как соберётся награда опытом
+.editor-dialog__reward-preview {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
 // Добавить навык
 .editor-dialog__add {
   align-self: flex-start;

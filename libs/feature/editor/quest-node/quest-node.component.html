@@ -21,9 +21,14 @@
   [style.z-index]="quest()?.zIndex"
 >
   <span class="quest-node__fill"></span>
-  @if (mark()) {
-    <span class="quest-node__mark">{{ mark() }}</span>
+  @if (quest()?.rewards?.length) {
+    <gm-reward-gem class="quest-node__reward" [quest]="quest()!" />
   }
+  <span class="quest-node__face">
+    @if (mark()) {
+      <span class="quest-node__mark">{{ mark() }}</span>
+    }
+  </span>
   <!-- Вспышка обода -->
   @for (burst of bursts(); track burst) {
     <span class="quest-node__gleam"></span>

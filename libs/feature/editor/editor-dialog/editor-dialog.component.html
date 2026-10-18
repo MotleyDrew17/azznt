@@ -197,6 +197,105 @@
         </div>
 
         <div class="field">
+          <div class="field__heading">
+            <gm-checkbox
+              controlId="quest-reward"
+              [checked]="rewardOn()"
+              (checkedChange)="setRewardOn($event)"
+            >Добавить награду</gm-checkbox>
+            <button
+              type="button"
+              class="field__hint" appHintWrap
+              appHint="Своя награда — название и описание. Опыт — выбранные навыки и количество опыта за каждый. Название и описание такой награды собираются сами."
+              aria-label="Подсказка"
+            >
+              <span class="field__hint-icon"></span>
+            </button>
+          </div>
+          @if (rewardOn()) {
+            <div class="editor-dialog__rewards">
+              @for (reward of rewardDrafts(); track reward.key) {
+                <div class="editor-dialog__reward">
+                  <div class="editor-dialog__reward-head">
+                    <gm-select
+                      [options]="rewardKinds"
+                      [selected]="rewardKindLabel(reward)"
+                      (selectedChange)="setRewardKind(reward.key, $event)"
+                    />
+                    <button type="button" class="editor-dialog__remove" aria-label="Удалить награду" (click)="removeReward(reward.key)">
+                      <span class="editor-dialog__remove-icon"></span>
+                    </button>
+                  </div>
+                  @if (reward.kind === 'custom') {
+                    <div class="field">
+                      <label class="field__label" [attr.for]="'reward-name-' + reward.key">Название</label>
+                      <input
+                        class="control"
+                        type="text"
+                        [id]="'reward-name-' + reward.key"
+                        [class.control_error]="!reward.name.trim()"
+                        [value]="reward.name"
+                        (input)="setRewardText(reward.key, 'name', $event)"
+                      />
+                    </div>
+                    <div class="field">
+                      <label class="field__label" [attr.for]="'reward-text-' + reward.key">Описание</label>
+                      <textarea
+                        class="control control_area"
+                        rows="3"
+                        [id]="'reward-text-' + reward.key"
+                        [class.control_error]="!reward.description.trim()"
+                        [value]="reward.description"
+                        (input)="setRewardText(reward.key, 'description', $event)"
+                      ></textarea>
+                    </div>
+                  } @else {
+                    <ul class="editor-dialog__skills">
+                      @for (skill of reward.skills; track skill.key) {
+                        <li class="editor-dialog__skill-row">
+                          <gm-select
+                            placeholder="Навык"
+                            [options]="rewardSkillOptions(reward, skill)"
+                            [selected]="rewardSkillLabel(skill)"
+                            (selectedChange)="setRewardSkill(reward.key, skill.key, $event)"
+                          />
+                          <label class="editor-dialog__level">
+                            Опыт
+                            <input
+                              class="control"
+                              type="number"
+                              step="1"
+                              min="1"
+                              aria-label="Опыт"
+                              [class.control_error]="!isPositiveDay(skill.experience)"
+                              [value]="skill.experience"
+                              (input)="setRewardExperience(reward.key, skill.key, $event)"
+                            />
+                          </label>
+                          <button type="button" class="editor-dialog__remove" aria-label="Удалить навык" (click)="removeRewardSkill(reward.key, skill.key)">
+                            <span class="editor-dialog__remove-icon"></span>
+                          </button>
+                        </li>
+                      }
+                    </ul>
+                    @if (canAddRewardSkill(reward)) {
+                      <button type="button" class="text-button editor-dialog__add" (click)="addRewardSkill(reward.key)">+ Добавить навык</button>
+                    }
+                    @if (rewardPreview(reward)) {
+                      <p class="editor-dialog__reward-preview">{{ rewardPreview(reward) }}</p>
+                    }
+                  }
+                </div>
+              }
+              <button type="button" class="text-button editor-dialog__add" (click)="addReward()">+ Добавить награду</button>
+            </div>
+            @if (rewardError()) {
+              <span class="field__error">{{ rewardError() }}</span>
+            }
+          }
+        </div>
+
+        <div class="field">
           <label class="field__label" for="storyline-description">Описание</label>
           <textarea id="storyline-description" class="control control_area" rows="4" [formField]="storylineForm.description"></textarea>
           <span class="field__error"></span>
@@ -207,7 +306,7 @@
 
   <div class="dialog__footer">
     @if (kind === EditorDialogKind.Storyline || kind === EditorDialogKind.Quest || kind === EditorDialogKind.Edit || kind === EditorDialogKind.Relation) {
-      <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="storylineForm().invalid() || skillInvalid() || streakInvalid()">
+      <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="storylineForm().invalid() || skillInvalid() || streakInvalid() || rewardInvalid()">
         {{ kind === EditorDialogKind.Edit ? 'Сохранить' : 'Создать' }}
       </gm-button>
     }

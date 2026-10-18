@@ -150,13 +150,31 @@
   }
 }
 
+// Алмаз награды снаружи кружка
+.quest-node__reward {
+  position: absolute;
+  z-index: 5;
+  top: calc(-10px * var(--field-zoom, 1));
+  right: calc(-16px * var(--field-zoom, 1));
+  color: var(--color-parchment);
+}
+
+// Буквы в центре кружка
+.quest-node__face {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
 // Согласные названия в центре кружка
 .quest-node__mark {
-  position: absolute;
+  position: static;
   z-index: 2;
-  inset: 0;
-  display: grid;
-  place-items: center;
+  display: block;
   padding: 0 calc(4px * var(--field-zoom, 1));
   color: var(--color-shadow);
   font-size: calc(11px * var(--field-zoom, 1));

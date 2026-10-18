@@ -1,0 +1,40 @@
+<button
+  type="button"
+  class="reward-gem interactive"
+  aria-label="Награда"
+  [attr.aria-expanded]="open()"
+  (pointerdown)="$event.stopPropagation()"
+  (pointerover)="$event.stopPropagation()"
+  (click)="toggle($event)"
+>
+  <span class="reward-gem__icon"></span>
+</button>
+@if (open()) {
+  <div
+    class="reward-panel"
+    [class.reward-panel_above]="above()"
+    [style.left.px]="left()"
+    [style.top.px]="top()"
+    (pointerdown)="$event.stopPropagation()"
+    (click)="$event.stopPropagation()"
+  >
+    @for (reward of rewards(); track reward.id) {
+      <section class="reward-panel__item">
+        <p class="reward-panel__name">{{ reward.name }}</p>
+        @if (reward.description.trim()) {
+          <p class="reward-panel__text">{{ reward.description }}</p>
+        }
+        @if (reward.isTaken) {
+          <p class="reward-panel__taken">Забрано</p>
+        } @else {
+          <button
+            type="button"
+            class="text-button reward-panel__claim"
+            [appDisabled]="!claimable()"
+            (click)="claim($event, reward.id)"
+          >Забрать</button>
+        }
+      </section>
+    }
+  </div>
+}

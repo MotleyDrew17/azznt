@@ -66,6 +66,9 @@
         @for (quest of filtered(); track quest.id) {
           <li class="quest-menu__item">
             <div class="quest-menu__row" [class.quest-menu__row_picked]="pickedId() === quest.id">
+              @if (quest.rewards.length) {
+                <gm-reward-gem [quest]="quest" />
+              }
               <button type="button" class="quest-menu__name" [style.color]="priorityAccent(quest.priority)" (click)="pick(quest)">
                 {{ quest.name.trim() || 'Без названия' }}
               </button>

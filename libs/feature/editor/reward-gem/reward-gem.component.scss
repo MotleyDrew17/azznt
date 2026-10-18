@@ -1,0 +1,91 @@
+:host {
+  display: block;
+  width: calc(28px * var(--field-zoom, 1));
+  height: calc(28px * var(--field-zoom, 1));
+  pointer-events: auto;
+}
+
+:host-context(.quest-menu__row) {
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+
+// Алмаз награды
+.reward-gem {
+  --surface: transparent;
+  --surface-border: transparent;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: calc(6px * var(--field-zoom, 1));
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.reward-gem__icon {
+  width: calc(18px * var(--field-zoom, 1));
+  height: calc(13px * var(--field-zoom, 1));
+  background: currentColor;
+  mask: center / contain no-repeat;
+  mask-image: url('../../../../src/app/assets/icons/diamond.svg');
+  mask-mode: alpha;
+  filter: drop-shadow(0 0 1px var(--color-shadow));
+}
+
+// Описание награды по клику
+.reward-panel {
+  position: fixed;
+  z-index: 1000002;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(280px, calc(100vw - 16px));
+  max-height: min(280px, calc(100dvh - 16px));
+  padding: 8px 10px;
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--color-parchment) 42%, transparent);
+  border-radius: 6px;
+  background: var(--color-bg);
+  color: var(--color-parchment);
+  text-align: left;
+  transform: translateY(8px);
+
+  &_above {
+    transform: translateY(calc(-100% - 8px));
+  }
+}
+
+.reward-panel__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.reward-panel__name,
+.reward-panel__text,
+.reward-panel__taken {
+  margin: 0;
+}
+
+.reward-panel__name {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.reward-panel__text,
+.reward-panel__taken {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.reward-panel__claim {
+  font-size: 13px;
+}

@@ -62,6 +62,15 @@ export class Skill {
         return this.#level?.score ?? 0;
     }
 
+    addExperience(experience: number) {
+        this.#level?.addExp(experience);
+    }
+
+
+    removeExperience(experience: number) {
+        this.#level?.removeExp(experience);
+    }
+    
     addLayer(levelScore: number) {
         const hasLayer = this.#layers.some(layer => layer.levelScore === levelScore);
         if(!hasLayer) this.#layers.push({ levelScore, exercises: [] }); // если слой навыка не существует, то добавляем его

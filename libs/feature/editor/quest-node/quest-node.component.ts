@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
 import { Quest, QuestPriority } from '../../../core/shared/classes/quest.class';
 import { GraphService } from '../../../core/shared/services/graph.service';
+import { RewardGemComponent } from '../reward-gem/reward-gem.component';
 
 interface QuestSpark {
   left: number;
@@ -39,6 +40,7 @@ function questMark(name: string): string {
 
 @Component({
   selector: 'gm-quest-node',
+  imports: [RewardGemComponent],
   templateUrl: './quest-node.component.html',
   styleUrl: './quest-node.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
