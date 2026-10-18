@@ -5,12 +5,14 @@ import { AutocompleteComponent } from '../../../core/shared/components/autocompl
 import { CheckboxComponent } from '../../../core/shared/components/checkbox/checkbox.component';
 import { SelectComponent } from '../../../core/shared/components/select/select.component';
 import { DisabledDirective } from '../../../core/shared/directives/disabled.directive';
+import { HintDirective } from '../../../core/shared/directives/hint.directive';
 import { FieldMode } from '../../../core/shared/enums/field-mode.enum';
 import { DialogService } from '../../../core/shared/services/dialog.service';
 import { FieldModeService } from '../../../core/shared/services/field-mode.service';
 import { GraphService } from '../../../core/shared/services/graph.service';
 import { SkillService } from '../../../core/shared/services/skill.service';
 import { EditorDialogKind } from '../editor-dialog/editor-dialog.component';
+import { StreakChainComponent } from '../streak-chain/streak-chain.component';
 
 const ANY_PRIORITY = 'Любой';
 const SORT_BY_NAME = 'По алфавиту';
@@ -18,7 +20,7 @@ const SORT_BY_PRIORITY = 'По приоритету';
 
 @Component({
   selector: 'gm-quest-menu',
-  imports: [AutocompleteComponent, CheckboxComponent, SelectComponent, DisabledDirective, RouterLink],
+  imports: [AutocompleteComponent, CheckboxComponent, SelectComponent, DisabledDirective, HintDirective, RouterLink, StreakChainComponent],
   templateUrl: './quest-menu.component.html',
   styleUrl: './quest-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -136,6 +138,21 @@ export class QuestMenuComponent {
     this.expanded.set(next);
   }
 
+  // Связанный квест: от корня предыдущий, от остальных следующий
+  add(quest: Quest): void {
+    const offset = 16;
+    const root = this.graphService.graph();
+    this.dialogService.openEditorDialog({
+      kind: EditorDialogKind.Relation,
+      name: '',
+      description: '',
+      anchorId: quest.id,
+      relation: quest.isRoot || quest.id === root?.id ? 'previous' : 'next',
+      pos_x: quest.pos_x + offset,
+      pos_y: quest.pos_y + offset,
+    });
+  }
+
   // Редактировать квест
   edit(quest: Quest): void {
     this.dialogService.openEditorDialog({
@@ -162,6 +179,16 @@ export class QuestMenuComponent {
   // Отметить квест выполненным
   complete(quest: Quest): void {
     this.graphService.completeQuest(quest.id);
+  }
+
+  // Начать серию
+  startStreak(quest: Quest): void {
+    this.graphService.startStreak(quest.id);
+  }
+
+  // Повторить серию
+  repeatStreak(quest: Quest): void {
+    this.graphService.repeatStreak(quest.id);
   }
 
   // Снять выполнение квеста

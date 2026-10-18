@@ -94,7 +94,7 @@
     <span class="quest-card__bridge"></span>
     <div class="quest-card__body">
       <!-- Снять выполнение, только в редакторе -->
-      @if (mode() === FieldMode.Editor) {
+      @if (mode() === FieldMode.Editor && !quest.streak) {
         <button
           type="button"
           class="text-button quest-card__undo"
@@ -115,20 +115,40 @@
           {{ required.level }} уровень. Текущий {{ required.skill.score }}
         </p>
       }
-      <!-- Выполнить квест -->
-      <button
-        type="button"
-        class="quest-card__complete"
-        [class.quest-card__complete_done]="quest.isCompleted"
-        [class.quest-card__complete_locked]="!quest.isCompleted && !quest.isAvailable"
-        [appDisabled]="quest.isCompleted || !quest.isAvailable"
-        (click)="completeQuest(quest)"
-      >
-        @if (quest.isCompleted) {
-          <span class="quest-card__complete-icon"></span>
+      @if (quest.streak) {
+        @if (!quest.isStreakStarted) {
+          <button
+            type="button"
+            class="quest-card__complete"
+            [class.quest-card__complete_locked]="!quest.isAvailable"
+            [appDisabled]="!quest.isAvailable"
+            (click)="startStreak(quest)"
+          >
+            <span class="quest-card__complete-label">Начать</span>
+          </button>
+        } @else {
+          <gm-streak-chain [quest]="quest" />
+          @if (quest.isStreakSettled) {
+            <button type="button" class="quest-card__complete" (click)="repeatStreak(quest)">
+              <span class="quest-card__complete-label">Повторить</span>
+            </button>
+          }
         }
-        <span class="quest-card__complete-label">{{ quest.isCompleted ? 'Выполнено' : 'Выполнить' }}</span>
-      </button>
+      } @else {
+        <button
+          type="button"
+          class="quest-card__complete"
+          [class.quest-card__complete_done]="quest.isCompleted"
+          [class.quest-card__complete_locked]="!quest.isCompleted && !quest.isAvailable"
+          [appDisabled]="quest.isCompleted || !quest.isAvailable"
+          (click)="completeQuest(quest)"
+        >
+          @if (quest.isCompleted) {
+            <span class="quest-card__complete-icon"></span>
+          }
+          <span class="quest-card__complete-label">{{ quest.isCompleted ? 'Выполнено' : 'Выполнить' }}</span>
+        </button>
+      }
       <p class="quest-card__priority">{{ priorityLabel(quest.priority) }}</p>
     </div>
   </div>
@@ -177,7 +197,8 @@
     [grabbing]="allows(FieldAction.MoveQuest) && grabbedId() === keyOf(quest)"
     [selected]="selectedQuestId() === quest.id"
     [priority]="quest.priority"
-    [completed]="quest.isCompleted"
+    [completed]="questDone(quest)"
+    [failed]="quest.isStreakFailed"
     [available]="quest.isAvailable"
   />
 }

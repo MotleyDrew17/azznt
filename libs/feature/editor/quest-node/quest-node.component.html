@@ -12,7 +12,8 @@
   [class.quest-node_main]="priority() === QuestPriority.Main"
   [class.quest-node_press]="pressing()"
   [class.quest-node_completed]="shownCompleted()"
-  [class.quest-node_blocked]="!completed() && !available()"
+  [class.quest-node_failed]="failed()"
+  [class.quest-node_blocked]="!completed() && !failed() && !available()"
   [style.left.px]="left()"
   [style.top.px]="top()"
   [style.width.px]="size()"
@@ -20,6 +21,9 @@
   [style.z-index]="quest()?.zIndex"
 >
   <span class="quest-node__fill"></span>
+  @if (mark()) {
+    <span class="quest-node__mark">{{ mark() }}</span>
+  }
   <!-- Вспышка обода -->
   @for (burst of bursts(); track burst) {
     <span class="quest-node__gleam"></span>

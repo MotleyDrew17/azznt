@@ -16,6 +16,7 @@ import { DialogService } from '../../../core/shared/services/dialog.service';
 import { EditorDialogKind } from '../editor-dialog/editor-dialog.component';
 import { ButtonComponent } from '../../../core/shared/components/button/button.component';
 import { QuestNodeComponent } from '../quest-node/quest-node.component';
+import { StreakChainComponent } from '../streak-chain/streak-chain.component';
 import { FieldAction, FieldMode, modeAllows } from '../../../core/shared/enums/field-mode.enum';
 import { FieldModeService } from '../../../core/shared/services/field-mode.service';
 import { HintDirective } from '../../../core/shared/directives/hint.directive';
@@ -44,7 +45,7 @@ interface QuestEdge {
 
 @Component({
   selector: 'gm-work-field',
-  imports: [QuestNodeComponent, ButtonComponent, HintDirective, RouterLink, DisabledDirective],
+  imports: [QuestNodeComponent, StreakChainComponent, ButtonComponent, HintDirective, RouterLink, DisabledDirective],
   templateUrl: './work-field.component.html',
   styleUrl: './work-field.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -296,6 +297,21 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
   // Отметить квест выполненным
   completeQuest(quest: Quest): void {
     this.graphService.completeQuest(quest.id);
+  }
+
+  // Начать серию
+  startStreak(quest: Quest): void {
+    this.graphService.startStreak(quest.id);
+  }
+
+  // Повторить серию
+  repeatStreak(quest: Quest): void {
+    this.graphService.repeatStreak(quest.id);
+  }
+
+  // Зелёный вид: обычное выполнение или успешная серия
+  questDone(quest: Quest): boolean {
+    return quest.streak ? quest.isStreakSuccess : quest.isCompleted;
   }
 
   // Снять выполнение квеста
@@ -814,7 +830,8 @@ export class WorkFieldComponent implements OnInit, OnDestroy {
 
   // Выполнение уже видно на стрелке
   #arrowDone(quest: Quest): boolean {
-    if (!quest.isCompleted) return false;
+    const done = quest.streak ? quest.isStreakSuccess : quest.isCompleted;
+    if (!done) return false;
     const pressedAt = quest.pressedAt;
     if (pressedAt == null) return true;
     return Date.now() >= pressedAt + EDGE_DONE_DELAY_MS;

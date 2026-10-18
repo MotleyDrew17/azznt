@@ -20,8 +20,14 @@
   background: var(--color-lvl-1);
   transition: width 0.25s ease;
 
+  // Свёрнуто: только кнопка со стрелкой
   &_collapsed {
     width: 40px;
+    height: 40px;
+
+    .quest-menu__bar {
+      padding-right: 0;
+    }
   }
 }
 
@@ -155,7 +161,7 @@
   cursor: pointer;
 }
 
-// Лупа, раскрытие, редактирование, удаление
+// Лупа, раскрытие, добавление, редактирование, удаление
 .quest-menu__icon {
   --surface: transparent;
   --surface-border: transparent;
@@ -196,6 +202,10 @@
 
   &_loupe {
     mask-image: url('../../../../src/app/assets/icons/search.svg');
+  }
+
+  &_plus {
+    mask-image: url('../../../../src/app/assets/icons/plus.svg');
   }
 
   &_edit {

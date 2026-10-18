@@ -5,11 +5,20 @@ export interface QuestRequiredSkill {
   level: number;
 }
 
+export interface QuestStreakData {
+  exerciseId: string;
+  durationDays: number;
+  mustBeDonePerDay: number;
+  mustBeDoneCount: number;
+  startedAt?: number;
+}
+
 export interface CreateQuestData {
   name: string;
   description: string;
   priority?: QuestPriority;
   requiredSkills?: QuestRequiredSkill[] | null;
+  streak?: QuestStreakData | null;
   parent?: Quest;
   child?: Quest;
   pos_x?: number;
@@ -28,9 +37,11 @@ export interface QuestSnapshot {
   layer: number | null;
   isRoot: boolean;
   isCompleted?: boolean;
+  streakFailed?: boolean;
   priority?: QuestPriority;
   requiredSkills?: QuestRequiredSkill[];
   requiredSkill?: QuestRequiredSkill;
+  streak?: QuestStreakData;
 }
 
 export function parseQuestSnapshots(text: string): QuestSnapshot[] | null {
@@ -66,9 +77,11 @@ function isQuestSnapshot(value: unknown): value is QuestSnapshot {
     && (quest.layer === null || Number.isFinite(quest.layer))
     && typeof quest.isRoot === 'boolean'
     && (quest.isCompleted === undefined || typeof quest.isCompleted === 'boolean')
+    && (quest.streakFailed === undefined || typeof quest.streakFailed === 'boolean')
     && isOptionalPriority(quest.priority)
     && isOptionalRequiredSkills(quest.requiredSkills)
-    && isRequiredSkill(quest.requiredSkill);
+    && isRequiredSkill(quest.requiredSkill)
+    && isStreak(quest.streak);
 }
 
 function isOptionalPriority(value: unknown): value is QuestPriority | undefined {
@@ -91,6 +104,21 @@ function isRequiredSkill(value: unknown): value is QuestRequiredSkill | undefine
 
 function isOptionalRequiredSkills(value: unknown): value is QuestRequiredSkill[] | undefined {
   return value === undefined || (Array.isArray(value) && value.every((item) => isRequiredSkill(item) && item !== undefined));
+}
+
+function isStreak(value: unknown): value is QuestStreakData | undefined {
+  if (value === undefined) return true;
+  if (!value || typeof value !== 'object') return false;
+  const streak = value as QuestStreakData;
+  return typeof streak.exerciseId === 'string'
+    && streak.exerciseId.length > 0
+    && Number.isInteger(streak.durationDays)
+    && streak.durationDays >= 1
+    && Number.isInteger(streak.mustBeDonePerDay)
+    && streak.mustBeDonePerDay >= 1
+    && Number.isInteger(streak.mustBeDoneCount)
+    && streak.mustBeDoneCount >= 1
+    && (streak.startedAt === undefined || Number.isFinite(streak.startedAt));
 }
 
 function isIdList(value: unknown): value is string[] | undefined {

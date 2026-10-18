@@ -182,6 +182,12 @@ function localDayStamp(time: number): string {
     return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 }
 
+export function startOfLocalDay(time: number): number {
+    const date = new Date(time);
+    date.setHours(0, 0, 0, 0);
+    return date.getTime();
+}
+
 export class Exercise {
     #id: string = '';
     #name: string = '';
@@ -192,6 +198,7 @@ export class Exercise {
     #available_on_level: number = 0; // уровень навыка, на котором доступно выполнение упражнения
     #performedAt: number = 0;
     #level: Level | null = null; // уровень навык. Нужен для работы с уровнем навыка
+    #doneHistory: {date_ms: number, was_done: boolean}[] = []; // история выполнения упражнения в миллисекундах
 
     constructor(level: Level, max_level: number, available_on_level: number, experience: number, is_freezing_decay: boolean, name: string, description: string) {
         this.#id = crypto.randomUUID();
@@ -239,6 +246,9 @@ export class Exercise {
     get isFreezingDecay(): boolean {
         return this.#is_freezing_decay;
     }
+    getDoneHistory(from_ms: number, to_ms: number): {date_ms: number, was_done: boolean}[] {
+        return this.#doneHistory.filter(item => item.date_ms >= from_ms && item.date_ms <= to_ms);
+    }
 
     update(data: CreateExerciseData): void {
         this.#name = data.name;
@@ -284,6 +294,23 @@ export class Exercise {
             this.#level.addExp(this.#experience);
         }
         this.#performedAt = Date.now();
+        this.#updateDoneHistory();
+    }
+
+    // Каждое выполнение и пропуски после последней даты
+    #updateDoneHistory(): void {
+        const today = startOfLocalDay(Date.now());
+        const last = this.#doneHistory.at(-1);
+        const lastDay = last ? startOfLocalDay(last.date_ms) : null;
+        if (lastDay != null && lastDay < today) {
+            const cursor = new Date(lastDay);
+            cursor.setDate(cursor.getDate() + 1);
+            while (cursor.getTime() < today) {
+                this.#doneHistory.push({ date_ms: cursor.getTime(), was_done: false });
+                cursor.setDate(cursor.getDate() + 1);
+            }
+        }
+        this.#doneHistory.push({ date_ms: today, was_done: true });
     }
 
     toSnapshot(): ExerciseSnapshot {
@@ -296,6 +323,7 @@ export class Exercise {
             is_freezing_decay: this.#is_freezing_decay,
             available_on_level: this.#available_on_level,
             performed_at: this.#performedAt,
+            done_history: this.#doneHistory.length ? this.#doneHistory.map((item) => ({ ...item })) : undefined,
         };
     }
 
@@ -311,6 +339,7 @@ export class Exercise {
         );
         exercise.#id = snapshot.id;
         exercise.#performedAt = snapshot.performed_at ?? 0;
+        exercise.#doneHistory = snapshot.done_history?.map((item) => ({ ...item })) ?? [];
         return exercise;
     }
 

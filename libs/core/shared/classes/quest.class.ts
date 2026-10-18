@@ -1,6 +1,6 @@
 import { QuestSnapshot } from "../models/quest.model";
 import { createsCycle } from "../services/graph.utils";
-import { Skill } from "./skill.class";
+import { Exercise, Skill, startOfLocalDay } from "./skill.class";
 
 export const QUEST_CYCLE_ERROR = 'Такая связь замкнёт цикл.';
 
@@ -24,6 +24,122 @@ export const QUEST_PRIORITY_LABEL: Record<QuestPriority, string> = {
   [QuestPriority.Main]: 'Главный',
 };
 
+export interface StreakDay {
+  date_ms: number;
+  was_done: boolean;
+  must_be_done: number;
+  done_count: number;
+}
+
+export class Streak {
+  #id: string = '';
+  #exercise: Exercise | null = null;
+  #startedAtTimestamp: number = 0;
+  #durationDays: number = 0;
+  #mustBeDoneCount: number = 0;
+  #mustBeDonePerDay: number = 1;
+
+  constructor(exercise: Exercise, startedAtTimestamp: number, durationDays: number, mustBeDoneCount?: number, mustBeDonePerDay?: number) {
+    this.#id = crypto.randomUUID();
+    this.#exercise = exercise;
+    this.#startedAtTimestamp = startedAtTimestamp;
+    this.#durationDays = durationDays;
+    this.#mustBeDoneCount = mustBeDoneCount || this.#durationDays;
+    this.#mustBeDonePerDay = mustBeDonePerDay || 1;
+  }
+
+  get id(): string {
+    return this.#id;
+  }
+
+  get exercise(): Exercise | null {
+    return this.#exercise;
+  }
+  
+  
+  set exercise(exercise: Exercise) {
+    this.#exercise = exercise;
+  }
+
+  get startedAtTimestamp(): number {
+    return this.#startedAtTimestamp;
+  }
+
+
+  set startedAtTimestamp(startedAtTimestamp: number) {
+    this.#startedAtTimestamp = startedAtTimestamp;
+  }
+
+  get durationDays(): number {
+    return this.#durationDays;
+  }
+
+  get mustBeDoneCount(): number {
+    return this.#mustBeDoneCount;
+  }
+
+  get mustBeDonePerDay(): number {
+    return this.#mustBeDonePerDay;
+  }
+
+  set mustBeDoneCount(mustBeDoneCount: number) {
+    this.#mustBeDoneCount = mustBeDoneCount;
+  }
+
+  set mustBeDonePerDay(mustBeDonePerDay: number) {
+    this.#mustBeDonePerDay = mustBeDonePerDay;
+  }
+
+  // Дни всего срока, включая ещё не наступившие
+  getStreakDays(): StreakDay[] {
+    if (!this.#exercise || this.#startedAtTimestamp <= 0) return [];
+    const today = startOfLocalDay(Date.now());
+    const start = startOfLocalDay(this.#startedAtTimestamp);
+    if (start > today) return [];
+
+    const doneByDay = new Map<number, number>();
+    for (const item of this.#exercise.getDoneHistory(start, Date.now())) {
+      if (!item.was_done) continue;
+      const day = startOfLocalDay(item.date_ms);
+      doneByDay.set(day, (doneByDay.get(day) ?? 0) + 1);
+    }
+
+    const streakDays: StreakDay[] = [];
+    const lastDay = new Date(start);
+    lastDay.setDate(lastDay.getDate() + Math.max(this.#durationDays, 1) - 1);
+    const end = lastDay.getTime();
+    const cursor = new Date(start);
+    while (cursor.getTime() <= end) {
+      const date_ms = cursor.getTime();
+      const done_count = doneByDay.get(date_ms) ?? 0;
+      streakDays.push({
+        date_ms,
+        done_count,
+        must_be_done: this.#mustBeDonePerDay,
+        was_done: done_count >= this.#mustBeDonePerDay,
+      });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return streakDays;
+  }
+
+  isStreakCompleted(): boolean {
+    const streakDays = this.getStreakDays();
+    const completedDays = streakDays.filter(day => day.was_done).length;
+    return completedDays >= this.#mustBeDoneCount;
+  }
+
+  // Срок серии уже прошёл
+  isOver(): boolean {
+    if (this.#startedAtTimestamp <= 0) return false;
+    const start = startOfLocalDay(this.#startedAtTimestamp);
+    const end = new Date(start);
+    end.setDate(end.getDate() + Math.max(this.#durationDays, 1) - 1);
+    return startOfLocalDay(Date.now()) > end.getTime();
+  }
+
+}
+
 export class Quest {
   #id: string = '';
   #children: Quest[] = [];
@@ -40,6 +156,8 @@ export class Quest {
   #zIndex: number = 0;
   #requiredSkills: { skill: Skill; level: number }[] = [];
   #priority: QuestPriority = QuestPriority.Common;
+  #streak: Streak | null = null;
+  #streakFailed = false;
 
   constructor() {
     this.#id = crypto.randomUUID();
@@ -137,6 +255,14 @@ export class Quest {
     this.#priority = priority;
   }
 
+  get streak(): Streak | null{
+    return this.#streak;
+  }
+
+  set streak(streak: Streak | null){
+    this.#streak = streak;
+  }
+
   get requiredSkills(): { skill: Skill; level: number }[] {
     return this.#requiredSkills;
   }
@@ -153,6 +279,61 @@ export class Quest {
     return this.#pressedAt;
   }
 
+  get streakDays(): StreakDay[] {
+    return this.#streak?.getStreakDays() ?? [];
+  }
+
+  get isStreakStarted(): boolean {
+    return this.#streak ? this.#streak.startedAtTimestamp > 0 : false;
+  }
+
+  get streakFailed(): boolean {
+    return this.#streakFailed;
+  }
+
+  set streakFailed(streakFailed: boolean) {
+    this.#streakFailed = streakFailed;
+  }
+
+  get isStreakSuccess(): boolean {
+    return !!this.#streak && this.#isCompleted && !this.#streakFailed;
+  }
+
+  get isStreakFailed(): boolean {
+    return !!this.#streak && this.#streakFailed;
+  }
+
+  get isStreakSettled(): boolean {
+    return this.isStreakSuccess || this.isStreakFailed;
+  }
+
+  // Серия не закрывает путь к следующему квесту
+  get opensPath(): boolean {
+    return this.#isCompleted || this.#streak != null;
+  }
+
+  // Успех или провал серии. Оба исхода помечают квест выполненным
+  syncStreak(): boolean {
+    const streak = this.#streak;
+    if (!streak || !this.isStreakStarted || this.isStreakSettled) return false;
+    if (streak.isStreakCompleted()) {
+      this.complete(true);
+      return true;
+    }
+    if (streak.isOver()) {
+      this.#streakFailed = true;
+      this.complete(false);
+      return true;
+    }
+    return false;
+  }
+
+  // Снять итог серии перед новым заходом
+  clearStreakResult(): void {
+    this.uncomplete();
+    this.#streakFailed = false;
+  }
+
   // Отметить выполненным. mark — только что нажали, стрелка подождёт вмятину
   complete(mark = false){
     this.#isCompleted = true;
@@ -160,10 +341,10 @@ export class Quest {
   }
 
   /**
-   * Квест доступен, если выполнены все предквесты и каждый требуемый навык достиг своего уровня.
+   * Квест доступен, если выполнены предыдущие квесты и навыки. Серия путь не закрывает.
    * */
   get isAvailable(){
-    const childrenDone = this.#children.every((child) => child.isCompleted);
+    const childrenDone = this.#children.every((child) => child.opensPath);
     const skillsReady = this.#requiredSkills.every((item) => item.skill.score >= item.level);
     return childrenDone && skillsReady;
   }
@@ -231,10 +412,18 @@ export class Quest {
       layer: this.#layer,
       isRoot: this.#isRoot,
       isCompleted: this.#isCompleted || undefined,
+      streakFailed: this.#streakFailed || undefined,
       priority: this.#priority,
       requiredSkills: this.#requiredSkills.length
         ? this.#requiredSkills.map((item) => ({ skillId: item.skill.id, level: item.level }))
         : undefined,
+      streak: this.#streak?.exercise ? {
+        exerciseId: this.#streak.exercise.id,
+        startedAt: this.#streak.startedAtTimestamp,
+        durationDays: this.#streak.durationDays,
+        mustBeDonePerDay: this.#streak.mustBeDonePerDay,
+        mustBeDoneCount: this.#streak.mustBeDoneCount,
+      } : undefined,
     };
   }
 

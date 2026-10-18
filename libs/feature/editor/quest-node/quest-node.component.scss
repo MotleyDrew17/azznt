@@ -119,7 +119,8 @@
   }
 
   // Вмятина выполненного квеста
-  &_completed {
+  &_completed,
+  &_failed {
     box-shadow:
       inset 0 6px 8px color-mix(in srgb, var(--color-shadow) 72%, transparent),
       inset 0 -1px 1px color-mix(in srgb, var(--color-highlight) 14%, transparent);
@@ -139,13 +140,39 @@
   }
 
   // Свечение доступного квеста
-  &:hover:not(&_blocked):not(&_completed) {
+  &:hover:not(&_blocked):not(&_completed):not(&_failed) {
     box-shadow:
       inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 45%, transparent),
       inset 0 -2px 3px color-mix(in srgb, var(--color-shadow) 35%, transparent),
       0 0 6px color-mix(in srgb, var(--quest-metal-light) 90%, transparent),
       0 0 16px color-mix(in srgb, var(--quest-metal) 55%, transparent),
       0 0 32px color-mix(in srgb, var(--quest-metal) 28%, transparent);
+  }
+}
+
+// Согласные названия в центре кружка
+.quest-node__mark {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0 calc(4px * var(--field-zoom, 1));
+  color: var(--color-shadow);
+  font-size: calc(11px * var(--field-zoom, 1));
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  user-select: none;
+
+  .quest-node_notable &,
+  .quest-node_epic &,
+  .quest-node_mythic &,
+  .quest-node_completed &,
+  .quest-node_failed &,
+  .quest-node_blocked & {
+    color: var(--color-text);
   }
 }
 
@@ -167,6 +194,17 @@
 
   .quest-node_completed & {
     opacity: 1;
+  }
+
+  // Алая заливка проваленной серии
+  .quest-node_failed & {
+    opacity: 1;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-quest-failed-dark) 42%, var(--color-shadow)) 0%,
+      color-mix(in srgb, var(--color-quest-failed-dark) 68%, var(--color-shadow)) 58%,
+      color-mix(in srgb, var(--color-quest-failed) 48%, var(--color-shadow)) 100%
+    );
   }
 }
 

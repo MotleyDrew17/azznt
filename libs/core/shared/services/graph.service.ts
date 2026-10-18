@@ -1,7 +1,7 @@
-import { inject, Injectable, signal } from '@angular/core';
-import {Quest, QUEST_CYCLE_ERROR} from '../classes/quest.class';
-import { CreateQuestData, parseQuestSnapshots, QuestRequiredSkill, QuestSnapshot } from '../models/quest.model';
-import { Skill } from '../classes/skill.class';
+import { effect, inject, Injectable, signal, untracked } from '@angular/core';
+import {Quest, QUEST_CYCLE_ERROR, Streak} from '../classes/quest.class';
+import { CreateQuestData, parseQuestSnapshots, QuestRequiredSkill, QuestSnapshot, QuestStreakData } from '../models/quest.model';
+import { Exercise, Skill } from '../classes/skill.class';
 import { UserService } from './user.service';
 import { SkillService } from './skill.service';
 import { parseUserFile } from '../models/user.model';
@@ -27,6 +27,11 @@ export class GraphService {
   constructor() {
     if (!this.skillService.skills().length) this.skillService.loadSkills();
     this.#restoreActive();
+    effect(() => {
+      this.skillService.now();
+      this.skillService.exerciseDone();
+      untracked(() => this.syncStreaks());
+    });
   }
 
   get questsList(): Quest[]{
@@ -53,6 +58,7 @@ export class GraphService {
     quest.description = data.description;
     if (data.priority !== undefined) quest.priority = data.priority;
     this.#applyRequiredSkills(quest, data.requiredSkills);
+    this.#applyStreak(quest, data.streak);
     if (data.pos_x !== undefined) quest.pos_x = data.pos_x;
     if (data.pos_y !== undefined) quest.pos_y = data.pos_y;
     const cyclicBefore = hasCycle(this.questsList);
@@ -89,8 +95,40 @@ export class GraphService {
   // Отметить квест выполненным
   completeQuest(id: string): void {
     const quest = this.#questsMap[id];
-    if (!quest || quest.isCompleted || !quest.isAvailable) return;
+    if (!quest || quest.streak || quest.isCompleted || !quest.isAvailable) return;
     quest.complete(true);
+    this.listVersion.update((version) => version + 1);
+    this.saveGraphToStorage();
+  }
+
+  // Начать серию
+  startStreak(id: string): void {
+    const quest = this.#questsMap[id];
+    if (!quest?.streak || quest.isStreakStarted || !quest.isAvailable) return;
+    quest.streak.startedAtTimestamp = Date.now();
+    this.listVersion.update((version) => version + 1);
+    this.saveGraphToStorage();
+    this.syncStreaks();
+  }
+
+  // Повторить серию после успеха или провала
+  repeatStreak(id: string): void {
+    const quest = this.#questsMap[id];
+    if (!quest?.streak || !quest.isStreakSettled) return;
+    quest.clearStreakResult();
+    quest.streak.startedAtTimestamp = Date.now();
+    this.listVersion.update((version) => version + 1);
+    this.saveGraphToStorage();
+    this.syncStreaks();
+  }
+
+  // Закрыть серии, которые уже набраны или просрочены
+  syncStreaks(): void {
+    let changed = false;
+    for (const quest of this.questsList) {
+      if (quest.syncStreak()) changed = true;
+    }
+    if (!changed) return;
     this.listVersion.update((version) => version + 1);
     this.saveGraphToStorage();
   }
@@ -104,7 +142,7 @@ export class GraphService {
     this.saveGraphToStorage();
   }
 
-  updateQuest(id: string, data: Pick<CreateQuestData, 'name' | 'description' | 'priority' | 'requiredSkills'>): void {
+  updateQuest(id: string, data: Pick<CreateQuestData, 'name' | 'description' | 'priority' | 'requiredSkills' | 'streak'>): void {
     const quest = this.#questsMap[id];
     if (!quest) return;
 
@@ -112,8 +150,10 @@ export class GraphService {
     quest.description = data.description;
     if (data.priority !== undefined) quest.priority = data.priority;
     this.#applyRequiredSkills(quest, data.requiredSkills);
+    if (data.streak !== undefined) this.#applyStreak(quest, data.streak);
     this.listVersion.update((version) => version + 1);
     this.saveGraphToStorage();
+    this.syncStreaks();
   }
 
   linkQuests(childId: string, parentId: string): string | null {
@@ -262,6 +302,7 @@ export class GraphService {
       return;
     }
     this.extractGraphFromSnapshot(snapshot);
+    this.syncStreaks();
     const root = this.questsList.find((quest) => quest.isRoot) ?? this.questsList[0];
     this.#graph = root;
     this.graph.set(root);
@@ -276,6 +317,45 @@ export class GraphService {
 
   #applyRequiredSkills(quest: Quest, required: QuestRequiredSkill[] | null | undefined): void {
     quest.requiredSkills = this.#resolveRequiredSkills(required ?? []);
+  }
+
+  // Серия выполнений упражнения на квесте
+  #applyStreak(quest: Quest, data: QuestStreakData | null | undefined, keepResult = false): void {
+    if (!data) {
+      quest.streak = null;
+      if (!keepResult) quest.clearStreakResult();
+      return;
+    }
+    const exercise = this.#findExercise(data.exerciseId);
+    if (!exercise) {
+      quest.streak = null;
+      if (!keepResult) quest.clearStreakResult();
+      return;
+    }
+    const startedAt = data.startedAt ?? 0;
+    const previous = quest.streak;
+    const same = !!previous
+      && previous.exercise?.id === exercise.id
+      && previous.startedAtTimestamp === startedAt
+      && previous.durationDays === data.durationDays
+      && previous.mustBeDonePerDay === data.mustBeDonePerDay
+      && previous.mustBeDoneCount === data.mustBeDoneCount;
+    quest.streak = new Streak(
+      exercise,
+      startedAt,
+      data.durationDays,
+      data.mustBeDoneCount,
+      data.mustBeDonePerDay,
+    );
+    if (!keepResult && !same) quest.clearStreakResult();
+  }
+
+  #findExercise(id: string): Exercise | undefined {
+    for (const skill of this.skillService.skills()) {
+      const exercise = skill.getExercise(id);
+      if (exercise) return exercise;
+    }
+    return undefined;
   }
 
   #resolveRequiredSkills(required: QuestRequiredSkill[]): { skill: Skill; level: number }[] {
@@ -300,6 +380,8 @@ export class GraphService {
       if (snapshot.isCompleted) quest.complete();
       const required = snapshot.requiredSkills ?? (snapshot.requiredSkill ? [snapshot.requiredSkill] : []);
       quest.requiredSkills = this.#resolveRequiredSkills(required);
+      this.#applyStreak(quest, snapshot.streak, true);
+      if (snapshot.streakFailed) quest.streakFailed = true;
       this.#questsMap[quest.id] = quest;
     });
     snapshot.forEach(snapshot => {

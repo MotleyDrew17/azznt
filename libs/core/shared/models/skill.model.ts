@@ -64,6 +64,7 @@ export interface ExerciseSnapshot {
   is_freezing_decay: boolean;
   available_on_level: number;
   performed_at?: number;
+  done_history?: { date_ms: number; was_done: boolean }[];
 }
 
 export interface LayerSnapshot {
@@ -158,7 +159,18 @@ function isExerciseSnapshot(value: unknown): value is ExerciseSnapshot {
     && isFiniteNumber(exercise.maxLevel)
     && typeof exercise.is_freezing_decay === 'boolean'
     && isFiniteNumber(exercise.available_on_level)
-    && (exercise.performed_at === undefined || isFiniteNumber(exercise.performed_at));
+    && (exercise.performed_at === undefined || isFiniteNumber(exercise.performed_at))
+    && isDoneHistory(exercise.done_history);
+}
+
+function isDoneHistory(value: unknown): boolean {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  return value.every((item) => {
+    if (!item || typeof item !== 'object') return false;
+    const day = item as { date_ms: number; was_done: boolean };
+    return isFiniteNumber(day.date_ms) && typeof day.was_done === 'boolean';
+  });
 }
 
 function isFiniteNumber(value: unknown): value is number {

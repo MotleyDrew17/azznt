@@ -63,6 +63,14 @@
   mask-image: url('../../../../src/app/assets/icons/close.svg');
 }
 
+// Поля серии выполнений
+.editor-dialog__streak {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 10px;
+}
+
 // Добавить навык
 .editor-dialog__add {
   align-self: flex-start;

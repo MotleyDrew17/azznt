@@ -84,6 +84,9 @@
                 <span class="quest-menu__glyph quest-menu__glyph_chevron" [class.quest-menu__glyph_down]="!expanded().has(quest.id)" [class.quest-menu__glyph_up]="expanded().has(quest.id)"></span>
               </button>
               @if (editor()) {
+                <button type="button" class="quest-menu__icon interactive" appHint="Добавить" aria-label="Добавить" (click)="add(quest)">
+                  <span class="quest-menu__glyph quest-menu__glyph_plus"></span>
+                </button>
                 <button type="button" class="quest-menu__icon interactive" aria-label="Редактировать" (click)="edit(quest)">
                   <span class="quest-menu__glyph quest-menu__glyph_edit"></span>
                 </button>
@@ -96,7 +99,7 @@
             </div>
             @if (expanded().has(quest.id)) {
               <div class="quest-menu__details">
-                @if (editor()) {
+                @if (editor() && !quest.streak) {
                   <button type="button" class="text-button quest-menu__undo" [appDisabled]="!quest.isCompleted" (click)="reset(quest)">Отменить</button>
                 }
                 @if (quest.description.trim()) {
@@ -109,19 +112,38 @@
                     {{ required.level }} уровень. Текущий {{ required.skill.score }}
                   </p>
                 }
-                <button
-                  type="button"
-                  class="quest-menu__complete"
-                  [class.quest-menu__complete_done]="quest.isCompleted"
-                  [class.quest-menu__complete_locked]="!quest.isCompleted && !quest.isAvailable"
-                  [appDisabled]="quest.isCompleted || !quest.isAvailable"
-                  (click)="complete(quest)"
-                >
-                  @if (quest.isCompleted) {
-                    <span class="quest-menu__complete-icon"></span>
+                @if (quest.streak) {
+                  @if (!quest.isStreakStarted) {
+                    <button
+                      type="button"
+                      class="quest-menu__complete"
+                      [class.quest-menu__complete_locked]="!quest.isAvailable"
+                      [appDisabled]="!quest.isAvailable"
+                      (click)="startStreak(quest)"
+                    >
+                      Начать
+                    </button>
+                  } @else {
+                    <gm-streak-chain [quest]="quest" />
+                    @if (quest.isStreakSettled) {
+                      <button type="button" class="quest-menu__complete" (click)="repeatStreak(quest)">Повторить</button>
+                    }
                   }
-                  {{ quest.isCompleted ? 'Выполнено' : 'Выполнить' }}
-                </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="quest-menu__complete"
+                    [class.quest-menu__complete_done]="quest.isCompleted"
+                    [class.quest-menu__complete_locked]="!quest.isCompleted && !quest.isAvailable"
+                    [appDisabled]="quest.isCompleted || !quest.isAvailable"
+                    (click)="complete(quest)"
+                  >
+                    @if (quest.isCompleted) {
+                      <span class="quest-menu__complete-icon"></span>
+                    }
+                    {{ quest.isCompleted ? 'Выполнено' : 'Выполнить' }}
+                  </button>
+                }
                 <p class="quest-menu__priority" [style.color]="priorityAccent(quest.priority)">{{ priorityLabel(quest.priority) }}</p>
               </div>
             }

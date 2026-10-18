@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
 import { Quest, QuestPriority } from '../../../core/shared/classes/quest.class';
+import { GraphService } from '../../../core/shared/services/graph.service';
 
 interface QuestSpark {
   left: number;
@@ -21,6 +22,21 @@ const QUEST_SPARKS: QuestSpark[] = [
 const PRESS_DELAY_MS = 1500;
 const PRESS_MS = 900;
 
+const VOWEL = /[aeiouyаеёиоуыэюя]/i;
+
+// Первые согласные названия, не больше трёх
+function questMark(name: string): string {
+  const consonants: string[] = [];
+  for (const char of name) {
+    if (!/\p{L}/u.test(char) || VOWEL.test(char)) continue;
+    const lower = char.toLowerCase();
+    if (lower === 'ь' || lower === 'ъ') continue;
+    consonants.push(char);
+    if (consonants.length === 3) break;
+  }
+  return consonants.join('').toLocaleUpperCase('ru');
+}
+
 @Component({
   selector: 'gm-quest-node',
   templateUrl: './quest-node.component.html',
@@ -28,6 +44,8 @@ const PRESS_MS = 900;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QuestNodeComponent {
+  private graphService = inject(GraphService);
+
   readonly QuestPriority = QuestPriority;
   readonly quest = input<Quest>();
   readonly nodeId = input('');
@@ -39,8 +57,14 @@ export class QuestNodeComponent {
   readonly selected = input(false);
   readonly priority = input(QuestPriority.Common);
   readonly completed = input(false);
+  readonly failed = input(false);
   readonly available = input(true);
   readonly sparks = QUEST_SPARKS;
+  // Согласные в центре кружка
+  readonly mark = computed(() => {
+    this.graphService.listVersion();
+    return questMark(this.quest()?.name ?? '');
+  });
 
   private burstToken = 0;
   private burstTimer = 0;

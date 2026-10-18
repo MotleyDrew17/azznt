@@ -1,0 +1,14 @@
+<ol class="streak-chain">
+  @for (mark of marks(); track mark.day.date_ms) {
+    <li class="streak-chain__day">
+      <span
+        class="streak-chain__mark"
+        [class.streak-chain__mark_done]="mark.tone === 'done'"
+        [class.streak-chain__mark_missed]="mark.tone === 'missed'"
+      >
+        <span class="streak-chain__check"></span>
+      </span>
+      <span class="streak-chain__count">{{ mark.day.done_count }}/{{ mark.day.must_be_done }}</span>
+    </li>
+  }
+</ol>

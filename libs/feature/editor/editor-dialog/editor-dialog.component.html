@@ -83,6 +83,120 @@
         </div>
 
         <div class="field">
+          <div class="field__heading">
+            <gm-checkbox
+              controlId="quest-streak"
+              [checked]="streakOn()"
+              (checkedChange)="streakOn.set($event)"
+            >Серия выполнений</gm-checkbox>
+            <button
+              type="button"
+              class="field__hint" appHintWrap
+              appHint="Серия — это срок, за который нужно набрать успешные дни. День успешен, когда упражнение выполнено указанное число раз. Если успешных дней меньше длительности, часть дней можно пропустить. Если числа равны, упражнение нужно выполнять каждый день."
+              aria-label="Подсказка"
+            >
+              <span class="field__hint-icon"></span>
+            </button>
+          </div>
+          @if (streakOn()) {
+            <div class="editor-dialog__streak">
+              <div class="field">
+                <div class="field__heading">
+                  <label class="field__label" for="quest-streak-exercise">Упражнение</label>
+                  <button
+                    type="button"
+                    class="field__hint" appHintWrap
+                    appHint="Упражнение, которое считается в серии. В скобках — навык, которому оно принадлежит."
+                    aria-label="Подсказка"
+                  >
+                    <span class="field__hint-icon"></span>
+                  </button>
+                </div>
+                <gm-autocomplete
+                  controlId="quest-streak-exercise"
+                  placeholder="Упражнение"
+                  [options]="exerciseOptions()"
+                  [(value)]="exerciseQuery"
+                  (picked)="exerciseId.set($event)"
+                />
+              </div>
+              <div class="field">
+                <div class="field__heading">
+                  <label class="field__label" for="quest-streak-duration">Длительность, дни</label>
+                  <button
+                    type="button"
+                    class="field__hint" appHintWrap
+                    appHint="Сколько дней от старта длится серия. Успешные дни считаются только внутри этого срока."
+                    aria-label="Подсказка"
+                  >
+                    <span class="field__hint-icon"></span>
+                  </button>
+                </div>
+                <input
+                  id="quest-streak-duration"
+                  class="control"
+                  type="number"
+                  step="1"
+                  min="1"
+                  [class.control_error]="!isPositiveDay(durationDays())"
+                  [value]="durationDays()"
+                  (input)="setStreakNumber('duration', $event)"
+                />
+              </div>
+              <div class="field">
+                <div class="field__heading">
+                  <label class="field__label" for="quest-streak-per-day">Выполнений в день</label>
+                  <button
+                    type="button"
+                    class="field__hint" appHintWrap
+                    appHint="Сколько раз за день нужно выполнить упражнение, чтобы день стал успешным."
+                    aria-label="Подсказка"
+                  >
+                    <span class="field__hint-icon"></span>
+                  </button>
+                </div>
+                <input
+                  id="quest-streak-per-day"
+                  class="control"
+                  type="number"
+                  step="1"
+                  min="1"
+                  [class.control_error]="!isPositiveDay(perDay())"
+                  [value]="perDay()"
+                  (input)="setStreakNumber('perDay', $event)"
+                />
+              </div>
+              <div class="field">
+                <div class="field__heading">
+                  <label class="field__label" for="quest-streak-success">Успешных дней</label>
+                  <button
+                    type="button"
+                    class="field__hint" appHintWrap
+                    appHint="Сколько успешных дней нужно набрать за срок. Если число меньше длительности, пропуски допустимы."
+                    aria-label="Подсказка"
+                  >
+                    <span class="field__hint-icon"></span>
+                  </button>
+                </div>
+                <input
+                  id="quest-streak-success"
+                  class="control"
+                  type="number"
+                  step="1"
+                  min="1"
+                  [class.control_error]="!isPositiveDay(successDays()) || successDays() > durationDays()"
+                  [value]="successDays()"
+                  (input)="setStreakNumber('success', $event)"
+                />
+              </div>
+            </div>
+            @if (streakError()) {
+              <span class="field__error">{{ streakError() }}</span>
+            }
+          }
+        </div>
+
+        <div class="field">
           <label class="field__label" for="storyline-description">Описание</label>
           <textarea id="storyline-description" class="control control_area" rows="4" [formField]="storylineForm.description"></textarea>
           <span class="field__error"></span>
@@ -93,7 +207,7 @@
 
   <div class="dialog__footer">
     @if (kind === EditorDialogKind.Storyline || kind === EditorDialogKind.Quest || kind === EditorDialogKind.Edit || kind === EditorDialogKind.Relation) {
-      <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="storylineForm().invalid() || skillInvalid()">
+      <gm-button variant="confirm" width="148px" (click)="submit()" [appDisabled]="storylineForm().invalid() || skillInvalid() || streakInvalid()">
         {{ kind === EditorDialogKind.Edit ? 'Сохранить' : 'Создать' }}
       </gm-button>
     }

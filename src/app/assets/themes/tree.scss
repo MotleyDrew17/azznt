@@ -1,0 +1,99 @@
+// Тема дерева: кора, заболонь, лист и смола.
+html[data-theme='tree'] {
+  --color-midnight: #1C1814;
+  --color-gold: #C6A15A;
+  --color-parchment: #E8D7B8;
+  --color-plum: #3A3228;
+  --color-moss: #2A3C30;
+
+  --color-silver: #A89880;
+  --color-lilac: #8FA67A;
+  --color-epic: #D4C4A0;
+  --color-bronze: #6E5236;
+  --color-error: #C47058;
+  --color-green: #6FA85A;
+
+  --color-highlight: #FFF6E4;
+  --color-shadow: #100C08;
+
+  --color-skill-well: #141810;
+
+  --color-skill-metal-light: #B89A74;
+  --color-skill-metal: #7A5E42;
+  --color-skill-metal-dark: #3C2C1E;
+  --color-skill-metal-mid: #8C6E4E;
+
+  --color-skill-decay-light: #C48A72;
+  --color-skill-decay: #7A4638;
+  --color-skill-decay-dark: #3E241E;
+  --color-skill-decay-mid: #A06050;
+
+  --color-skill-rim-light: #F2E4C4;
+  --color-skill-rim-deep: #8A6838;
+  --color-skill-rim: #E6D2A8;
+
+  --color-skill-spark: #FFF3D0;
+  --color-skill-spark-core: #FFE6B4;
+  --color-skill-spark-glow: #E8C060;
+
+  --color-skill-fill-light: #8EC86A;
+  --color-skill-fill: #3E8A44;
+  --color-skill-fill-sheen: rgb(214 232 168 / 55%);
+  --color-skill-fill-sheen-end: rgb(100 160 70 / 0%);
+  --color-skill-fill-glow: rgb(110 180 70 / 42%);
+  --color-skill-fill-inset: rgb(210 220 160 / 18%);
+
+  // Common — береста.
+  --color-quest-common-light: #F6F1E6;
+  --color-quest-common: #D2C8B4;
+  --color-quest-common-dark: #847C6C;
+  --color-quest-common-mid: #E8E0D2;
+
+  // Uncommon — молодой лист.
+  --color-quest-uncommon-light: #D8E8C8;
+  --color-quest-uncommon: #6E9460;
+  --color-quest-uncommon-dark: #314428;
+  --color-quest-uncommon-mid: #A8C498;
+
+  // Notable — хвоя.
+  --color-quest-notable-light: #B8D4C4;
+  --color-quest-notable: #2E6E58;
+  --color-quest-notable-dark: #143228;
+  --color-quest-notable-mid: #6AAB90;
+
+  // Epic — спелая ягода.
+  --color-quest-epic-light: #E4C8D8;
+  --color-quest-epic: #7A4A68;
+  --color-quest-epic-dark: #321C2C;
+  --color-quest-epic-mid: #B888A4;
+
+  // Mythic — рябина.
+  --color-quest-mythic-light: #E8B4A8;
+  --color-quest-mythic: #8A3830;
+  --color-quest-mythic-dark: #3A1614;
+  --color-quest-mythic-mid: #C46858;
+
+  // Legendary — янтарь.
+  --color-quest-legendary-light: #F8D4A0;
+  --color-quest-legendary: #D48428;
+  --color-quest-legendary-dark: #642E0C;
+  --color-quest-legendary-mid: #E8A454;
+
+  // Main — ядро ствола.
+  --color-quest-main-light: #F4E6C8;
+  --color-quest-main: #C4A05C;
+  --color-quest-main-dark: #5A3E1C;
+  --color-quest-main-mid: #E6D2A8;
+
+  // Выполненный квест — живой лист.
+  --color-quest-done-light: #C8E8B8;
+  --color-quest-done: #2E8A4A;
+  --color-quest-done-dark: #143820;
+  --color-quest-done-mid: #78C080;
+
+  // Проваленная серия — спелая ягода, ярче мифической рябины.
+  --color-quest-failed-light: #F0C0B0;
+  --color-quest-failed: #D4533A;
+  --color-quest-failed-dark: #6A2418;
+  --color-quest-failed-mid: #E88870;
+}
