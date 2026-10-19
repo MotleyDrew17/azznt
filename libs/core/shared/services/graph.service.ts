@@ -1,6 +1,6 @@
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import {Quest, QUEST_CYCLE_ERROR, Reward, Streak, expRewardCopy} from '../classes/quest.class';
-import { CreateQuestData, parseQuestSnapshots, QuestRequiredSkill, QuestRewardData, QuestSnapshot, QuestStreakData } from '../models/quest.model';
+import { CreateQuestData, parseQuestSnapshots, QuestFields, QuestRequiredSkill, QuestRewardData, QuestSnapshot, QuestStreakData } from '../models/quest.model';
 import { Exercise, Skill } from '../classes/skill.class';
 import { UserService } from './user.service';
 import { SkillService } from './skill.service';
@@ -152,7 +152,7 @@ export class GraphService {
     this.saveGraphToStorage();
   }
 
-  updateQuest(id: string, data: Pick<CreateQuestData, 'name' | 'description' | 'priority' | 'requiredSkills' | 'streak' | 'rewards'>): void {
+  updateQuest(id: string, data: QuestFields): void {
     const quest = this.#questsMap[id];
     if (!quest) return;
 

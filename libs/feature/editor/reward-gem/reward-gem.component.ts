@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, inject, input, signal } from '@angular/core';
 import { Quest } from '../../../core/shared/classes/quest.class';
-import { DisabledDirective } from '../../../core/shared/directives/disabled.directive';
+import { ButtonComponent } from '../../../core/shared/components/button/button.component';
 import { GraphService } from '../../../core/shared/services/graph.service';
 
 @Component({
   selector: 'gm-reward-gem',
-  imports: [DisabledDirective],
+  imports: [ButtonComponent],
   templateUrl: './reward-gem.component.html',
   styleUrl: './reward-gem.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

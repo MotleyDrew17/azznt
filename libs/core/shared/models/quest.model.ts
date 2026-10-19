@@ -27,13 +27,16 @@ export interface QuestRewardData {
   skills?: QuestRewardSkillData[];
 }
 
-export interface CreateQuestData {
+export interface QuestFields {
   name: string;
   description: string;
   priority?: QuestPriority;
   requiredSkills?: QuestRequiredSkill[] | null;
   streak?: QuestStreakData | null;
   rewards?: QuestRewardData[] | null;
+}
+
+export interface CreateQuestData extends QuestFields {
   parent?: Quest;
   child?: Quest;
   pos_x?: number;

@@ -18,6 +18,7 @@
     (pointerdown)="$event.stopPropagation()"
     (click)="$event.stopPropagation()"
   >
+    <p class="reward-panel__title">Награда</p>
     @for (reward of rewards(); track reward.id) {
       <section class="reward-panel__item">
         <p class="reward-panel__name">{{ reward.name }}</p>
@@ -27,12 +28,12 @@
         @if (reward.isTaken) {
           <p class="reward-panel__taken">Забрано</p>
         } @else {
-          <button
-            type="button"
-            class="text-button reward-panel__claim"
-            [appDisabled]="!claimable()"
+          <gm-button
+            class="reward-panel__claim"
+            variant="confirm"
+            [disabled]="!claimable()"
             (click)="claim($event, reward.id)"
-          >Забрать</button>
+          >Забрать награду</gm-button>
         }
       </section>
     }
