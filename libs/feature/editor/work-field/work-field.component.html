@@ -103,10 +103,13 @@
         >Отменить</button>
       }
       @if (quest.name.trim()) {
-        <p class="quest-card__name">{{ quest.name }}</p>
+        <p class="quest-card__name hint-title">{{ quest.name }}</p>
       }
       @if (quest.description.trim()) {
-        <p class="quest-card__description">{{ quest.description }}</p>
+        <div class="quest-card__description hint-description">
+          <p class="hint-description__label">Описание:</p>
+          <div class="hint-description__text">{{ quest.description.trim() }}</div>
+        </div>
       }
       @for (required of quest.requiredSkills; track required.skill.id + required.level) {
         <p class="quest-card__skill">

@@ -205,19 +205,13 @@
 .quest-card__name,
 .quest-card__description {
   margin: 0;
-  line-height: 1.35;
   overflow-wrap: anywhere;
-}
-
-.quest-card__name {
-  font-size: 14px;
-  font-weight: 600;
 }
 
 .quest-card__description {
   color: var(--color-text-muted);
   font-size: 13px;
-  white-space: pre-wrap;
+  line-height: 1.35;
 }
 
 .quest-card__name + .quest-card__description {

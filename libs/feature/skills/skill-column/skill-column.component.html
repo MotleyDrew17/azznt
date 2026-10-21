@@ -18,6 +18,9 @@
     @if (active()) {
       <div class="skill-column__hint" appHintContent (pointerdown)="$event.stopPropagation()" (click)="$event.stopPropagation()">
         <div class="hint-panel">
+          @if (name().trim()) {
+            <p class="skill-column__title hint-title">{{ name() }}</p>
+          }
           <ul class="skill-column__facts">
             <li>Опыт: {{ currentExp() }} / {{ requiredExp() }}</li>
             @if (hasDecay()) {
@@ -27,7 +30,10 @@
             <li>Доступных действий: {{ availableActions() }}</li>
           </ul>
           @if (description().trim()) {
-            <p class="skill-column__description">{{ description() }}</p>
+            <div class="skill-column__description hint-description">
+              <p class="hint-description__label">Описание:</p>
+              <div class="hint-description__text">{{ description().trim() }}</div>
+            </div>
           }
           @if (editor()) {
           <div class="skill-column__actions">

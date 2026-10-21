@@ -201,6 +201,22 @@ select {
   @include hint.panel;
 }
 
+.hint-title {
+  @include hint.title;
+}
+
+.hint-description {
+  @include hint.description;
+}
+
+.hint-description__label {
+  @include hint.description-label;
+}
+
+.hint-description__text {
+  @include hint.description-text;
+}
+
 .exercise-gain {
   position: fixed;
   z-index: 1000000;

@@ -91,3 +91,31 @@
   line-height: 1.35;
   text-align: left;
 }
+
+// Название в подсказке
+@mixin title {
+  color: var(--color-parchment);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+// Описание в подсказке: абзацы и своя прокрутка
+@mixin description {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+@mixin description-label {
+  font-weight: 700;
+}
+
+@mixin description-text {
+  max-height: 15lh;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overscroll-behavior: contain;
+}

@@ -3,9 +3,12 @@
 </button>
 <div class="exercise__hint" appHintContent>
   <div class="hint-panel">
-    <p class="exercise__title">{{ view().name }}</p>
+    <p class="exercise__title hint-title">{{ view().name }}</p>
     @if (view().description.trim()) {
-      <p class="exercise__description">{{ view().description }}</p>
+      <div class="exercise__description hint-description">
+        <p class="hint-description__label">Описание:</p>
+        <div class="hint-description__text">{{ view().description.trim() }}</div>
+      </div>
     }
     @if (view().showExperience) {
       <p class="exercise__experience">Опыт: {{ view().experience }}</p>

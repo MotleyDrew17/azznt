@@ -41,6 +41,8 @@ alwaysApply: true
 - `interactive` — ховер; на элементе задай `--surface`
 - `is-disabled` — ставит `appDisabled` (`libs/core/shared/directives/disabled.directive.ts`) на кнопку, инпут, textarea и select
 - `hint` — подсказка из `data-hint` над элементом. `hint_below` показывает её снизу, если сверху нет места. `hint_right` показывает её справа. `hint_wrap` переносит длинный текст. `hint-panel` — такая же оболочка на обычном элементе, когда в подсказке несколько строк
+- `hint-title` — название в подсказке: крупнее и жирнее текста
+- `hint-description` — блок описания в подсказке. Подпись `hint-description__label`, текст `hint-description__text`: абзацы из поля и прокрутка на пятнадцать строк
 - `dialog-host` на хосте компонента окна. Внутри: `dialog`, `dialog__close`, `dialog__title`, `dialog__body`, `dialog__message`, `dialog__footer`. Окно не выше `min(640px, 100dvh - 32px)`: длинное содержимое скроллится в `dialog__body` и `dialog__message`
 
 ```html

@@ -21,9 +21,12 @@
     <p class="reward-panel__title">Награда</p>
     @for (reward of rewards(); track reward.id) {
       <section class="reward-panel__item">
-        <p class="reward-panel__name">{{ reward.name }}</p>
+        <p class="reward-panel__name hint-title">{{ reward.name }}</p>
         @if (reward.description.trim()) {
-          <p class="reward-panel__text">{{ reward.description }}</p>
+          <div class="reward-panel__text hint-description">
+            <p class="hint-description__label">Описание:</p>
+            <div class="hint-description__text">{{ reward.description.trim() }}</div>
+          </div>
         }
         @if (reward.isTaken) {
           <p class="reward-panel__taken">Забрано</p>

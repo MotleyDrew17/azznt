@@ -277,6 +277,11 @@
   pointer-events: none;
 }
 
+// Название навыка в подсказке
+.skill-column__title {
+  margin-bottom: 8px;
+}
+
 .skill-column__actions {
   display: flex;
   gap: 8px;
