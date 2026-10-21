@@ -102,8 +102,8 @@
             </div>
             @if (expanded().has(quest.id)) {
               <div class="quest-menu__details">
-                @if (editor() && !quest.streak) {
-                  <button type="button" class="text-button quest-menu__undo" [appDisabled]="!quest.isCompleted" (click)="reset(quest)">Отменить</button>
+                @if (!quest.streak && quest.isCompleted) {
+                  <button type="button" class="text-button text-button_undo quest-menu__undo" (click)="reset(quest)">Отменить</button>
                 }
                 @if (quest.description.trim()) {
                   <div class="quest-menu__description hint-description">
@@ -111,12 +111,16 @@
                     <div class="hint-description__text">{{ quest.description.trim() }}</div>
                   </div>
                 }
-                @for (required of quest.requiredSkills; track required.skill.id + required.level) {
-                  <p class="quest-menu__skill">
-                    Навык:
-                    <a class="quest-menu__skill-link" [routerLink]="['/skill', required.skill.id]">{{ required.skill.name }}</a>
-                    {{ required.level }} уровень. Текущий {{ required.skill.score }}
-                  </p>
+                @if (quest.requiredSkills.length) {
+                  <div class="hint-skills">
+                    <p class="hint-skills__label">Навыки</p>
+                    @for (required of quest.requiredSkills; track required.skill.id + required.level) {
+                      <p class="quest-menu__skill">
+                        <a class="quest-menu__skill-link" [routerLink]="['/skill', required.skill.id]">{{ required.skill.name }}</a>
+                        {{ required.skill.score }}/{{ required.level }}
+                      </p>
+                    }
+                  </div>
                 }
                 @if (quest.streak) {
                   @if (!quest.isStreakStarted) {

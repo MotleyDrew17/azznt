@@ -17,7 +17,7 @@ import { EditorDialogKind } from '../editor-dialog/editor-dialog.component';
 import { ButtonComponent } from '../../../core/shared/components/button/button.component';
 import { QuestNodeComponent } from '../quest-node/quest-node.component';
 import { StreakChainComponent } from '../streak-chain/streak-chain.component';
-import { FieldAction, FieldMode, modeAllows } from '../../../core/shared/enums/field-mode.enum';
+import { FieldAction, modeAllows } from '../../../core/shared/enums/field-mode.enum';
 import { FieldModeService } from '../../../core/shared/services/field-mode.service';
 import { HintDirective } from '../../../core/shared/directives/hint.directive';
 import { DisabledDirective } from '../../../core/shared/directives/disabled.directive';
@@ -66,7 +66,6 @@ interface QuestEdge {
 })
 export class WorkFieldComponent implements OnInit, OnDestroy {
   readonly FieldAction = FieldAction;
-  readonly FieldMode = FieldMode;
 
   private host = inject(ElementRef<HTMLElement>);
   private graphService = inject(GraphService);

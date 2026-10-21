@@ -113,6 +113,10 @@ select {
   @include text-button.button;
 }
 
+.text-button_undo {
+  @include text-button.undo;
+}
+
 .field {
   @include controls.field;
 }
@@ -215,6 +219,14 @@ select {
 
 .hint-description__text {
   @include hint.description-text;
+}
+
+.hint-skills {
+  @include hint.skills;
+}
+
+.hint-skills__label {
+  @include hint.skills-label;
 }
 
 .exercise-gain {

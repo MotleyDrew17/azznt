@@ -119,3 +119,19 @@
   overflow-wrap: anywhere;
   overscroll-behavior: contain;
 }
+
+// Требуемые навыки в подсказке
+@mixin skills {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+@mixin skills-label {
+  margin: 0;
+  color: var(--color-parchment);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}

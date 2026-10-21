@@ -93,12 +93,11 @@
   >
     <span class="quest-card__bridge"></span>
     <div class="quest-card__body">
-      <!-- Снять выполнение, только в редакторе -->
-      @if (mode() === FieldMode.Editor && !quest.streak) {
+      <!-- Снять выполнение -->
+      @if (!quest.streak && quest.isCompleted) {
         <button
           type="button"
-          class="text-button quest-card__undo"
-          [appDisabled]="!quest.isCompleted"
+          class="text-button text-button_undo quest-card__undo"
           (click)="resetQuest(quest)"
         >Отменить</button>
       }
@@ -111,12 +110,16 @@
           <div class="hint-description__text">{{ quest.description.trim() }}</div>
         </div>
       }
-      @for (required of quest.requiredSkills; track required.skill.id + required.level) {
-        <p class="quest-card__skill">
-          Навык:
-          <a class="quest-card__skill-link" [routerLink]="['/skill', required.skill.id]">{{ required.skill.name }}</a>
-          {{ required.level }} уровень. Текущий {{ required.skill.score }}
-        </p>
+      @if (quest.requiredSkills.length) {
+        <div class="hint-skills">
+          <p class="hint-skills__label">Навыки</p>
+          @for (required of quest.requiredSkills; track required.skill.id + required.level) {
+            <p class="quest-card__skill">
+              <a class="quest-card__skill-link" [routerLink]="['/skill', required.skill.id]">{{ required.skill.name }}</a>
+              {{ required.skill.score }}/{{ required.level }}
+            </p>
+          }
+        </div>
       }
       @if (quest.streak) {
         @if (!quest.isStreakStarted) {

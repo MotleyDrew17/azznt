@@ -21,3 +21,17 @@
     outline: none;
   }
 }
+
+// Отмена выполнения: фиолетовая, чтобы не терялась
+@mixin undo {
+  color: var(--color-epic);
+  font-weight: 700;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-quest-epic-light);
+    text-shadow:
+      0 0 6px color-mix(in srgb, var(--color-epic) 90%, transparent),
+      0 0 16px color-mix(in srgb, var(--color-epic) 55%, transparent);
+  }
+}
