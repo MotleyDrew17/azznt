@@ -24,8 +24,11 @@
           <ul class="skill-column__facts">
             <li>Опыт: {{ currentExp() }} / {{ requiredExp() }}</li>
             @if (hasDecay()) {
-              <li>Откат через: {{ decayDelay() }}</li>
+              <li>Следующий откат: {{ decayAt() }}</li>
               <li>Сила отката: {{ decayValue() }}</li>
+              @if (decayLost() > 0) {
+                <li class="skill-column__lost">Потеряно: {{ decayLost() }}</li>
+              }
             }
             <li>Доступных действий: {{ availableActions() }}</li>
           </ul>

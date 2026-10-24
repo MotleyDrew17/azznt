@@ -93,11 +93,15 @@ export class SkillColumnComponent {
     this.skillService.skills();
     return this.skill()?.getLevel()?.decay?.value ?? 0;
   });
-  readonly decayDelay = computed(() => {
+  readonly decayLost = computed(() => {
+    this.skillService.skills();
+    return this.skill()?.getLevel()?.decay?.lost ?? 0;
+  });
+  readonly decayAt = computed(() => {
     this.skillService.skills();
     const till = this.skill()?.getDecayTimestamp() ?? 0;
-    if (!this.hasDecay() || till <= 0) return formatDecayDelay(0);
-    return formatDecayDelay(till - this.now());
+    if (!this.hasDecay() || till <= 0) return '';
+    return formatDecayMoment(till);
   });
   readonly decaying = computed(() => {
     this.skillService.skills();
@@ -210,12 +214,9 @@ const LEVEL_SPARKS: LevelSpark[] = [
   { left: 82, top: 96, delay: 2660 },
 ];
 
-function formatDecayDelay(ms: number): string {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+// Дата и время следующего отката
+function formatDecayMoment(ms: number): string {
+  const date = new Date(ms);
   const pad = (value: number) => String(value).padStart(2, '0');
-
-  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }

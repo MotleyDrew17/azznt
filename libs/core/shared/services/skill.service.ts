@@ -14,7 +14,10 @@ export class SkillService {
   readonly exerciseDone = signal<{ skillId: string; count: number } | null>(null);
 
   constructor() {
-    const timer = window.setInterval(() => this.now.set(Date.now()), 60_000);
+    const timer = window.setInterval(() => {
+      this.now.set(Date.now());
+      this.#settleDecay();
+    }, 60_000);
     inject(DestroyRef).onDestroy(() => window.clearInterval(timer));
   }
 
@@ -82,6 +85,8 @@ export class SkillService {
       existing.applySnapshot(snapshot);
       return existing;
     });
+    const now = Date.now();
+    for (const skill of skills) skill.settleDecay(now);
     this.skills.set(skills);
     const decayChanged = skills.some((skill, index) => skill.getDecayTimestamp() !== (stored[index]?.level?.decay?.freezed_till_ms ?? 0));
     const layersMissing = stored.some((skill) => !skill.layers);
@@ -148,5 +153,13 @@ export class SkillService {
 
   #save(): void {
     this.user.setSkills(this.skills().map((skill) => skill.toSnapshot()));
+  }
+
+  #settleDecay(): void {
+    const now = Date.now();
+    const changed = this.skills().some((skill) => skill.settleDecay(now));
+    if (!changed) return;
+    this.skills.update((skills) => [...skills]);
+    this.#save();
   }
 }

@@ -3,7 +3,8 @@ import { CreateExerciseData, CreateSkillData, ExerciseSnapshot, LevelSnapshot, S
 export interface Decay {
     value: number; // значение отката навыка
     freezed_till_ms: number; // дата в миллисекундах, до которой заморожен откат навыка
-    freezed_interval_ms: number; /** Интервал в миллисекундах, через который будет уменьшаться откат навыка.                                  Нужен, чтобы обновлять дату до которой заморожен откат навыка */ 
+    freezed_interval_ms: number; /** Интервал в миллисекундах, через который будет уменьшаться откат навыка.                                  Нужен, чтобы обновлять дату до которой заморожен откат навыка */
+    lost: number; // опыт, потерянный за текущую непрерывную серию откатов
 }
 
 export interface SkillLayer {
@@ -143,6 +144,11 @@ export class Skill {
         return this.#level?.decay?.freezed_till_ms ?? 0;
     }
 
+    // Списать просроченные откаты и сдвинуть срок
+    settleDecay(now: number): boolean {
+        return this.#level?.settleDecay(now) ?? false;
+    }
+
     toSnapshot(): SkillSnapshot {
         return {
             id: this.#id,
@@ -194,6 +200,13 @@ function localDayStamp(time: number): string {
 export function startOfLocalDay(time: number): number {
     const date = new Date(time);
     date.setHours(0, 0, 0, 0);
+    return date.getTime();
+}
+
+// 23:59 дня, в который истекает срок отката
+function endOfDecayDay(fromMs: number, intervalMs: number): number {
+    const date = new Date(fromMs + intervalMs);
+    date.setHours(23, 59, 0, 0);
     return date.getTime();
 }
 
@@ -371,7 +384,8 @@ export class Level {
             const interval = inactivityDays * 24 * 60 * 60 * 1000;
             this.#decay = {
                 value: lostExp,
-                freezed_till_ms: Date.now() + interval,
+                lost: 0,
+                freezed_till_ms: endOfDecayDay(Date.now(), interval),
                 freezed_interval_ms: interval,
             };
         }
@@ -429,21 +443,45 @@ export class Level {
             this.#decay.value = lostExp;
             if (this.#decay.freezed_interval_ms !== interval) {
                 this.#decay.freezed_interval_ms = interval;
-                this.#decay.freezed_till_ms = Date.now() + interval;
+                this.#decay.freezed_till_ms = endOfDecayDay(Date.now(), interval);
             }
             return;
         }
 
         this.#decay = {
             value: lostExp,
-            freezed_till_ms: Date.now() + interval,
+            lost: 0,
+            freezed_till_ms: endOfDecayDay(Date.now(), interval),
             freezed_interval_ms: interval,
         };
     }
 
     freezeDecay() {
         if(!this.#decay) throw new Error('Decay is not set');
-        this.#decay.freezed_till_ms = Date.now() + this.#decay.freezed_interval_ms; // увеличиваем дату до которой заморожен откат навыка на интервал
+        this.#decay.lost = 0;
+        this.#decay.freezed_till_ms = endOfDecayDay(Date.now(), this.#decay.freezed_interval_ms);
+    }
+
+    // Просроченный откат: списание, пока опыт не нулевой, и новый срок
+    settleDecay(now: number): boolean {
+        const decay = this.#decay;
+        if (!decay || decay.freezed_interval_ms <= 0 || now < decay.freezed_till_ms) return false;
+        let changed = false;
+        let guard = 0;
+        while (now >= decay.freezed_till_ms && guard < 1000) {
+            guard++;
+            const due = decay.freezed_till_ms;
+            if (this.#current_exp > 0) {
+                const before = this.#current_exp;
+                this.removeExp(decay.value);
+                decay.lost = roundExp((decay.lost ?? 0) + before - this.#current_exp);
+            }
+            const next = endOfDecayDay(due, decay.freezed_interval_ms);
+            if (next <= due) break;
+            decay.freezed_till_ms = next;
+            changed = true;
+        }
+        return changed;
     }
 
     addExp(exp: number) {
@@ -536,9 +574,9 @@ export class Level {
             level.#prev_exp = snapshot.prev_exp;
             level.#next_exp = snapshot.next_exp;
         }
-        level.#decay = snapshot.decay ? { ...snapshot.decay } : null;
+        level.#decay = snapshot.decay ? { ...snapshot.decay, lost: snapshot.decay.lost ?? 0 } : null;
         if (level.#decay && level.#decay.freezed_till_ms <= 0 && level.#decay.freezed_interval_ms > 0) {
-            level.#decay.freezed_till_ms = Date.now() + level.#decay.freezed_interval_ms;
+            level.#decay.freezed_till_ms = endOfDecayDay(Date.now(), level.#decay.freezed_interval_ms);
         }
         return level;
     }

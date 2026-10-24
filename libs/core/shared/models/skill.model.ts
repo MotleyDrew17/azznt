@@ -43,6 +43,7 @@ export interface DecaySnapshot {
   value: number;
   freezed_till_ms: number;
   freezed_interval_ms: number;
+  lost?: number;
 }
 
 export interface LevelSnapshot {
@@ -145,7 +146,8 @@ function isDecaySnapshot(value: unknown): value is DecaySnapshot {
   const decay = value as DecaySnapshot;
   return isFiniteNumber(decay.value)
     && isFiniteNumber(decay.freezed_till_ms)
-    && isFiniteNumber(decay.freezed_interval_ms);
+    && isFiniteNumber(decay.freezed_interval_ms)
+    && (decay.lost === undefined || isFiniteNumber(decay.lost));
 }
 
 function isExerciseSnapshot(value: unknown): value is ExerciseSnapshot {

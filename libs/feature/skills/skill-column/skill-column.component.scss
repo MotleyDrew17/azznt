@@ -348,6 +348,11 @@
   }
 }
 
+// Потерянный за откат опыт
+.skill-column__lost {
+  color: var(--color-error);
+}
+
 .skill-column__description {
   margin: 12px 0 0;
 }
