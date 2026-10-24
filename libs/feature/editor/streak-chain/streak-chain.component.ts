@@ -40,4 +40,11 @@ export class StreakChainComponent {
       return { day, tone };
     });
   });
+
+  // Успешные дни из нужного числа
+  readonly progress = computed(() => {
+    const done = this.marks().filter((mark) => mark.tone === 'done').length;
+    const goal = this.quest().streak?.mustBeDoneCount ?? 0;
+    return `${done}/${goal}`;
+  });
 }

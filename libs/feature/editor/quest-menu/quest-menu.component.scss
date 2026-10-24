@@ -241,9 +241,12 @@
   line-height: 1.35;
 }
 
-.quest-menu__description,
 .quest-menu__skill {
   color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.quest-menu__description {
   overflow-wrap: anywhere;
 }
 

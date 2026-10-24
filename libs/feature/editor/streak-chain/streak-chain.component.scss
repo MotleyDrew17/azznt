@@ -1,6 +1,22 @@
 // Цепочка дней серии
 .streak-chain {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+// Успешные дни из нужного числа
+.streak-chain__progress {
+  margin: 0;
+  color: var(--color-parchment);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.streak-chain__days {
+  display: flex;
   gap: 8px;
   width: 100%;
   min-width: 0;

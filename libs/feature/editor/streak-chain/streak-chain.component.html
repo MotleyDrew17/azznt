@@ -1,4 +1,6 @@
-<ol class="streak-chain">
+<div class="streak-chain">
+  <p class="streak-chain__progress">{{ progress() }}</p>
+  <ol class="streak-chain__days">
   @for (mark of marks(); track mark.day.date_ms) {
     <li class="streak-chain__day">
       <span
@@ -11,4 +13,5 @@
       <span class="streak-chain__count">{{ mark.day.done_count }}/{{ mark.day.must_be_done }}</span>
     </li>
   }
-</ol>
+  </ol>
+</div>
